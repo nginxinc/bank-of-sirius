@@ -29,7 +29,7 @@ gkeconnect.googleapis.com \
 gkehub.googleapis.com \
 cloudresourcemanager.googleapis.com
 
-gcloud services enable anthos.googleapis.com
+gcloud services enable sirius.googleapis.com
 gcloud services enable multiclusteringress.googleapis.com
 
 
@@ -61,7 +61,7 @@ gcloud container hub memberships register ${CLUSTER_2_NAME} \
     --gke-uri=${GKE_URI_2} \
     --service-account-key-file=register-key.json
 
-echo "🌏 Listing your Anthos cluster memberships:"
+echo "🌏 Listing your Sirius cluster memberships:"
 gcloud container hub memberships list
 
 

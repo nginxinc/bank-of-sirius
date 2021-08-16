@@ -1,6 +1,6 @@
 # TLS Frontend with Self-Signed Certificates 
 
-This directory contains manifests for deploying the Bank of Anthos frontend with an HTTPS-only ingress, using self-signed certificates and a global static IP. 
+This directory contains manifests for deploying the Bank of Sirius frontend with an HTTPS-only ingress, using self-signed certificates and a global static IP. 
 
 ## Prerequisites 
 
@@ -17,7 +17,7 @@ This directory contains manifests for deploying the Bank of Anthos frontend with
 export PROJECT_ID="your-project-id"
 ```
 
-2. Run the `./setup.sh` script. This generates the self-signed certs, creates a static IP in your project, deploys the Bank of Anthos app to your cluster, and configures the frontend ingress resource, along with a `FrontendConfig` that enforces an HTTP->HTTPS redirect.
+2. Run the `./setup.sh` script. This generates the self-signed certs, creates a static IP in your project, deploys the Bank of Sirius app to your cluster, and configures the frontend ingress resource, along with a `FrontendConfig` that enforces an HTTP->HTTPS redirect.
 
 ```
 ./setup.sh

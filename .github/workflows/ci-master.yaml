@@ -123,10 +123,10 @@ jobs:
         EOF
         echo Deploying application
         skaffold config set --global local-cluster false
-        skaffold run --default-repo=gcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
+        skaffold run --default-repo=ghcr.io/$PROJECT_ID/$GITHUB_REF --tag=$GITHUB_SHA --namespace=$NAMESPACE
       env:
-        PROJECT_ID: "bank-of-anthos"
-        PR_CLUSTER: "bank-of-anthos-pr-2"
+        PROJECT_ID: "bank-of-sirius"
+        PR_CLUSTER: "bank-of-sirius-pr-2"
         ZONE: "us-central1-c"
         ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Wait For Pods

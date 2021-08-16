@@ -6,11 +6,11 @@ End-to-end tests use the [Cypress](cypress.io) test runner.
 
 1. [BoA Development Guide]((../../../docs/development.md))
     * [Docker Desktop](https://www.docker.com/products/docker-desktop)
-    * A working Bank of Anthos deployment
+    * A working Bank of Sirius deployment
 1. Ensure you are authenticated to the correct cluster
 
     ```console
-        gcloud container clusters get-credentials bank-of-anthos --zone us-west1-a
+        gcloud container clusters get-credentials bank-of-sirius --zone us-west1-a
     ```
 
 ### Running all tests

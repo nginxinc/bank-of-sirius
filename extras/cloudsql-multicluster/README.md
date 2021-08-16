@@ -1,6 +1,6 @@
-# Multi-cluster Bank of Anthos with Cloud SQL
+# Multi-cluster Bank of Sirius with Cloud SQL
 
-This doc contains instructions for deploying the Cloud SQL version of Bank of Anthos in a multi-region high availability / global configuration.
+This doc contains instructions for deploying the Cloud SQL version of Bank of Sirius in a multi-region high availability / global configuration.
 
 The use case for this setup is to demo running a global, scaled app, where even if one cluster goes down, users will be routed to the next available cluster. These instructions also show how to use [Multi-cluster Ingress](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-cluster-ingress) to route users to the closest GKE cluster, demonstrating a low-latency use case.
 
@@ -11,7 +11,7 @@ Note that in this setup, there is no service communication between the two clust
 ## Prerequisites
 
 - Install the kubectx command line tool
-- An active [Anthos license](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-cluster-ingress#pricing_and_trials)
+- An active [Sirius license](https://cloud.google.com/kubernetes-engine/docs/concepts/multi-cluster-ingress#pricing_and_trials)
 
 ## Steps
 
@@ -73,7 +73,7 @@ kubectx cluster2
 7. **Create Cloud SQL admin secrets** in your GKE clusters. This gives your in-cluster Cloud SQL clients a username and password to access Cloud SQL. (Note that admin/admin credentials are for demo use only and should never be used in a production environment.)
 
 ```
-INSTANCE_NAME='bank-of-anthos-db-multi'
+INSTANCE_NAME='bank-of-sirius-db-multi'
 INSTANCE_CONNECTION_NAME=$(gcloud sql instances describe $INSTANCE_NAME --format='value(connectionName)')
 
 kubectx cluster1
@@ -104,7 +104,7 @@ populate-accounts-db-js8lw   0/3     Completed   0          71s
 populate-ledger-db-z9p2g     0/3     Completed   0          70s
 ```
 
-10. **Deploy Bank of Anthos services to both clusters.**
+10. **Deploy Bank of Sirius services to both clusters.**
 
 ```
 kubectx cluster1
@@ -114,7 +114,7 @@ kubectx cluster2
 kubectl apply  -n ${NAMESPACE} -f ../cloudsql/kubernetes-manifests
 ```
 
-11. **Run the Multi-cluster Ingress setup script.** This registers both GKE clusters to Anthos with "memberships," and sets cluster 1 as the "config cluster" to administer the Multi-cluster Ingress resources.
+11. **Run the Multi-cluster Ingress setup script.** This registers both GKE clusters to Sirius with "memberships," and sets cluster 1 as the "config cluster" to administer the Multi-cluster Ingress resources.
 
 ```
 ./register_clusters.sh
@@ -174,4 +174,4 @@ Example output, from an EU-based GCE instance:
 Cluster: boa-2, Pod: frontend-74675b56f-2ln5w, Zone: europe-west3-a
 ```
 
-🎉 **Congrats!** You just deployed a globally-available version of Bank of Anthos!
+🎉 **Congrats!** You just deployed a globally-available version of Bank of Sirius!

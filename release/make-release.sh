@@ -16,7 +16,7 @@
 set -euxo pipefail
 
 # set default repo
-REPO_PREFIX="${REPO_PREFIX:-gcr.io/bank-of-anthos}"
+REPO_PREFIX="${REPO_PREFIX:-ghcr.io/bank-of-sirius}"
 
 # move to repo root
 SCRIPT_DIR=$(dirname $(realpath -s $0))

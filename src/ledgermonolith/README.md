@@ -70,7 +70,7 @@ Located in `init/ledgermonolith.env`
 
 ## Quickstart
 
-To deploy Bank of Anthos with a monolith service:
+To deploy Bank of Sirius with a monolith service:
 
 ```
 # In the root directory of the project repo
@@ -79,7 +79,7 @@ export ZONE=<your-gcp-zone>
 make monolith
 ```
 
-Deploys the full Bank of Anthos application with a Java monolith service running
+Deploys the full Bank of Sirius application with a Java monolith service running
 on a Google Compute Engine VM and all other microservices running on Kubernetes.
 
 ## Deploying the Monolith
@@ -88,7 +88,7 @@ on a Google Compute Engine VM and all other microservices running on Kubernetes.
 
 Deploy the canonical version of the monolith to a Google Compute Engine VM.
 Use canonical build artifacts hosted on Google Cloud Storage at
-`gs://bank-of-anthos/monolith`.
+`gs://bank-of-sirius/monolith`.
 
 ```
 # In the root directory of the project repo
@@ -153,9 +153,9 @@ Cloud network that also has the `monolith` network tag.
 6. If you see a version string like `v0.1.0`, the ledgermonolith is correctly serving HTTP requests
 
 
-## Running Bank of Anthos with the Monolith
+## Running Bank of Sirius with the Monolith
 
-To run the full Bank of Anthos application you also need to configure and deploy
+To run the full Bank of Sirius application you also need to configure and deploy
 the microservices that are not part of the ledgermonolith service.
 This directory (`src/ledgermonolith`) includes a custom `skaffold.yaml` file and
 associated manifests in the `kubernetes-manifests` directory.
@@ -182,7 +182,7 @@ gcloud container clusters create ${CLUSTER} \
 
 3. Replace `[PROJECT_ID]` with your `$PROJECT_ID` in `src/ledgermonolith/config.yaml`.
 
-4. Run the following commands from the root of this repository, to deploy your custom config alongside the other Bank of Anthos services.
+4. Run the following commands from the root of this repository, to deploy your custom config alongside the other Bank of Sirius services.
 
 ```
 kubectl apply -f src/ledgermonolith/config.yaml

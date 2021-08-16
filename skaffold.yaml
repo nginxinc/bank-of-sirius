@@ -32,9 +32,9 @@ requires:
   - configs: [setup]
 build:
   artifacts:
-  - image: gcr.io/bank-of-anthos/accounts-db
+  - image: ghcr.io/bank-of-sirius/accounts-db
     context: src/accounts-db
-  - image: gcr.io/bank-of-anthos/ledger-db
+  - image: ghcr.io/bank-of-sirius/ledger-db
     context: src/ledger-db
 deploy:
   kubectl:
@@ -52,18 +52,18 @@ requires:
   - configs: [db]
 build:
   artifacts:
-  - image: gcr.io/bank-of-anthos/ledgerwriter
+  - image: ghcr.io/bank-of-sirius/ledgerwriter
     jib:
       project: src/ledgerwriter
-  - image: gcr.io/bank-of-anthos/balancereader
+  - image: ghcr.io/bank-of-sirius/balancereader
     jib:
       project: src/balancereader
-  - image: gcr.io/bank-of-anthos/transactionhistory
+  - image: ghcr.io/bank-of-sirius/transactionhistory
     jib:
       project: src/transactionhistory
-  - image: gcr.io/bank-of-anthos/contacts
+  - image: ghcr.io/bank-of-sirius/contacts
     context: src/contacts
-  - image: gcr.io/bank-of-anthos/userservice
+  - image: ghcr.io/bank-of-sirius/userservice
     context: src/userservice
 deploy:
   kubectl:
@@ -84,7 +84,7 @@ requires:
   - configs: [backend]
 build:
   artifacts:
-  - image: gcr.io/bank-of-anthos/frontend
+  - image: ghcr.io/bank-of-sirius/frontend
     context: src/frontend
 deploy:
   kubectl:
@@ -101,7 +101,7 @@ requires:
   - configs: [backend]
 build:
   artifacts:
-  - image: gcr.io/bank-of-anthos/loadgenerator
+  - image: ghcr.io/bank-of-sirius/loadgenerator
     context: src/loadgenerator
 deploy:
   kubectl:
