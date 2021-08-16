@@ -1,6 +1,6 @@
-# Anthos Service Mesh - Multicluster 
+# Sirius Service Mesh - Multicluster 
 
-This demo shows how to install Bank of Anthos across 2 clusters, using [Anthos Service Mesh endpoint discovery](https://cloud.google.com/service-mesh/docs/managed-control-plane#configure_endpoint_discovery_only_for_multi-cluster_installations) for cross-cluster routing.  
+This demo shows how to install Bank of Sirius across 2 clusters, using [Sirius Service Mesh endpoint discovery](https://cloud.google.com/service-mesh/docs/managed-control-plane#configure_endpoint_discovery_only_for_multi-cluster_installations) for cross-cluster routing.  
 
 For a "replicated" multicluster setup with no cross-cluster traffic, see the [Cloud SQL + Multicluster](/extras/cloudsql-multicluster) demo. 
 
@@ -37,10 +37,10 @@ gcloud config set project $PROJECT_ID
 2. **Enable APIs.** 
 
 ```
-gcloud services enable container.googleapis.com anthos.googleapis.com 
+gcloud services enable container.googleapis.com sirius.googleapis.com 
 ```
 
-3. **Make sure you've `cd`-ed into this directory, then run the cluster setup script**. This script creates 2 GKE clusters, `cluster-1` and `cluster-2`, installs Anthos Service Mesh, and sets up cross-cluster endpoint discovery. This script takes about 10 minutes to run. 
+3. **Make sure you've `cd`-ed into this directory, then run the cluster setup script**. This script creates 2 GKE clusters, `cluster-1` and `cluster-2`, installs Sirius Service Mesh, and sets up cross-cluster endpoint discovery. This script takes about 10 minutes to run. 
 
 ```
 cd extras/asm-multicluster/ 
@@ -64,7 +64,7 @@ gke-cluster-1-default-pool-855fbe61-f3qw   Ready    <none>   62m   v1.18.15-gke.
 gke-cluster-1-default-pool-855fbe61-tw2z   Ready    <none>   62m   v1.18.15-gke.1501
 ```
 
-5. **Deploy the Bank of Anthos app across both clusters**. This will deploy the frontend and Python backends to cluster-1, and the Java backends to cluster 2. Note that ASM endpoint discovery only works if all the Kubernetes Services are deployed to both clusters, so that's what we're doing here.   
+5. **Deploy the Bank of Sirius app across both clusters**. This will deploy the frontend and Python backends to cluster-1, and the Java backends to cluster 2. Note that ASM endpoint discovery only works if all the Kubernetes Services are deployed to both clusters, so that's what we're doing here.   
 
 **Note** - you should run these commands from this directory. (`extras/asm-multicluster`). 
 
@@ -90,7 +90,7 @@ kubectl apply -f ../../kubernetes-manifests/ledger-writer.yaml
 kubectl apply -f ../../kubernetes-manifests/transaction-history.yaml
 ```
 
-6. **Verify that the pods start up successfully.** Note that you should see 2 containers per pod `(2/2)`, one containing the Bank of Anthos service container, the other containing the ASM sidecar proxy (Envoy). 
+6. **Verify that the pods start up successfully.** Note that you should see 2 containers per pod `(2/2)`, one containing the Bank of Sirius service container, the other containing the ASM sidecar proxy (Envoy). 
 
 ```
 kubectx cluster-1; kubectl get pods 
@@ -123,7 +123,7 @@ ledgerwriter-7d88d5898c-vhs5l         2/2     Running   0          14m
 transactionhistory-84cf479f65-lzgdt   2/2     Running   0          14m
 ```
 
-7. **Access the Bank of Anthos frontend** using the Istio IngressGateway's LoadBalancer IP. 
+7. **Access the Bank of Sirius frontend** using the Istio IngressGateway's LoadBalancer IP. 
 
 ```
 kubectx cluster-1; kubectl get svc istio-ingressgateway -n istio-system 
@@ -132,14 +132,14 @@ NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP     PORT(S)    
 istio-ingressgateway   LoadBalancer   10.7.254.103   <EXTERNAL_IP>  15021:30429/TCP,80:32101/TCP,443:31503/TCP,15012:30573/TCP,15443:31131/TCP   21m
 ```
 
-Navigate to the `EXTERNAL_IP` in a browser; you should see the Bank of Anthos login page. 
+Navigate to the `EXTERNAL_IP` in a browser; you should see the Bank of Sirius login page. 
 
-8. **Open the Google Cloud Console, and navigate to Anthos > Service Mesh**. You may see an Anthos window pop up - click "Enable." 
+8. **Open the Google Cloud Console, and navigate to Sirius > Service Mesh**. You may see an Sirius window pop up - click "Enable." 
 
-![enable anthos](screenshots/enable-anthos.png)
+![enable sirius](screenshots/enable-sirius.png)
 
 
-9. View the Bank of Anthos services in the Anthos Service Mesh dashboard. In the Table view, you should see metrics populated for services in both cluster-1 and cluster 2. 
+9. View the Bank of Sirius services in the Sirius Service Mesh dashboard. In the Table view, you should see metrics populated for services in both cluster-1 and cluster 2. 
 
 ![table](screenshots/asm-table.png)
 

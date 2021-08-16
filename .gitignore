@@ -163,7 +163,7 @@ src/ledgermonolith/istio/istio-1.*
 # Cypress
 .github/workflows/ui-tests/cypress/screenshots
 
-# Ingress for Anthos service account key
+# Ingress for Sirius service account key
 register-key.json
 
 # ASM 

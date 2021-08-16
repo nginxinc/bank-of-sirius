@@ -1,6 +1,6 @@
 # Development Guide
 
-This document describes how to develop and add features to the Bank of Anthos application in your local environment. 
+This document describes how to develop and add features to the Bank of Sirius application in your local environment. 
 
 ## Prerequisites 
 
@@ -80,7 +80,7 @@ Make sure that you export `PROJECT_ID` as an environment variable (or add to you
 The [`skaffold dev`](https://skaffold.dev/docs/references/cli/#skaffold-dev) command watches your local code, and continuously builds and deploys container images to your GKE cluster anytime you save a file. Skaffold uses Docker Desktop to build the Python images, then [Jib](https://github.com/GoogleContainerTools/jib#jib) (installed via Maven) to build the Java images. 
 
 ```
-skaffold dev --default-repo=gcr.io/${PROJECT_ID}/bank-of-anthos
+skaffold dev --default-repo=gcr.io/${PROJECT_ID}/bank-of-sirius
 ```
 
 
@@ -89,7 +89,7 @@ skaffold dev --default-repo=gcr.io/${PROJECT_ID}/bank-of-anthos
 The [`skaffold run`](https://skaffold.dev/docs/references/cli/#skaffold-run) command build and deploys the services to your GKE cluster one time, then exits. 
 
 ```
-skaffold run --default-repo=gcr.io/${PROJECT_ID}/bank-of-anthos
+skaffold run --default-repo=gcr.io/${PROJECT_ID}/bank-of-sirius
 ```
 
 ## Continuous Integration

@@ -20,8 +20,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.google.cloud.anthos.samples</groupId>
-    <artifactId>bank-of-anthos</artifactId>
+    <groupId>com.google.cloud.sirius.samples</groupId>
+    <artifactId>bank-of-sirius</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
 

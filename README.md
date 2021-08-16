@@ -1,14 +1,14 @@
-![Continuous Integration](https://github.com/GoogleCloudPlatform/bank-of-anthos/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
+![Continuous Integration](https://github.com/GoogleCloudPlatform/bank-of-sirius/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
 
-# Bank of Anthos
+# Bank of Sirius
 
-**Bank of Anthos** is a sample HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
+**Bank of Sirius** is a sample HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
 
-Google uses this application to demonstrate how developers can modernize enterprise applications using GCP products, including: [GKE](https://cloud.google.com/kubernetes-engine), [Anthos Service Mesh](https://cloud.google.com/anthos/service-mesh), [Anthos Config Management](https://cloud.google.com/anthos/config-management), [Migrate for Anthos](https://cloud.google.com/migrate/anthos), [Spring Cloud GCP](https://spring.io/projects/spring-cloud-gcp), and [Cloud Operations](https://cloud.google.com/products/operations). This application works on any Kubernetes cluster.
+Google uses this application to demonstrate how developers can modernize enterprise applications using GCP products, including: [GKE](https://cloud.google.com/kubernetes-engine), [Sirius Service Mesh](https://cloud.google.com/sirius/service-mesh), [Sirius Config Management](https://cloud.google.com/sirius/config-management), [Migrate for Sirius](https://cloud.google.com/migrate/sirius), [Spring Cloud GCP](https://spring.io/projects/spring-cloud-gcp), and [Cloud Operations](https://cloud.google.com/products/operations). This application works on any Kubernetes cluster.
 
 If you’re using this app, please ★Star the repository to show your interest!
 
-> 👓 Note to Googlers: Please fill out the form at go/bank-of-anthos-form if you are using this application.
+> 👓 Note to Googlers: Please fill out the form at go/bank-of-sirius-form if you are using this application.
 
 ## Screenshots
 
@@ -35,7 +35,7 @@ If you’re using this app, please ★Star the repository to show your interest!
 
 ## Quickstart (GKE)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?show=ide&cloudshell_git_repo=https://github.com/GoogleCloudPlatform/bank-of-anthos&cloudshell_workspace=.&cloudshell_tutorial=extras/cloudshell/tutorial.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?show=ide&cloudshell_git_repo=https://github.com/GoogleCloudPlatform/bank-of-sirius&cloudshell_workspace=.&cloudshell_tutorial=extras/cloudshell/tutorial.md)
 
 
 1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine API is enabled.
@@ -48,8 +48,8 @@ gcloud services enable container --project ${PROJECT_ID}
 2. **Clone this repository.**
 
 ```
-git clone https://github.com/GoogleCloudPlatform/bank-of-anthos.git
-cd bank-of-anthos
+git clone https://github.com/GoogleCloudPlatform/bank-of-sirius.git
+cd bank-of-sirius
 ```
 
 3. **Create a GKE cluster.**
@@ -61,7 +61,7 @@ gcloud services enable container.googleapis.com monitoring.googleapis.com \
   --project ${PROJECT_ID}
 
 REGION=us-central1
-gcloud container clusters create-auto bank-of-anthos \
+gcloud container clusters create-auto bank-of-sirius \
   --project=${PROJECT_ID} --region=${REGION}
 ```
 
@@ -69,11 +69,11 @@ gcloud container clusters create-auto bank-of-anthos \
 
 ```
 ZONE=us-central1-b
-gcloud beta container clusters create bank-of-anthos \
+gcloud beta container clusters create bank-of-sirius \
   --project=${PROJECT_ID} --zone=${ZONE} \
   --machine-type=e2-standard-2 --num-nodes=4 \
   --enable-stackdriver-kubernetes --subnetwork=default \
-  --tags=bank-of-anthos --labels csm=
+  --tags=bank-of-sirius --labels csm=
 ```
 
 4. **Get credentials for the created cluster**
@@ -81,14 +81,14 @@ gcloud beta container clusters create bank-of-anthos \
 - GKE Autopilot mode:
 
 ```
-gcloud container clusters get-credentials bank-of-anthos \
+gcloud container clusters get-credentials bank-of-sirius \
   --project=${PROJECT_ID} --region=${REGION}
 ```
 
 - GKE Standard mode:
 
 ```
-gcloud container clusters get-credentials bank-of-anthos \
+gcloud container clusters get-credentials bank-of-sirius \
   --project=${PROJECT_ID} --zone=${ZONE}
 ```
 
@@ -144,7 +144,7 @@ EXTERNAL-IP
 - **Cloud SQL**: [See these instructions](./extras/cloudsql) to replace the in-cluster databases with hosted Google Cloud SQL.
 - **Multicluster with Cloud SQL**: [See these instructions](./extras/cloudsql-multicluster) to replicate the app across two regions using GKE, Multi-cluster Ingress, and Google Cloud SQL.
 - **Istio**: Apply `istio-manifests/` to your cluster to access the frontend through the IngressGateway.
-- **Anthos Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](./docs/workload-identity.md) to configure and deploy the app. Then, apply `istio-manifests/` to your cluster to configure frontend ingress.
+- **Sirius Service Mesh**: ASM requires Workload Identity to be enabled in your GKE cluster. [See the workload identity instructions](./docs/workload-identity.md) to configure and deploy the app. Then, apply `istio-manifests/` to your cluster to configure frontend ingress.
 - **Java Monolith (VM)**: We provide a version of this app where the three Java microservices are coupled together into one monolithic service, which you can deploy inside a VM (eg. Google Compute Engine). See the [ledgermonolith](./src/ledgermonolith) directory.
 
 ## Troubleshooting
@@ -155,6 +155,6 @@ See the [Troubleshooting guide](./docs/troubleshooting.md) for resolving common 
 
 See the [Development guide](./docs/development.md) to learn how to run and develop this app locally.
 
-## Talks/Demos using Bank of Anthos
+## Talks/Demos using Bank of Sirius
 
-- [Google Cloud Next '20 - Hands-on Keynote](https://www.youtube.com/watch?v=7QR1z35h_yc)  (Anthos, Cloud Operations, Spring Cloud GCP, BigQuery, AutoML)
+- [Google Cloud Next '20 - Hands-on Keynote](https://www.youtube.com/watch?v=7QR1z35h_yc)  (Sirius, Cloud Operations, Spring Cloud GCP, BigQuery, AutoML)

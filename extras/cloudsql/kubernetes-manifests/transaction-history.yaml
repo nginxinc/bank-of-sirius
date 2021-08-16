@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: transactionhistory
-        image: gcr.io/bank-of-anthos/transactionhistory:v0.4.3
+        image: ghcr.io/bank-of-sirius/transactionhistory:v0.4.3
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
@@ -96,7 +96,7 @@ spec:
           limits:
             cpu: "200m"
             memory: "100Mi"
-        image: gcr.io/cloudsql-docker/gce-proxy:1.19.0-alpine
+        image: ghcr.io/cloudsql-docker/gce-proxy:1.19.0-alpine
         env:
         - name: CONNECTION_NAME
           valueFrom:

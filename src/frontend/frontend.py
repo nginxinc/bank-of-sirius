@@ -144,7 +144,7 @@ def create_app():
                                account_id=account_id,
                                contacts=contacts,
                                message=request.args.get('msg', None),
-                               bank_name=os.getenv('BANK_NAME', 'Bank of Anthos'))
+                               bank_name=os.getenv('BANK_NAME', 'Bank of Sirius'))
 
 
     def _populate_contact_labels(account_id, transactions, contacts):
@@ -361,7 +361,7 @@ def create_app():
                                message=request.args.get('msg', None),
                                default_user=os.getenv('DEFAULT_USERNAME', ''),
                                default_password=os.getenv('DEFAULT_PASSWORD', ''),
-                               bank_name=os.getenv('BANK_NAME', 'Bank of Anthos'))
+                               bank_name=os.getenv('BANK_NAME', 'Bank of Sirius'))
 
 
     @app.route('/login', methods=['POST'])
@@ -417,7 +417,7 @@ def create_app():
                                cluster_name=cluster_name,
                                pod_name=pod_name,
                                pod_zone=pod_zone,
-                               bank_name=os.getenv('BANK_NAME', 'Bank of Anthos'))
+                               bank_name=os.getenv('BANK_NAME', 'Bank of Sirius'))
 
 
     @app.route("/signup", methods=['POST'])

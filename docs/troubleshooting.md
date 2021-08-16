@@ -1,12 +1,12 @@
-# Troubleshooting Bank of Anthos 
+# Troubleshooting Bank of Sirius 
 
-This doc describes how to debug a running instance of Bank of Anthos on a GKE cluster. 
+This doc describes how to debug a running instance of Bank of Sirius on a GKE cluster. 
 
 ## Background 
 
 The conatiner images used in [`kubernetes-manifests/`](/kubernetes-manifests) correspond to a tagged, stable release (`v0.x.x`) that is ready for public consumption. Per the [README deploy instructions](/README.md), we highly recommend using these stable image tags, not the `latest` tag. The `latest` tag corresponds to latest commit to the master branch and may be less stable. 
 
-No matter what image tags you're using, you may encounter errors when running the Bank of Anthos app. Use the following steps to debug and fix problems. 
+No matter what image tags you're using, you may encounter errors when running the Bank of Sirius app. Use the following steps to debug and fix problems. 
 
 ## Steps to Debug
 
@@ -25,9 +25,9 @@ transactionhistory-dd999969f-dgjth   1/1     Running   0          15m
 userservice-5765f7bf44-7rs2r         1/1     Running   0          15m
 ```
 
-One or two `RESTARTS` in the pods is expected, as the services sometimes start up before `skaffold` can deploy necessary dependencies (eg. `jwt-secret` mount). You're looking for `STATUS: Running` and `READY: 1/1`. If your cluster's namespace has Istio or Anthos Service Mesh, you would see `READY: 2/2`, since each pod would have a sidecar proxy container.  
+One or two `RESTARTS` in the pods is expected, as the services sometimes start up before `skaffold` can deploy necessary dependencies (eg. `jwt-secret` mount). You're looking for `STATUS: Running` and `READY: 1/1`. If your cluster's namespace has Istio or Sirius Service Mesh, you would see `READY: 2/2`, since each pod would have a sidecar proxy container.  
 
-- **Make sure all the Kubernetes services are present**. Run `kubectl get service`. You should see a service per pod, except for the loadgen (8 services total). The `frontend` service should have an `EXTERNAL_IP`. Try to reach that `EXTERNAL_IP` in a web browser, or using `curl`. You should see the Bank of Anthos login screen. 
+- **Make sure all the Kubernetes services are present**. Run `kubectl get service`. You should see a service per pod, except for the loadgen (8 services total). The `frontend` service should have an `EXTERNAL_IP`. Try to reach that `EXTERNAL_IP` in a web browser, or using `curl`. You should see the Bank of Sirius login screen. 
 
 ```
 accounts-db          ClusterIP      10.48.23.153   <none>          5432/TCP       23d
@@ -40,7 +40,7 @@ transactionhistory   ClusterIP      10.48.20.206   <none>          8080/TCP     
 userservice          ClusterIP      10.48.19.11    <none>          8080/TCP       23d
 ```
 
-- The next step to verify your issue is to **clean deploy** the Bank of Anthos app to your cluster:
+- The next step to verify your issue is to **clean deploy** the Bank of Sirius app to your cluster:
 
 ```
 kubectl delete -f kubernetes-manifests
@@ -53,7 +53,7 @@ If your problem persists, proceed to the Common Problems section below.
 
 ### Pod has `STATUS: CrashLoopBackOff` 
 
-If a pod is crash-looping, this means the process inside the container has exited with an error. Run `kubectl logs <pod-name>` to get the container logs. It is likely that a Java or Python exception caused the service to crash. [**File a Github issue**](https://github.com/googlecloudplatform/bank-of-anthos/issues) if this is happening, as it could correspond to a widespread outage (or an environment problem that could affect other users). When filing your issue, include the crash logs for the failing pods. 
+If a pod is crash-looping, this means the process inside the container has exited with an error. Run `kubectl logs <pod-name>` to get the container logs. It is likely that a Java or Python exception caused the service to crash. [**File a Github issue**](https://github.com/googlecloudplatform/bank-of-sirius/issues) if this is happening, as it could correspond to a widespread outage (or an environment problem that could affect other users). When filing your issue, include the crash logs for the failing pods. 
 
 
 ### Pod is stuck in `STATUS: Pending` or `READY: 0/1` 
@@ -66,8 +66,8 @@ Events:
   ----     ------       ----               ----                                             -------
   Normal   Scheduled    73s                default-scheduler                                Successfully assigned default/balancereader-fb6784fc-9fw2k to gke-toggles-default-pool-28882412-xljt
   Warning  FailedMount  72s (x2 over 72s)  kubelet, gke-toggles-default-pool-28882412-xljt  MountVolume.SetUp failed for volume "publickey" : secret "jwt-key" not found
-  Normal   Pulling      70s                kubelet, gke-toggles-default-pool-28882412-xljt  Pulling image "gcr.io/my-cool-project/bank-of-anthos/gcr.io/bank-of-anthos/balancereader:v0.2.0-171-gd459ddb-dirty@sha256:5b178bd029d04e25bf68df57096b961a28dfb243717d380524a89de994d81ff6"
-  Normal   Pulled       69s                kubelet, gke-toggles-default-pool-28882412-xljt  Successfully pulled image "gcr.io/my-cool-projectt/bank-of-anthos/gcr.io/bank-of-anthos/balancereader:v0.2.0-171-gd459ddb-dirty@sha256:5b178bd029d04e25bf68df57096b961a28dfb243717d380524a89de994d81ff6"
+  Normal   Pulling      70s                kubelet, gke-toggles-default-pool-28882412-xljt  Pulling image "gcr.io/my-cool-project/bank-of-sirius/gcr.io/bank-of-sirius/balancereader:v0.2.0-171-gd459ddb-dirty@sha256:5b178bd029d04e25bf68df57096b961a28dfb243717d380524a89de994d81ff6"
+  Normal   Pulled       69s                kubelet, gke-toggles-default-pool-28882412-xljt  Successfully pulled image "gcr.io/my-cool-projectt/bank-of-sirius/gcr.io/bank-of-sirius/balancereader:v0.2.0-171-gd459ddb-dirty@sha256:5b178bd029d04e25bf68df57096b961a28dfb243717d380524a89de994d81ff6"
   Normal   Created      69s                kubelet, gke-toggles-default-pool-28882412-xljt  Created container balancereader
   Normal   Started      69s                kubelet, gke-toggles-default-pool-28882412-xljt  Started container balancereader
   Warning  Unhealthy    4s (x2 over 9s)    kubelet, gke-toggles-default-pool-28882412-xljt  Readiness probe failed: Get http://10.0.1.141:8080/ready: dial tcp 10.0.1.141:8080: connect: connection refused
@@ -85,11 +85,11 @@ Events:
   Warning  FailedScheduling  12s (x3 over 13s)  default-scheduler  0/1 nodes are available: 1 Insufficient memory.
 ```
 
-This means that your cluster's [Node Pools](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pools) do not have enough capacity to host all the Bank of Anthos workloads, and you either need to use a different cluster, or increase your existing cluster's capacity (see the [GKE docs](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster)). 
+This means that your cluster's [Node Pools](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pools) do not have enough capacity to host all the Bank of Sirius workloads, and you either need to use a different cluster, or increase your existing cluster's capacity (see the [GKE docs](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster)). 
 
 ### `503` error in the frontend 
 
-You may see a `503: Service Unavailble` error if you have added Istio or Anthos Service Mesh to the cluster namespace where Bank of Anthos is deployed. A 503 error typically comes from an Envoy proxy - either the IngressGateway proxy, or the sidecar proxy for a service pod. For the frontend specifically, the 503 is likely coming from the IngressGateway. 
+You may see a `503: Service Unavailble` error if you have added Istio or Sirius Service Mesh to the cluster namespace where Bank of Sirius is deployed. A 503 error typically comes from an Envoy proxy - either the IngressGateway proxy, or the sidecar proxy for a service pod. For the frontend specifically, the 503 is likely coming from the IngressGateway. 
 
 Make sure you've deployed the `VirtualService` and `Gateway` resources provided in [`istio-manifests/`](/istio-manifests), and that they're deployed into the namespace where the app is running. If you've modified the frontend's Service or Deployment port, make sure the `VirtualService` port is updated, too.  
 

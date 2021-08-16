@@ -1,6 +1,6 @@
 # Cloud Monitoring - Metrics Dashboard Example 
 
-The `dashboard.json` file in this directory provides a built-in view of the Java app-level metrics exported from the three Bank of Anthos Java services (`ledgerwriter`, `balancereader`, `transactionreader`). 
+The `dashboard.json` file in this directory provides a built-in view of the Java app-level metrics exported from the three Bank of Sirius Java services (`ledgerwriter`, `balancereader`, `transactionreader`). 
 
 ## Adding the dashboard to your project
 
@@ -19,11 +19,11 @@ gcloud config set project <your-project-id>
 gcloud monitoring dashboards create --config-from-file=dashboard.json
 ```
 
-4. Open the Cloud Monitoring UI in the Google Cloud Console. Navigate to Dashboards, and you should see the Bank of Anthos dashboard in the list: 
+4. Open the Cloud Monitoring UI in the Google Cloud Console. Navigate to Dashboards, and you should see the Bank of Sirius dashboard in the list: 
 
 
 ![metrics-dashboard](list_screenshot.png)
 
-5. Click on the dashboard. If Bank of Anthos is running in GKE inside your project, and the `ENABLE_METRICS` option is set to `true`, you should see the charts populated with Java metrics including JVM cache, and DB queries. 
+5. Click on the dashboard. If Bank of Sirius is running in GKE inside your project, and the `ENABLE_METRICS` option is set to `true`, you should see the charts populated with Java metrics including JVM cache, and DB queries. 
 
 ![metrics-dashboard](dashboard_screenshot.png)
