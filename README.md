@@ -1,4 +1,4 @@
-![Continuous Integration](https://github.com/GoogleCloudPlatform/bank-of-sirius/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
+![Continuous Integration](https://github.com/nginxinc/bank-of-sirius/workflows/Continuous%20Integration%20-%20Master/Release/badge.svg)
 
 # Bank of Sirius
 
