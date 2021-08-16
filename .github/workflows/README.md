@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-This page describes the CI/CD workflows for the Bank of Sirius app, which run in [Github Actions](https://github.com/GoogleCloudPlatform/bank-of-sirius/actions).
+This page describes the CI/CD workflows for the Bank of Sirius app, which run in [Github Actions](https://github.com/nginxinc/bank-of-sirius/actions).
 
 ## Infrastructure
 
@@ -51,7 +51,7 @@ Should one of the two self-hosted Github Actions runners (GCE instances) fail, o
     - VM should be at least n1-standard-4 with 50GB persistent disk
     - VM should use custom service account with only permissions to push images to GCR
 2. SSH into new VM through Google Cloud Console
-3. Follow the instructions to add a new runner on the [Actions Settings page](https://github.com/GoogleCloudPlatform/bank-of-sirius/settings/actions) to authenticate the new runner
+3. Follow the instructions to add a new runner on the [Actions Settings page](https://github.com/nginxinc/bank-of-sirius/settings/actions) to authenticate the new runner
 4. Start GitHub Actions as a background service:
 ```
 sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start
@@ -59,6 +59,6 @@ sudo ~/actions-runner/svc.sh install ; sudo ~/actions-runner/svc.sh start
 5. Install project-specific dependencies, including docker, skaffold, and kubectl:
 
 ```
-wget -O - https://raw.githubusercontent.com/GoogleCloudPlatform/bank-of-sirius/master/.github/workflows/install-dependencies.sh | bash
+wget -O - https://raw.githubusercontent.com/nginxinc/bank-of-sirius/master/.github/workflows/install-dependencies.sh | bash
 ```
 

@@ -53,7 +53,7 @@ If your problem persists, proceed to the Common Problems section below.
 
 ### Pod has `STATUS: CrashLoopBackOff` 
 
-If a pod is crash-looping, this means the process inside the container has exited with an error. Run `kubectl logs <pod-name>` to get the container logs. It is likely that a Java or Python exception caused the service to crash. [**File a Github issue**](https://github.com/googlecloudplatform/bank-of-sirius/issues) if this is happening, as it could correspond to a widespread outage (or an environment problem that could affect other users). When filing your issue, include the crash logs for the failing pods. 
+If a pod is crash-looping, this means the process inside the container has exited with an error. Run `kubectl logs <pod-name>` to get the container logs. It is likely that a Java or Python exception caused the service to crash. [**File a Github issue**](https://github.com/nginxinc/bank-of-sirius/issues) if this is happening, as it could correspond to a widespread outage (or an environment problem that could affect other users). When filing your issue, include the crash logs for the failing pods. 
 
 
 ### Pod is stuck in `STATUS: Pending` or `READY: 0/1` 
