@@ -163,6 +163,3 @@ See the [Troubleshooting guide](./docs/troubleshooting.md) for resolving common 
 
 See the [Development guide](./docs/development.md) to learn how to run and develop this app locally.
 
-## Talks/Demos using Bank of Sirius
-
-- [Google Cloud Next '20 - Hands-on Keynote](https://www.youtube.com/watch?v=7QR1z35h_yc)  (Sirius, Cloud Operations, Spring Cloud GCP, BigQuery, AutoML)
