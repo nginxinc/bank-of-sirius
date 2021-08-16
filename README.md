@@ -2,6 +2,14 @@
 
 # Bank of Sirius
 
+
+**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/GoogleCloudPlatform/bank-of-anthos). This project
+improves upon **Bank of Anthos** by adding additional telemetry, instrumentation, performance tuning, upgraded libraries, and more.
+The intention is for it to me a more *productionized* example.
+
+## Project
+
+
 **Bank of Sirius** is a sample HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
 
 Google uses this application to demonstrate how developers can modernize enterprise applications using GCP products, including: [GKE](https://cloud.google.com/kubernetes-engine), [Sirius Service Mesh](https://cloud.google.com/sirius/service-mesh), [Sirius Config Management](https://cloud.google.com/sirius/config-management), [Migrate for Sirius](https://cloud.google.com/migrate/sirius), [Spring Cloud GCP](https://spring.io/projects/spring-cloud-gcp), and [Cloud Operations](https://cloud.google.com/products/operations). This application works on any Kubernetes cluster.
