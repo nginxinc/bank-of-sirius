@@ -3,7 +3,7 @@
 # Bank of Sirius
 
 
-**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/GoogleCloudPlatform/bank-of-anthos). This project
+**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/nginxinc/bank-of-anthos). This project
 improves upon **Bank of Anthos** by adding additional telemetry, instrumentation, performance tuning, upgraded libraries, and more.
 The intention is for it to me a more *productionized* example.
 
@@ -43,7 +43,7 @@ If you’re using this app, please ★Star the repository to show your interest!
 
 ## Quickstart (GKE)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?show=ide&cloudshell_git_repo=https://github.com/GoogleCloudPlatform/bank-of-sirius&cloudshell_workspace=.&cloudshell_tutorial=extras/cloudshell/tutorial.md)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?show=ide&cloudshell_git_repo=https://github.com/nginxinc/bank-of-sirius&cloudshell_workspace=.&cloudshell_tutorial=extras/cloudshell/tutorial.md)
 
 
 1. **[Create a Google Cloud Platform project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project)** or use an existing project. Set the `PROJECT_ID` environment variable and ensure the Google Kubernetes Engine API is enabled.
@@ -56,7 +56,7 @@ gcloud services enable container --project ${PROJECT_ID}
 2. **Clone this repository.**
 
 ```
-git clone https://github.com/GoogleCloudPlatform/bank-of-sirius.git
+git clone https://github.com/nginxinc/bank-of-sirius.git
 cd bank-of-sirius
 ```
 
