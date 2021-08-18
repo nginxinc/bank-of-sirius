@@ -16,13 +16,13 @@
 # and various os-level packages to allow installation of popular Python
 # libraries. The source is on github at:
 #   https://github.com/nginxinc/python-docker
-FROM gcr.io/google-appengine/python
+FROM ghcr.io/bank-of-sirius/python3
+
+ENV PORT=8080
+ENV THREADS=2
 
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
-
-# Create a virtualenv for the application dependencies.
-RUN virtualenv -p python3.7 /env
 
 # Set virtualenv environment variables. This is equivalent to running
 # source /env/bin/activate. This ensures the application is executed within
@@ -35,7 +35,16 @@ ENV LOG_LEVEL info
 
 # Install dependencies.
 ADD requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
+RUN set -eux; \
+    python3 -m venv --system-site-packages /env; \
+    apt-get -q update; \
+    apt-get install -q -y python3-psycopg2 gcc g++ python3-dev libffi-dev; \
+    pip3 install -r /app/requirements.txt; \
+    apt-get purge -q -y gcc g++ python3-dev libffi-dev; \
+    apt-get autoremove -q -y; \
+    apt-get clean; \
+    rm /var/lib/apt/lists/*_*; \
+    chown "app:app" /app
 
 # Add application code.
 ADD *.py /app/
@@ -43,5 +52,7 @@ ADD *.py /app/
 # Copy logging configuration for gunicorn
 COPY logging.conf /logging.conf
 
+USER app
+
 # Start server using gunicorn
-CMD gunicorn -b :$PORT --threads 2 --log-config /logging.conf --log-level=$LOG_LEVEL "userservice:create_app()"
+CMD gunicorn -b :$PORT --threads $THREADS --log-config /logging.conf --log-level=$LOG_LEVEL "userservice:create_app()"

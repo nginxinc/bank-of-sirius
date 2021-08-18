@@ -36,7 +36,7 @@ pyasn1-modules==0.2.8
 pycparser==2.20
 pycryptodome==3.9.7
 pyjwt==1.7.1
-psycopg2==2.7.7
+psycopg2~=2.8.6
 pyparsing==2.4.7
 pytest==5.4.1
 pytest-cov==2.10.0
