@@ -1,4 +1,5 @@
 # Copyright 2021 Google LLC
+# Copyright 2021 F5
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# The Google App Engine python runtime is Debian Jessie with Python installed
-# and various os-level packages to allow installation of popular Python
-# libraries. The source is on github at:
-#   https://github.com/nginxinc/python-docker
-FROM gcr.io/google-appengine/python
+FROM ghcr.io/nginxic/bos-python3
+
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-frontend
+
+ENV PORT=8080
+ENV THREADS=4
 
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
-
-# Create a virtualenv for the application dependencies.
-RUN virtualenv -p python3.7 /env
 
 # Set virtualenv environment variables. This is equivalent to running
 # source /env/bin/activate. This ensures the application is executed within
@@ -35,12 +34,16 @@ ENV LOG_LEVEL info
 
 # Install dependencies.
 ADD requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
-
-# This is a workaround to use an unreleased version of grpcio, so that the cloud trace exporter and the OpenTelemetry RequestsInstrumentor do not create an infinite request loop.
-RUN pip install --pre --upgrade --force-reinstall --extra-index-url \
-    https://packages.grpc.io/archive/2020/06/635ded1749f990ffe6be0ca403e4b255cf62742f-983cbea2-bebc-4777-911c-14e4cb494b92/python \
-    grpcio
+RUN set -eux; \
+    python3 -m venv --system-site-packages /env; \
+    apt-get -q update; \
+    apt-get install -q -y gcc g++ python3-dev libffi-dev; \
+    pip3 install -r /app/requirements.txt; \
+    apt-get purge -q -y gcc g++ python3-dev libffi-dev; \
+    apt-get autoremove -q -y; \
+    apt-get clean; \
+    rm /var/lib/apt/lists/*_*; \
+    chown "app:app" /app
 
 # Add application code.
 ADD static /app/static
@@ -51,4 +54,4 @@ ADD *.py /app/
 COPY logging.conf /logging.conf
 
 # Start server using gunicorn
-CMD gunicorn -b :$PORT --threads 4 --log-config /logging.conf --log-level=$LOG_LEVEL "frontend:create_app()"
+CMD gunicorn -b :$PORT --threads $THREADS --log-config /logging.conf --log-level=$LOG_LEVEL "frontend:create_app()"

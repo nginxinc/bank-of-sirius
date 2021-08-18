@@ -1,4 +1,5 @@
 # Copyright 2021 Google LLC
+# Copyright 2021 F5
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# The Google App Engine python runtime is Debian Jessie with Python installed
-# and various os-level packages to allow installation of popular Python
-# libraries. The source is on github at:
-#   https://github.com/nginxinc/python-docker
-FROM gcr.io/google-appengine/python
+FROM ghcr.io/nginxic/bos-python3
+
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-loadgenerator
 
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
-
-# Create a virtualenv for the application dependencies.
-RUN virtualenv -p python3.7 /env
 
 # Set virtualenv environment variables. This is equivalent to running
 # source /env/bin/activate. This ensures the application is executed within
@@ -38,10 +34,19 @@ ENV LOG_LEVEL info
 
 # Install dependencies.
 ADD requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
-
+RUN set -eux; \
+    python3 -m venv --system-site-packages /env; \
+    apt-get -q update; \
+    apt-get install -q -y gcc python3-dev; \
+    pip3 install -r /app/requirements.txt; \
+    apt-get purge -q -y gcc python3-dev; \
+    apt-get autoremove -q -y; \
+    apt-get clean; \
+    rm /var/lib/apt/lists/*_*; \
+    chown "app:app" /app
+#
 # Add application code.
 ADD locustfile.py /app
 
 # start loadgenerator
-ENTRYPOINT locust --host="http://${FRONTEND_ADDR}" --loglevel $LOG_LEVEL --no-web -c "${USERS:-10}" 2>&1
+ENTRYPOINT locust --loglevel $LOG_LEVEL

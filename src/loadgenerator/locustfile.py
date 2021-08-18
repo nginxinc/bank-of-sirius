@@ -23,7 +23,7 @@ import logging
 from string import ascii_letters, digits
 from random import randint, random, choice
 
-from locust import HttpLocust, TaskSet, TaskSequence, task, seq_task, between
+from locust import HttpUser, TaskSet, SequentialTaskSet, task, between
 
 MASTER_PASSWORD = "password"
 
@@ -63,11 +63,12 @@ def generate_username():
     alphanumeric username
     """
     return ''.join(choice(ascii_letters + digits) for _ in range(15))
-class AllTasks(TaskSequence):
+
+class AllTasks(SequentialTaskSet):
     """
     wrapper for UnauthenticatedTasks and AuthenticatedTasks sets
     """
-    @seq_task(1)
+    @task(1)
     class UnauthenticatedTasks(TaskSet):
         """
         set of tasks to run before obtaining an auth token
@@ -108,7 +109,7 @@ class AllTasks(TaskSequence):
                 self.locust.username = new_username
                 self.interrupt()
 
-    @seq_task(2)
+    @task(2)
     class AuthenticatedTasks(TaskSet):
         """
         set of tasks to run after obtaining an auth token
@@ -206,9 +207,9 @@ class AllTasks(TaskSequence):
             self.interrupt()
 
 
-class WebsiteUser(HttpLocust):
+class WebsiteUser(HttpUser):
     """
     Locust class to simulate HTTP users
     """
-    task_set = AllTasks
+    tasks = [AllTasks]
     wait_time = between(1, 1)
