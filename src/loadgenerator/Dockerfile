@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/bank-of-sirius/python3
+FROM ghcr.io/nginxic/bos-python3
+
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-loadgenerator
 
 # show python logs as they occur
 ENV PYTHONUNBUFFERED=0
@@ -45,8 +47,6 @@ RUN set -eux; \
 #
 # Add application code.
 ADD locustfile.py /app
-
-USER app
 
 # start loadgenerator
 ENTRYPOINT locust --loglevel $LOG_LEVEL

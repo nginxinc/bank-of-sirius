@@ -16,7 +16,9 @@
 # and various os-level packages to allow installation of popular Python
 # libraries. The source is on github at:
 #   https://github.com/nginxinc/python-docker
-FROM ghcr.io/bank-of-sirius/python3
+FROM ghcr.io/nginxic/bos-python3
+
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-userservice
 
 ENV PORT=8080
 ENV THREADS=2

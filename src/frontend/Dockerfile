@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/bank-of-sirius/python3
+FROM ghcr.io/nginxic/bos-python3
+
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-frontend
 
 ENV PORT=8080
 ENV THREADS=4
@@ -50,8 +52,6 @@ ADD *.py /app/
 
 # Copy logging configuration for gunicorn
 COPY logging.conf /logging.conf
-
-USER app
 
 # Start server using gunicorn
 CMD gunicorn -b :$PORT --threads $THREADS --log-config /logging.conf --log-level=$LOG_LEVEL "frontend:create_app()"
