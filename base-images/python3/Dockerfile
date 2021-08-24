@@ -16,7 +16,7 @@ ARG ARCH=amd64
 
 FROM $ARCH/debian:bullseye-slim
 
-LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-python3
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
 ENV PORT 8080
 
