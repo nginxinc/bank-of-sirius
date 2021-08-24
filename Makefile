@@ -1,91 +1,88 @@
-# Copyright 2019 Google LLC
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+#  Copyright 2020 F5 Networks
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
 #
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
 
-.-PHONY: cluster deploy deploy-continuous logs checkstyle check-env
+PACKAGE_ROOT  := github.com/nginxinc
+PACKAGE       := $(PACKAGE_ROOT)/bank-of-sirius
+DATE          ?= $(shell date -u +%FT%T%z)
+VERSION       ?= $(shell cat $(CURDIR)/.version 2> /dev/null || echo 0.0.0)
+GITHASH       ?= $(shell git rev-parse HEAD)
 
-CLUSTER=bank-of-sirius
-E2E_PATH=${PWD}/.github/workflows/ui-tests/
+SED           ?= $(shell which gsed 2> /dev/null || which sed 2> /dev/null)
+ARCH          := $(shell uname -m | $(SED) -e 's/x86_64/amd64/g' -e 's/i686/i386/g')
+PLATFORM      := $(shell uname | tr '[:upper:]' '[:lower:]')
+SHELL         := bash
 
-cluster: check-env
-	gcloud container clusters create ${CLUSTER} \
-		--project=${PROJECT_ID} --zone=${ZONE} \
-		--machine-type=e2-standard-4 --num-nodes=4 \
-		--enable-stackdriver-kubernetes --subnetwork=default \
-		--labels csm=
+MVN           := $(CURDIR)/mvnw -q
+JAVA_PROJECTS = balancereader ledgerwriter transactionhistory
+JARS          = $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/$(project).jar)
 
-deploy: check-env
-	echo ${CLUSTER}
-	gcloud container clusters get-credentials --project ${PROJECT_ID} ${CLUSTER} --zone ${ZONE}
-	skaffold run --default-repo=gcr.io/${PROJECT_ID} -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE}
+.SUFFIXES:
+.SUFFIXES: .jar
 
-deploy-continuous: check-env
-	gcloud container clusters get-credentials --project ${PROJECT_ID} ${CLUSTER} --zone ${ZONE}
-	skaffold dev --default-repo=gcr.io/${PROJECT_ID}
+TIMEOUT = 45
+V = 0
+Q = $(if $(filter 1,$V),,@)
+M = $(shell printf "\033[34;1m▶\033[0m")
 
-monolith: check-env
-ifndef GCS_BUCKET
-	# GCS_BUCKET is undefined
-	# ATTENTION: Deployment proceeding with canonical pre-built monolith artifacts
-endif
-	# build and deploy Bank of Sirius along with a monolith backend service
-	mvn -f src/ledgermonolith/ package
-	src/ledgermonolith/scripts/build-artifacts.sh
-	src/ledgermonolith/scripts/deploy-monolith.sh
-	(cd src/ledgermonolith/kubernetes-manifests; sed 's/\[PROJECT_ID\]/${PROJECT_ID}/g' config.yaml.template > config.yaml)
-	(cd src/ledgermonolith; skaffold run --default-repo=gcr.io/${PROJECT_ID} -l skaffold.dev/run-id=${CLUSTER}-${PROJECT_ID}-${ZONE})
+.PHONY: help
+help:
+	@grep --no-filename -E '^[ a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-24s\033[0m %s\n", $$1, $$2}' | sort
 
-monolith-build: check-env
-ifndef GCS_BUCKET
-	$(error GCS_BUCKET is undefined; specify a Google Cloud Storage bucket to store your build artifacts)
-endif
-	# build the artifacts for the ledgermonolith service 
-	mvn -f src/ledgermonolith/ package
-	src/ledgermonolith/scripts/build-artifacts.sh
+#include build/docker.mk
+#include build/tools.mk
+#include build/compile.mk
+#include build/test.mk
+#include build/release.mk
 
-monolith-deploy: check-env
-ifndef GCS_BUCKET
-	# GCS_BUCKET is undefined
-	# ATTENTION: Deployment proceeding with canonical pre-built monolith artifacts
-endif
-	# deploy the ledgermonolith service to a GCE VM
-	src/ledgermonolith/scripts/deploy-monolith.sh
+.PHONY: clean
+clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
+	$Q rm -rf $(foreach project,$(JAVA_PROJECTS),src/$(project)/target)
 
-checkstyle:
-	mvn checkstyle:check
-	# disable warnings: import loading, todos, function members, duplicate code, public methods
-	pylint --rcfile=./.pylintrc ./src/*/*.py
+.PHONY: java
+java: $(JARS) ## Builds all Java applications
 
-test-e2e:
-	E2E_URL="http://$(shell kubectl get service frontend -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" && \
-	docker run -it -v ${E2E_PATH}:/e2e -w /e2e -e CYPRESS_baseUrl=$${E2E_URL} cypress/included:5.0.0 $(E2E_FLAGS)
+.PHONY: test-java
+test-java: $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/surefire-reports) ## Runs unit tests for all Java applications
 
-test-unit:
-	mvn test
-	for SERVICE in "contacts" "userservice"; \
-	do \
-		pushd src/$$SERVICE;\
-			python3 -m venv $$HOME/venv-$$SERVICE; \
-			source $$HOME/venv-$$SERVICE/bin/activate; \
-			pip install -r requirements.txt; \
-			python -m pytest -v -p no:warnings; \
-			deactivate; \
-		popd; \
+.PHONY: test-coverage-java
+test-coverage-java: $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/site/jacoco) ## Creates test coverage reports for all Java applications
+
+.PRECIOUS: %.jar
+%.jar: ; $(info $(M) building Java distribution archive file: $(@))	@
+# $(dir $(@D)) - in this context will return src/<project dir>
+	$Q $(MVN) -pl $(dir $(@D)) package -DskipTests
+
+.PRECIOUS: %/target/surefire-reports
+%/target/surefire-reports: ; $(info $(M) running unit tests for project: $(dir $(@D))) @
+	$Q $(MVN) -pl $(dir $(@D)) test
+
+.PRECIOUS: %/target/site/jacoco
+%/target/site/jacoco: %/target/surefire-reports
+	$(info $(M) creating test coverage report for project: $(dir $(<D))) @
+# $(dir $(<D)) - in this context will return src/<project dir>
+	$Q $(MVN) -pl $(dir $(<D)) jacoco:report
+
+COVERAGE_SUMMARY := awk -F, '{ instructions += $$4 + $$5; covered += $$5 } END { print covered, "/", instructions, " instructions covered"; print int(100*covered/instructions), "% covered" }'
+
+.PHONY: test-coverage-summary-java
+.ONESHELL: test-coverage-summary-java
+test-coverage-summary-java: ## Shows a summary of the test coverage reports for all Java applications
+	$Q for project in $(JAVA_PROJECTS); do \
+		echo "Coverage for $${project}:"; \
+		$(COVERAGE_SUMMARY) "$(CURDIR)/src/$$project/target/site/jacoco/jacoco.csv"; \
+		echo; \
 	done
-
-check-env:
-ifndef PROJECT_ID
-	$(error PROJECT_ID is undefined)
-else ifndef ZONE
-	$(error ZONE is undefined)
-endif

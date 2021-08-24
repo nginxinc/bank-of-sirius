@@ -16,6 +16,6 @@ FROM bos-java8
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
-COPY target/transactionhistory-*.jar /app/libs/transactionhistory.jar
+COPY target/transactionhistory.jar /app/libs/transactionhistory.jar
 
 CMD ["java", "-jar", "/app/libs/transactionhistory.jar"]
