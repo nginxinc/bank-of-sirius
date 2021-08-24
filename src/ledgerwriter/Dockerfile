@@ -16,6 +16,6 @@ FROM bos-java8
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
-COPY target/ledgerwriter-*.jar /app/libs/ledgerwriter.jar
+COPY target/ledgerwriter.jar /app/libs/ledgerwriter.jar
 
 CMD ["java", "-jar", "/app/libs/ledgerwriter.jar"]
