@@ -13,6 +13,8 @@
 # limitations under the License.
 FROM postgres:12-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
+
 # Files for initializing the database.
 COPY initdb/0-accounts-schema.sql /docker-entrypoint-initdb.d/0-accounts-schema.sql
 RUN chmod 755  /docker-entrypoint-initdb.d/0-accounts-schema.sql

@@ -16,9 +16,9 @@
 # and various os-level packages to allow installation of popular Python
 # libraries. The source is on github at:
 #   https://github.com/nginxinc/python-docker
-FROM ghcr.io/nginxic/bos-python3
+FROM bos-python3
 
-LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-userservice
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
 ENV PORT=8080
 ENV THREADS=2
@@ -53,8 +53,6 @@ ADD *.py /app/
 
 # Copy logging configuration for gunicorn
 COPY logging.conf /logging.conf
-
-USER app
 
 # Start server using gunicorn
 CMD gunicorn -b :$PORT --threads $THREADS --log-config /logging.conf --log-level=$LOG_LEVEL "userservice:create_app()"

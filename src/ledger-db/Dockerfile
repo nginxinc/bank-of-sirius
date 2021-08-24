@@ -13,6 +13,8 @@
 # limitations under the License.
 FROM postgres:12-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
+
 # Need to get coreutils to get the date bash function working properly:
 RUN apk add --update coreutils && rm -rf /var/cache/apk/*
 
