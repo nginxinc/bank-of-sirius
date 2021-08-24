@@ -28,7 +28,7 @@ dirs_to_build="$(find "${script_dir}/base-images/" "${script_dir}/src/" -maxdept
 for dir in $dirs_to_build; do
   dir_basename="$(basename "${dir}")"
   short_name="bos-${dir_basename}"
-  image_name="${image_prefix}/${dir_basename}"
+  image_name="${image_prefix}/${short_name}"
   cd "${dir}"
   echo "Building image: ${image_name}"
   docker build ${docker_build_opts} -t "${short_name}" .

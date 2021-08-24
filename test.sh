@@ -12,8 +12,9 @@ python_test_dirs="$(find $python_test_dirs -maxdepth 1 -type d -name tests -prin
 for dir in $python_test_dirs; do
   if [ -d "${dir}/tests" ]; then
     dir_basename="$(basename "${dir}")"
+    short_name="bos-${dir_basename}"
     echo "[${dir_basename}] running Python unit test"
-    docker run -it --rm -v "${dir}/tests:/app/tests" "bos-${dir_basename}" bash -c "ln -s /app /${dir_basename} && python -m pytest -v --rootdir=/${dir_basename} -p no:warnings"
+    docker run -it --rm -v "${dir}/tests:/app/tests" "${short_name}" bash -c "ln -s /app /${dir_basename} && python -m pytest -v --rootdir=/${dir_basename} -p no:warnings"
   else
     echo "No directory found at ${dir}/tests - skipping tests"
   fi
