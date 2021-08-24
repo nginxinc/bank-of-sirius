@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM ghcr.io/nginxinc/bos-java8
+FROM bos-java8
 
-LABEL org.opencontainers.image.source=https://github.com/nginxinc/bos-ledgerwriter
+LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
 COPY target/ledgerwriter-*.jar /app/libs/ledgerwriter.jar
 

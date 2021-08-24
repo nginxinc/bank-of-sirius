@@ -11,7 +11,7 @@ dirs_to_build="$(find "${script_dir}/base-images/" "${script_dir}/src/" -maxdept
 for dir in $dirs_to_build; do
   if grep --quiet 'LABEL org.opencontainers.image.source' "${dir}/Dockerfile"; then
     dir_basename="$(basename "${dir}")"
-    image_name="${image_prefix}/bos-${dir_basename}"
+    image_name="${image_prefix}/${dir_basename}"
     echo "Publishing ${image_name}"
     docker push "${image_name}"
   else
