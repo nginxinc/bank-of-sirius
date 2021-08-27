@@ -79,6 +79,7 @@ class AllTasks(SequentialTaskSet):
             load the /login page
             fails if already logged on (redirects to /home)
             """
+            self.client.verify = False
             with self.client.get("/login", catch_response=True) as response:
                 for r_hist in response.history:
                     if r_hist.status_code > 200 and r_hist.status_code < 400:
@@ -90,6 +91,7 @@ class AllTasks(SequentialTaskSet):
             load the /signup page
             fails if not logged on (redirects to /home)
             """
+            self.client.verify = False
             with self.client.get("/signup", catch_response=True) as response:
                 for r_hist in response.history:
                     if r_hist.status_code > 200 and r_hist.status_code < 400:
@@ -106,7 +108,7 @@ class AllTasks(SequentialTaskSet):
             success = signup_helper(self, new_username)
             if success:
                 # go to AuthenticatedTasks
-                self.locust.username = new_username
+                self.client.username = new_username
                 self.interrupt()
 
     @task(2)
@@ -119,6 +121,7 @@ class AllTasks(SequentialTaskSet):
             on start, deposit a large balance into each account
             to ensure all payments are covered
             """
+            self.client.verify = False
             self.deposit(1000000)
 
         @task(10)
@@ -127,6 +130,7 @@ class AllTasks(SequentialTaskSet):
             load the / page
             fails if not logged on (redirects to /login)
             """
+            self.client.verify = False
             with self.client.get("/", catch_response=True) as response:
                 for r_hist in response.history:
                     if r_hist.status_code > 200 and r_hist.status_code < 400:
@@ -138,6 +142,7 @@ class AllTasks(SequentialTaskSet):
             load the /home page (identical to /)
             fails if not logged on (redirects to /login)
             """
+            self.client.verify = False
             with self.client.get("/home", catch_response=True) as response:
                 for r_hist in response.history:
                     if r_hist.status_code > 200 and r_hist.status_code < 400:
@@ -148,6 +153,7 @@ class AllTasks(SequentialTaskSet):
             """
             POST to /payment, sending money to other account
             """
+            self.client.verify = False
             if amount is None:
                 amount = random() * 1000
             transaction = {"account_num": choice(TRANSACTION_ACCT_LIST),
@@ -164,6 +170,7 @@ class AllTasks(SequentialTaskSet):
             """
             POST to /deposit, depositing external money into account
             """
+            self.client.verify = False
             if amount is None:
                 amount = random() * 1000
             acct_info = {"account_num": choice(TRANSACTION_ACCT_LIST),
@@ -183,7 +190,8 @@ class AllTasks(SequentialTaskSet):
             sends POST request to /login with stored credentials
             succeeds if a token was returned
             """
-            with self.client.post("/login", {"username":self.locust.username,
+            self.client.verify = False
+            with self.client.post("/login", {"username":self.client.username,
                                              "password":MASTER_PASSWORD},
                                   catch_response=True) as response:
                 found_token = False
@@ -201,8 +209,9 @@ class AllTasks(SequentialTaskSet):
             fails if not logged in
             exits AuthenticatedTasks
             """
+            self.client.verify = False
             self.client.post("/logout")
-            self.locust.username = None
+            self.client.username = None
             # go to UnauthenticatedTasks
             self.interrupt()
 
