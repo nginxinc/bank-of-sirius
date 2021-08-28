@@ -32,7 +32,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: loadgenerator
-        image: ghcr.io/bank-of-sirius/loadgenerator:latest
+        image: ghcr.io/nginxinc/bos-loadgenerator:latest
         env:
         - name: FRONTEND_ADDR
           value: "frontend:80"

@@ -30,7 +30,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: postgres
-          image: ghcr.io/bank-of-sirius/ledger-db:latest
+          image: ghcr.io/nginxinc/bos-ledger-db:latest
           ports:
             - containerPort: 5432
           envFrom:

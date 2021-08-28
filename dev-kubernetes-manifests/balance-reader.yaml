@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: balancereader
-        image: ghcr.io/bank-of-sirius/balancereader:latest
+        image: ghcr.io/nginxinc/bos-balancereader:latest
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
