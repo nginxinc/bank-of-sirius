@@ -12,6 +12,7 @@ set -o pipefail  # don't hide errors within pipes
 dir="$(dirname "${1}")"
 in_file="${dir}/requirements.in"
 txt_file="${dir}/requirements.txt"
+match_text="^# requirements checksum:"
 grep_cmd="$(shell which ggrep 2> /dev/null || which grep 2> /dev/null)"
 
 # If there are no requirements files, then there is nothing to process
@@ -25,7 +26,7 @@ if [ ! -f "${txt_file}" ]; then
   exit 0
 fi
 
-in_checksum="$(${grep_cmd} '^# requirements checksum:' "${in_file}" | cut -f4 -d' ' || true)"
+in_checksum="$(${grep_cmd} "${match_text}" "${in_file}" | cut -f4 -d' ' || true)"
 
 if [ "${in_checksum}" == "" ]; then
   >&2 echo "no checksum recorded in ${in_file}"
@@ -33,7 +34,8 @@ if [ "${in_checksum}" == "" ]; then
   exit 0
 fi
 
-reqs_checksum="$(${grep_cmd} -v '^# requirements checksum:' "${in_file}" | openssl md5 | cut -d' ' -f2)"
+reqs_checksum_output="$(${grep_cmd} -v "${match_text}" "${in_file}" | openssl md5 -r)"
+reqs_checksum="${reqs_checksum_output:0:32}"
 
 if [ "${in_checksum}" != "${reqs_checksum}" ]; then
   >&2 echo "checksum [${in_checksum}] recorded in ${in_file} does not match checksum [${reqs_checksum}] of previously compiled requirements"

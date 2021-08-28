@@ -10,6 +10,7 @@ python-preproc-requirements: docker-image-build/base-images/python3-dev ## Run p
 	$Q $(info $(M) transforming requirements.in -> requirements.txt)
 	REQS_TO_PREPROC="$$($(FIND) $(CURDIR)/src -mindepth 2 -maxdepth 2 -name requirements.in \
 						-exec $(CURDIR)/build/bin/find_changed_requirements.sh '{}' \; | xargs)"
+	MATCH_TEXT="# requirements checksum:"
 
 	for req in $${REQS_TO_PREPROC}; do \
 		dir="$$(dirname "$${req}")"; \
@@ -19,9 +20,10 @@ python-preproc-requirements: docker-image-build/base-images/python3-dev ## Run p
 		$(DOCKER) run --rm -v "$${dir}:/$${workdir}" --workdir "/$${workdir}" \
 			$(IMAGE_NAME_PREFIX)python3-dev \
 			pip-compile --quiet --output-file=- --pip-args '--no-color --prefer-binary' requirements.in | $(TEE) --output-error=exit requirements.txt > /dev/null; \
-		checksum="$$($(GREP) -v '^# requirements checksum:' requirements.in | openssl md5 | cut -d' ' -f2)"; \
-		$(SED) -i '/^# requirements checksum:/d' requirements.in; \
-		echo "# requirements checksum: $${checksum}" >> requirements.in; \
+		checksum_output="$$($(GREP) -v '^# requirements checksum:' requirements.in | openssl md5 -r)"; \
+		checksum="$${checksum_output:0:32}"; \
+		$(SED) -i "/^$${MATCH_TEXT}/d" requirements.in; \
+		echo "$${MATCH_TEXT} $${checksum}" >> requirements.in; \
 	done
 
 .PHONY: python-test
@@ -37,7 +39,7 @@ python-test-coverage: ## Creates test coverage reports for all Python applicatio
 
 .PHONY: run-python-tests
 .ONESHELL: run-python-tests
-run-python-tests:
+run-python-tests: docker-python-images
 	$Q $(info $(M) running python unit tests)
 	install_pytest_cmd="pip3 install /env/wheels/pytest/*"
 
