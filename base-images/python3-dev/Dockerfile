@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM bos-java8
+FROM bos-python3
 
-LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
-
-COPY target/balancereader.jar /app/libs/balancereader.jar
-
-CMD ["java", "-jar", "/app/libs/balancereader.jar"]
+RUN set -eux; \
+    apt-get -q update; \
+    apt-get install -q -y python3-psycopg2 gcc g++ python3-dev libffi-dev libpq-dev; \
+    pip3 install --prefer-binary pip-tools pylint ruamel.yaml==0.17.14; \
+    apt-get purge -q -y gcc g++ python3-dev libffi-dev; \
+    apt-get autoremove -q -y; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /root/.cache/*

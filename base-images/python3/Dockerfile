@@ -26,6 +26,15 @@ ENV LANG C.UTF-8
 # logging collection.
 ENV PYTHONUNBUFFERED 1
 
+# Set virtualenv environment variables. This is equivalent to running
+# source /env/bin/activate. This ensures the application is executed within
+# the context of the virtualenv and will have access to its dependencies.
+ENV VIRTUAL_ENV /env
+ENV PIP_CONFIG_FILE /env/etc/pip.conf
+ENV PATH /env/bin:$PATH
+
+COPY env/etc/pip.conf /env/etc/pip.conf
+
 RUN set -eux; \
     mkdir --parents /app; \
     mkdir --parents /env; \
@@ -36,7 +45,12 @@ RUN set -eux; \
     apt-get -qq update; \
     apt-get install -qq -y ca-certificates python3 python3-pip python3-venv python3-wheel; \
     apt-get clean; \
-    rm /var/lib/apt/lists/*_*
+    python3 -m venv --system-site-packages /env; \
+    mkdir -p /env/cache /env/wheels/pytest /env/wheels/grpcio; \
+    # Download wheels for frequently needed Python packages
+    /env/bin/pip3 download --dest /env/wheels/pytest pytest; \
+    /env/bin/pip3 download --dest /env/wheels/grpcio grpcio==1.39.0; \
+    rm -rf /var/lib/apt/lists/* /root/.cache /env/cache/*
 
 EXPOSE 8080
 WORKDIR /app

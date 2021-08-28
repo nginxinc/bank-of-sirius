@@ -2,7 +2,6 @@ flask==1.1.2
 requests==2.23.0
 pyjwt==1.7.1
 cryptography==3.3.2
-grpcio==1.39.0
 gunicorn==20.1.0
 opentelemetry-sdk==0.13b0
 opentelemetry-exporter-google-cloud==0.13b0
@@ -11,3 +10,13 @@ opentelemetry-instrumentation-flask==0.13b0
 opentelemetry-instrumentation-sqlalchemy==0.13b0
 opentelemetry-instrumentation-jinja2==0.13b0
 opentelemetry-instrumentation-requests==0.13b0
+
+# Hard-code the following to the pre-installed wheel versions
+grpcio==1.39.0
+six==1.16.0
+
+# Hard-code the following to debian package version
+cffi==1.14.5
+wrapt==1.12.1
+
+# requirements checksum: 1af689d81fabdf88f3750d593b568f6c
