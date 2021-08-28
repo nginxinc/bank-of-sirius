@@ -18,7 +18,7 @@ python-preproc-requirements: docker-image-build/base-images/python3-dev ## Run p
 		echo "Transforming $${req} into $${dir}/requirements.txt"
 		$(DOCKER) run --rm -v "$${dir}:/$${workdir}" --workdir "/$${workdir}" \
 			$(IMAGE_NAME_PREFIX)python3-dev \
-			pip-compile --quiet --output-file=- --pip-args '--no-color --prefer-binary' requirements.in | tee --output-error=exit requirements.txt > /dev/null; \
+			pip-compile --quiet --output-file=- --pip-args '--no-color --prefer-binary' requirements.in | $(TEE) --output-error=exit requirements.txt > /dev/null; \
 		checksum="$$($(GREP) -v '^# requirements checksum:' requirements.in | openssl md5 | cut -d' ' -f2)"; \
 		$(SED) -i '/^# requirements checksum:/d' requirements.in; \
 		echo "# requirements checksum: $${checksum}" >> requirements.in; \
