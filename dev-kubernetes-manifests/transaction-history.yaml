@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: transactionhistory
-        image: ghcr.io/bank-of-sirius/transactionhistory:latest
+        image: ghcr.io/nginxinc/bos-transactionhistory:latest
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"

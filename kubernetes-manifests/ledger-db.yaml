@@ -29,31 +29,31 @@ spec:
     spec:
       serviceAccountName: default
       containers:
-        - name: postgres
-          image: ghcr.io/bank-of-sirius/ledger-db:v0.5.0
-          ports:
-            - containerPort: 5432
-          envFrom:
-            - configMapRef:
-                name: environment-config
-            - configMapRef:
-                name: ledger-db-config
-            - configMapRef:
-                name: demo-data-config
-          resources:
-            requests:
-              cpu: 100m
-              memory: 512Mi
-            limits:
-              cpu: 500m
-              memory: 1Gi
-          volumeMounts:
-            - name: postgresdb
-              mountPath: /var/lib/postgresql/data
-              subPath: postgres
-      volumes:
+      - name: postgres
+        image: ghcr.io/nginxinc/bos-ledger-db:v1.0.0
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: environment-config
+        - configMapRef:
+            name: ledger-db-config
+        - configMapRef:
+            name: demo-data-config
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        volumeMounts:
         - name: postgresdb
-          emptyDir: {}
+          mountPath: /var/lib/postgresql/data
+          subPath: postgres
+      volumes:
+      - name: postgresdb
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: ConfigMap

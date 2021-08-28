@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: front
-        image: ghcr.io/bank-of-sirius/frontend:latest
+        image: ghcr.io/nginxinc/bos-frontend:latest
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"

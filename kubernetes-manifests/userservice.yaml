@@ -29,7 +29,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: userservice
-        image: ghcr.io/bank-of-sirius/userservice:v0.5.0
+        image: ghcr.io/nginxinc/bos-userservice:v1.0.0
         volumeMounts:
         - name: keys
           mountPath: "/root/.ssh"
@@ -79,8 +79,6 @@ spec:
             path: privatekey
           - key: jwtRS256.key.pub
             path: publickey
-
-
 ---
 apiVersion: v1
 kind: Service
