@@ -1,1 +1,8 @@
 locust==2.1.0
+
+# Hard-code the following to the pre-installed wheel versions
+six==1.16.0
+
+# Hard-code the following to debian package version
+
+# requirements checksum: 15d84aab4152c2e91fd2fe598d959b09

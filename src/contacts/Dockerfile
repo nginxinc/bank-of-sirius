@@ -17,36 +17,33 @@ FROM bos-python3
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
-ENV PORT=8080
-ENV THREADS=4
+ENV PORT 8080
+ENV THREADS 4
 
 # show python logs as they occur
-ENV PYTHONUNBUFFERED=0
-
-# Set virtualenv environment variables. This is equivalent to running
-# source /env/bin/activate. This ensures the application is executed within
-# the context of the virtualenv and will have access to its dependencies.
-ENV VIRTUAL_ENV /env
-ENV PATH /env/bin:$PATH
+ENV PYTHONUNBUFFERED 0
 
 # explicitly set a fallback log level in case no log level is defined by Kubernetes
 ENV LOG_LEVEL info
 
 # Install dependencies.
-ADD requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN set -eux; \
-    python3 -m venv --system-site-packages /env; \
     apt-get -q update; \
-    apt-get install -q -y python3-psycopg2 gcc g++ python3-dev libffi-dev; \
-    pip3 install -r /app/requirements.txt; \
-    apt-get purge -q -y gcc g++ python3-dev libffi-dev; \
+    apt-get install --no-install-recommends -q -y \
+        python3-psycopg2=2.8.6* \
+        python3-cffi=1.14.5* \
+        python3-sqlalchemy=1.3.22* \
+        python3-wrapt=1.12.1-4*; \
+    pip3 install /env/wheels/grpcio/*; \
+    pip3 install --requirement /app/requirements.txt; \
     apt-get autoremove -q -y; \
     apt-get clean; \
-    rm /var/lib/apt/lists/*_*; \
-    chown "app:app" /app
+    chown "app:app" /app; \
+    rm -rf /var/lib/apt/lists/* /root/.cache /env/cache/*
 
 # Add application code.
-ADD *.py /app/
+COPY *.py /app/
 
 # Copy logging configuration for gunicorn
 COPY logging.conf /logging.conf
