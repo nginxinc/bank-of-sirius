@@ -33,11 +33,12 @@ ENV GEVENT_SUPPORT=True
 ENV LOG_LEVEL info
 
 # Install dependencies.
-ADD requirements.txt /app/requirements.txt
+COPY requirements.txt /app/requirements.txt
 RUN set -eux; \
     python3 -m venv --system-site-packages /env; \
     apt-get -q update; \
-    apt-get install -q -y gcc python3-dev; \
+    apt-get install  --no-install-recommends -q -y gcc python3-dev; \
+    pip3 install /env/wheels/grpcio/six-1.16.0*.whl; \
     pip3 install -r /app/requirements.txt; \
     apt-get purge -q -y gcc python3-dev; \
     apt-get autoremove -q -y; \
@@ -46,7 +47,7 @@ RUN set -eux; \
     chown "app:app" /app
 #
 # Add application code.
-ADD locustfile.py /app
+COPY locustfile.py /app
 
 # start loadgenerator
 ENTRYPOINT locust --loglevel $LOG_LEVEL
