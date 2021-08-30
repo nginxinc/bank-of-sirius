@@ -7,6 +7,9 @@ docker-java-images: docker-image-build/base-images/java8 java-build $(foreach pr
 .PHONY: docker-python-images
 docker-python-images: docker-image-build/base-images/python3 $(foreach project,$(PYTHON_PROJECTS),docker-image-build/src/$(project)) ## Build Python container images
 
+.PHONY: docker-python-dev-images
+docker-python-dev-images: docker-image-build/base-images/python3 docker-image-build/base-images/python3-dev
+
 .PHONY: docker-db-images
 docker-db-images: $(foreach project,$(DB_PROJECTS),docker-image-build/src/$(project)) ## Build database container images
 
