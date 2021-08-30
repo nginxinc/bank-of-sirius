@@ -1,5 +1,5 @@
 .PHONY: python-checkstyle
-python-checkstyle: ## Python code style check
+python-checkstyle: docker-image-build/base-images/python3-dev ## Python code style check
 	$Q $(DOCKER) run --tty --rm -v "$(CURDIR):/project" --workdir "/project" \
 		$(IMAGE_NAME_PREFIX)python3-dev \
 		pylint --exit-zero --rcfile=./.pylintrc ./src/*/*.py ./build/bin/*.py

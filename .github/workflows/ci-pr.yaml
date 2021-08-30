@@ -53,6 +53,9 @@ jobs:
       timeout-minutes: 20
       run: |
         make python-test-coverage
+  image-build:
+    runs-on: ubuntu-latest
+    steps:
     - name: Build Container Images
       run: |
         make docker-all-images
