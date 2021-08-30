@@ -26,11 +26,12 @@ DATE              ?= $(shell date -u +%FT%T%z)
 VERSION           ?= $(shell cat $(CURDIR)/.version 2> /dev/null || echo 0.0.0)
 GITHASH           ?= $(shell git rev-parse HEAD)
 
-SED               ?= $(shell which gsed 2> /dev/null || which sed 2> /dev/null)
-AWK               ?= $(shell which gawk 2> /dev/null || which awk 2> /dev/null)
-GREP              ?= $(shell which ggrep 2> /dev/null || which grep 2> /dev/null)
-FIND              ?= $(shell which gfind 2> /dev/null || which find 2> /dev/null)
-TEE               ?= $(shell which gtee 2> /dev/null || which tee 2> /dev/null)
+SED               ?= $(shell command -v gsed 2> /dev/null || command -v sed 2> /dev/null)
+AWK               ?= $(shell command -v gawk 2> /dev/null || command -v awk 2> /dev/null)
+GREP              ?= $(shell command -v ggrep 2> /dev/null || command -v grep 2> /dev/null)
+FIND              ?= $(shell command -v gfind 2> /dev/null || command -v find 2> /dev/null)
+SORT              ?= $(shell command -v sort 2> /dev/null || command -v sort 2> /dev/null)
+TEE               ?= $(shell command -v gtee 2> /dev/null || command -v tee 2> /dev/null)
 ARCH              := $(shell uname -m | $(SED) -e 's/x86_64/amd64/g' -e 's/i686/i386/g')
 PLATFORM          := $(shell uname | tr '[:upper:]' '[:lower:]')
 SHELL             := bash
@@ -43,7 +44,7 @@ MVN               := $(CURDIR)/mvnw -q
 JARS              := $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/$(project).jar)
 
 DOCKER            := docker
-DOCKER_BUILD_OPTS :=
+DOCKER_BUILD_OPTS := --quiet
 DOCKER_BUILD      := $(DOCKER) build $(DOCKER_BUILD_OPTS)
 IMAGE_PREFIX      := ghcr.io/nginxinc
 IMAGE_NAME_PREFIX := bos-

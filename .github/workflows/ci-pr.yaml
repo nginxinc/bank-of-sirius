@@ -14,6 +14,10 @@
 
 name: "Continuous Integration - Pull Request"
 on:
+  push:
+    branches:
+      - master
+      - release/*
   pull_request:
     branches:
       - master
@@ -59,3 +63,6 @@ jobs:
     - name: Build Container Images
       run: |
         make docker-all-images
+    - name: Update Version
+      run: |
+        echo ${GITHUB_REF##*/}
