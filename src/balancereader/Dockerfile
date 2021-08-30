@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM bos-java8
+FROM bos-java
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 

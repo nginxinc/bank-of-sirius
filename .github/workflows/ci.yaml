@@ -1,0 +1,74 @@
+# Copyright 2020 F5
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: "Continuous Integration"
+on:
+  push:
+    branches:
+      - master
+      - release/*
+  create:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci-pipeline:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 8
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'zulu'
+        cache: maven
+    - name: Java Checkstyle
+      timeout-minutes: 20
+      run: |
+        make java-checkstyle
+    - name: Python Checkstyle
+      timeout-minutes: 20
+      run: |
+        make python-checkstyle
+    - name: Java Unit Tests
+      timeout-minutes: 20
+      run: |
+        make java-test
+    - name: Java Code Coverage
+      timeout-minutes: 20
+      run: |
+        make java-test-coverage-summary
+    - name: Python Unit Tests
+      timeout-minutes: 20
+      run: |
+        make python-test
+    - name: Python Code Coverage
+      timeout-minutes: 20
+      run: |
+        make python-test-coverage
+    - name: Build Container Images
+      run: |
+        make docker-all-images
+    - name: Push to Container Registry
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        .github/workflows/is_release_tag.sh && \
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
+          make release || true
