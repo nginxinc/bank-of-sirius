@@ -2,10 +2,13 @@
 docker-base-images: $(foreach dir,$(BASE_IMAGES),docker-image-build/$(dir)) ## Build base images inherited by other images
 
 .PHONY: docker-java-images
-docker-java-images: docker-image-build/base-images/java8 java-build $(foreach project,$(JAVA_PROJECTS),docker-image-build/src/$(project)) ## Build Java container images
+docker-java-images: docker-image-build/base-images/java java-build $(foreach project,$(JAVA_PROJECTS),docker-image-build/src/$(project)) ## Build Java container images
 
 .PHONY: docker-python-images
 docker-python-images: docker-image-build/base-images/python3 $(foreach project,$(PYTHON_PROJECTS),docker-image-build/src/$(project)) ## Build Python container images
+
+.PHONY: docker-python-dev-images
+docker-python-dev-images: docker-image-build/base-images/python3 docker-image-build/base-images/python3-dev
 
 .PHONY: docker-db-images
 docker-db-images: $(foreach project,$(DB_PROJECTS),docker-image-build/src/$(project)) ## Build database container images

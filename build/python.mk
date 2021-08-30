@@ -1,12 +1,12 @@
 .PHONY: python-checkstyle
-python-checkstyle: ## Python code style check
+python-checkstyle: docker-python-dev-images ## Python code style check
 	$Q $(DOCKER) run --tty --rm -v "$(CURDIR):/project" --workdir "/project" \
 		$(IMAGE_NAME_PREFIX)python3-dev \
 		pylint --exit-zero --rcfile=./.pylintrc ./src/*/*.py ./build/bin/*.py
 
 .PHONY: python-preproc-requirements
 .ONESHELL: python-preproc-requirements
-python-preproc-requirements: docker-image-build/base-images/python3-dev ## Run pip-compile for all requirements.in files
+python-preproc-requirements: docker-python-dev-images ## Run pip-compile for all requirements.in files
 	$Q $(info $(M) transforming requirements.in -> requirements.txt)
 	REQS_TO_PREPROC="$$($(FIND) $(CURDIR)/src -mindepth 2 -maxdepth 2 -name requirements.in \
 						-exec $(CURDIR)/build/bin/find_changed_requirements.sh '{}' \; | xargs)"
