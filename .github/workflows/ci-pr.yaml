@@ -27,9 +27,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Extract tag name
+      id: tag
+      uses: actions/github-script@0.2.0
       with:
-        ref: ${{github.event.pull_request.head.ref}}
-        repository: ${{github.event.pull_request.head.repo.full_name}}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          return context.payload.ref.replace(/\/refs\/tags\//, '');
+    - name: Echo
+      run: echo ${{ steps.tag.outputs.result }}
     - name: Set up JDK 8
       uses: actions/setup-java@v2
       with:
