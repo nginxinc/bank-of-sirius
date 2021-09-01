@@ -29,7 +29,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Release if release tag
       run: |
-        build/bin/is_release_tag.sh && make release
+        build/bin/is_release_tag.sh && make release || true
     - name: Set up JDK 8
       uses: actions/setup-java@v2
       with:
