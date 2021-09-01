@@ -29,4 +29,20 @@ version-update: ## Prompts for a new version
 .PHONY: release
 .ONESHELL: release
 release: ## Release container images to registry
-	$(info $(M) pushing container images) @
+	$Q $(info $(M) pushing container images)
+	latest_tag="$(git tag -l | $(SED) 's/^v//' | $(SORT) --version-sort --reverse | head -n1)"
+	latest_release="$(gh release list | $(GREP) -Eo '^v[0-9]+\.[0-9]+\.[0-9]+' | $(SORT) --version-sort --reverse | head -n1)"
+
+	for dir in $(IMAGES_TO_PUBLISH); do \
+		dir_basename="$$(basename "$${dir}")"; \
+		short_name="$(IMAGE_NAME_PREFIX)$${dir_basename}"; \
+		image_name="$(IMAGE_PREFIX)/$${short_name}"; \
+		echo "Publishing $${image_name}"; \
+		$(DOCKER) push "$${image_name}:v$(VERSION)"; \
+		if [[ "$${latest_tag}" == "v$(VERSION)" ]] && [[ "$${latest_release}" == "v$(VERSION)" ]]; then \
+			echo "tagging v$(VERSION) as latest"; \
+			$(DOCKER) tag "$${image_name}:v$(VERSION)" "$${image_name}:latest)"; \
+			echo "pushing v$(VERSION) as latest"; \
+			$(DOCKER) push "$${image_name}:latest"; \
+		fi; \
+	done
