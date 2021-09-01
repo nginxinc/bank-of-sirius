@@ -18,16 +18,18 @@ on:
     branches:
       - master
       - release/*
-    tags:
-      - 'v*'
   create:
   pull_request:
     branches:
       - master
 
 jobs:
-  code-tests:
+  ci-pipeline:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 8
@@ -63,6 +65,8 @@ jobs:
     - name: Build Container Images
       run: |
         make docker-all-images
-    - name: Release
+    - name: Push to Container Registry
       run: |
-        build/bin/is_release_tag.sh && make release || true
+        build/bin/is_release_tag.sh && \
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
+          make release || true
