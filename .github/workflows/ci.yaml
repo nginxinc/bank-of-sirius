@@ -66,6 +66,8 @@ jobs:
       run: |
         make docker-all-images
     - name: Push to Container Registry
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         build/bin/is_release_tag.sh && \
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
