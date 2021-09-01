@@ -20,6 +20,7 @@ on:
       - release/*
     tags:
       - 'v*'
+  create:
   pull_request:
     branches:
       - master
