@@ -25,3 +25,8 @@ version-update: ## Prompts for a new version
 	$Q echo "$$version" | $(GREP) -qE '^[0-9]+\.[0-9]+\.[0-9]+$$' || \
 		(echo "invalid version identifier: $$version" && exit 1) && \
 	echo -n $$version > $(CURDIR)/.version
+
+.PHONY: release
+.ONESHELL: release
+release: ## Release container images to registry
+	$(info $(M) pushing container images) @
