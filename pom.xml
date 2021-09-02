@@ -66,6 +66,7 @@
                         </dependency>
                     </dependencies>
                     <configuration>
+                        <configLocation>checkstyle.xml</configLocation>
                         <consoleOutput>true</consoleOutput>
                         <violationSeverity>warning</violationSeverity>
                         <excludes>**/generated/**/*</excludes>
