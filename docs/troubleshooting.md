@@ -1,10 +1,10 @@
 # Troubleshooting Bank of Sirius 
 
-This doc describes how to debug a running instance of Bank of Sirius on a GKE cluster. 
+This doc describes how to debug a running instance of Bank of Sirius.
 
 ## Background 
 
-The conatiner images used in [`kubernetes-manifests/`](/kubernetes-manifests) correspond to a tagged, stable release (`v0.x.x`) that is ready for public consumption. Per the [README deploy instructions](/README.md), we highly recommend using these stable image tags, not the `latest` tag. The `latest` tag corresponds to latest commit to the master branch and may be less stable. 
+The conatiner images used in [`kubernetes-manifests/`](/kubernetes-manifests) correspond to a tagged, stable release (`v0.x.x`) that is ready for public consumption. We highly recommend using these stable image tags, not the `latest` tag. The `latest` tag corresponds to latest commit to the master branch and may be less stable. 
 
 No matter what image tags you're using, you may encounter errors when running the Bank of Sirius app. Use the following steps to debug and fix problems. 
 
@@ -85,16 +85,7 @@ Events:
   Warning  FailedScheduling  12s (x3 over 13s)  default-scheduler  0/1 nodes are available: 1 Insufficient memory.
 ```
 
-This means that your cluster's [Node Pools](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pools) do not have enough capacity to host all the Bank of Sirius workloads, and you either need to use a different cluster, or increase your existing cluster's capacity (see the [GKE docs](https://cloud.google.com/kubernetes-engine/docs/how-to/resizing-a-cluster)). 
-
-### `503` error in the frontend 
-
-You may see a `503: Service Unavailble` error if you have added Istio or Sirius Service Mesh to the cluster namespace where Bank of Sirius is deployed. A 503 error typically comes from an Envoy proxy - either the IngressGateway proxy, or the sidecar proxy for a service pod. For the frontend specifically, the 503 is likely coming from the IngressGateway. 
-
-Make sure you've deployed the `VirtualService` and `Gateway` resources provided in [`istio-manifests/`](/istio-manifests), and that they're deployed into the namespace where the app is running. If you've modified the frontend's Service or Deployment port, make sure the `VirtualService` port is updated, too.  
-
-See the [Istio troubleshooting docs](https://istio.io/latest/docs/ops/common-problems/network-issues/) for more support.
-
+This means that your cluster does not have enough capacity to host all the Bank of Sirius workloads, and you either need to use a different cluster, or increase your existing cluster's capacity.
 
 ### `404` error in the frontend 
 
