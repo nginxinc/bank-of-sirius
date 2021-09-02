@@ -43,7 +43,7 @@ release: ## Release container images to registry
 		$(DOCKER) push "$${image_name}:v$(VERSION)"; \
 		if [[ "$${latest_tag}" == "$(VERSION)" ]] && [[ "$${latest_release}" == "$(VERSION)" ]]; then \
 			echo "tagging v$(VERSION) as latest"; \
-			$(DOCKER) tag "$${image_name}:v$(VERSION)" "$${image_name}:latest)"; \
+			$(DOCKER) tag "$${image_name}:v$(VERSION)" "$${image_name}:latest"; \
 			echo "pushing v$(VERSION) as latest"; \
 			$(DOCKER) push "$${image_name}:latest"; \
 		fi; \
