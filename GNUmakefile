@@ -75,6 +75,7 @@ include build/docker.mk
 include build/java.mk
 include build/python.mk
 include build/release.mk
+include build/tools.mk
 
 .PHONY: clean
 clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
