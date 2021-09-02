@@ -12,12 +12,39 @@ This document describes how to develop and add features to the Bank of Sirius ap
 You can use MacOS or Linux as your dev environment - all these languages and tools support both. 
 
 1. [Docker](https://www.docker.com/products/docker-desktop) 
-2. [GNU Make](https://www.gnu.org/software/make/)
+2. [GNU Make 4.x](https://www.gnu.org/software/make/)
 5. [JDK **14**](https://www.oracle.com/java/technologies/javase/jdk14-archive-downloads.html) (newer versions might cause issues)
 6. [Maven **3.6**](https://downloads.apache.org/maven/maven-3/) (newer versions might cause issues)
 7. [Python3](https://www.python.org/downloads/)  
 8. [piptools](https://pypi.org/project/pip-tools/)
 
+## Makefile Targets
+
+The following code block shows the valid targets for the make process. Most of these options are self-explanatory, but to completely build the application one can run `make docker-all-images`. To push the new versions to the defined registry, you can run `make release`. Note that this assumes you have the appropriate permissions to push to the defined registry.
+
+```angular2html
+checkstyle                   Run all code style checks
+clean                        Cleanup everything
+docker-all-images            Build all container images
+docker-base-images           Build base images inherited by other images
+docker-db-images             Build database container images
+docker-java-images           Build Java container images
+docker-python-images         Build Python container images
+java-build                   Builds all Java applications
+java-checkstyle              Java code style check
+java-test                    Runs unit tests for all Java applications
+java-test-coverage           Creates test coverage reports for all Java applications
+java-test-coverage-summary   Shows a summary of the test coverage reports for all Java applications
+python-checkstyle            Python code style check
+python-preproc-requirements  Run pip-compile for all requirements.in files
+python-test                  Runs unit tests for all Python applications
+python-test-coverage         Creates test coverage reports for all Python applications
+release                      Release container images to registry
+test                         Run all automated tests
+update-manifests             Updates Kubernetes manifest files to use the current deployment version
+version                      Outputs the current version
+version-update               Prompts for a new version
+```
 
 ## Adding External Packages 
 
@@ -36,7 +63,7 @@ python3 -m pip install pip-tools
 python3 -m piptools compile --output-file=requirements.txt requirements.in
 ```
 
-3. Re-run `make` with the appropriate target for your build.
+3. Re-run `make` with the appropriate target for your build. To build just the python packages you can run `make docker-python-images`
 
 
 ### Java 
@@ -51,18 +78,8 @@ If you're adding a new feature to one or more of the Java services (`ledgerwrite
             <artifactId>postgresql</artifactId>
         </dependency>
 ```
-3. Re-run `make` with the appropriate target for your build.
+3. Re-run `make` with the appropriate target for your build. To build just the python packages you can run `make docker-java-images`
 
-
-## Generating your own JWT public key. 
-
-The [extras](/extras/jwt) directory provides the RSA key/pair secret used for demos. To create your own: 
-
-```
-openssl genrsa -out jwtRS256.key 4096
-openssl rsa -in jwtRS256.key -outform PEM -pubout -out jwtRS256.key.pub
-kubectl create secret generic jwt-key --from-file=./jwtRS256.key --from-file=./jwtRS256.key.pub
-```
 
 ## Continuous Integration
 
