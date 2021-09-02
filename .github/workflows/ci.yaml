@@ -69,6 +69,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        build/bin/is_release_tag.sh && \
+        .github/workflows/is_release_tag.sh && \
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
           make release || true
