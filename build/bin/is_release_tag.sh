@@ -3,6 +3,14 @@
 set -o nounset   # abort on unbound variable
 set -o pipefail  # don't hide errors within pipes
 
+BRANCH="$(git branch --show-current)"
+BRANCH="${BRANCH//[$'\t\r\n']}"
+
+if [ "${BRANCH}" != "master" ]; then
+  >&2 echo "not on master branch"
+  exit 1
+fi
+
 if [ -z "${VERSION:-}" ]; then
   >&2 echo "reading version from file .version"
   VERSION="$(cat .version)"
