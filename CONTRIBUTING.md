@@ -1,33 +1,62 @@
-# How to Contribute
+# Contributing Guidelines
 
-We'd love to accept your patches and contributions to this project. There are
-just a few small guidelines you need to follow.
+The following is a set of guidelines for contributing. We really appreciate that you are considering contributing!
 
-## Contributor License Agreement
+#### Table Of Contents
 
-Contributions to this project must be accompanied by a Contributor License
-Agreement. You (or your employer) retain the copyright to your contribution;
-this simply gives us permission to use and redistribute your contributions as
-part of the project. Head over to <https://cla.developers.google.com/> to see
-your current agreements on file or to sign a new one.
+[Ask a Question](#ask-a-question)
 
-You generally only need to submit a CLA once, so if you've already submitted one
-(even if it was for a different project), you probably don't need to do it
-again.
+[Contributing](#contributing)
 
-## Code reviews
+[Style Guides](#style-guides)
+  * [Git Style Guide](#git-style-guide)
+  * [Java Style Guide](#java-style-guide)
+  * [Python Style Guide](#python-style-guide)
 
-All submissions, including submissions by project members, require review. We
-use GitHub pull requests for this purpose. Consult
-[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
-information on using pull requests.
+[Code of Conduct](https://github.com/nginxinc/nginx-wrapper/blob/master/CODE_OF_CONDUCT.md)
 
-## Community Guidelines
+## Ask a Question
 
-This project follows [Google's Open Source Community
-Guidelines](https://opensource.google/conduct/).
+Please open an Issue on GitHub with the label `question`.
+
+## Contributing
+
+### Report a Bug
+
+To report a bug, open an issue on GitHub with the label `bug` using the available bug report issue template. Please ensure the issue has not already been reported.
+
+### Suggest an Enhancement
+
+To suggest an enhancement, please create an issue on GitHub with the label `enhancement` using the available feature issue template.
+
+### Open a Pull Request
+
+* Fork the repo, create a branch, submit a PR when your changes are tested and ready for review.
+* Fill in [our pull request template](/.github/PULL_REQUEST_TEMPLATE.md)
+
+Note: if you’d like to implement a new feature, please consider creating a feature request issue first to start a discussion about the feature.
+
+## Style Guides
+
+### Git Style Guide
+
+* Keep a clean, concise and meaningful git commit history on your branch, rebasing locally and squashing before submitting a PR
+* Use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) format when writing a commit message, so that changelogs can be automatically generated
+* Follow the guidelines of writing a good commit message as described [here](https://chris.beams.io/posts/git-commit/) and summarised in the next few points
+    * In the subject line, use the present tense ("Add feature" not "Added feature")
+    * In the subject line, use the imperative mood ("Move cursor to..." not "Moves cursor to...")
+    * Limit the subject line to 72 characters or less
+    * Reference issues and pull requests liberally after the subject line
+    * Add more detailed description in the body of the git message (`git commit -a` to give you more space and time in your text editor to write a good message instead of `git commit -am`)
+
+### Java Style Guide
+
+* Java code should conform to the [Google Java Style](https://checkstyle.org/styleguides/google-java-style-20180523/javaguide.html) whenever possible.
+* The make target `java-checkstyle` should pass without errors.
+* Where feasible, include unit tests.
 
 
-## Development Guide 
+### Python Style Guide
 
-Please see the [development guide](docs/development.md) for how to set up your local environment.
+* Python code should conform to the [PEP-8 style guidelines](https://www.python.org/dev/peps/pep-0008/) whenever possible.
+* Where feasible, include unit tests.
