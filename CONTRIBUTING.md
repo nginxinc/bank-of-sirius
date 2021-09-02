@@ -8,10 +8,12 @@ The following is a set of guidelines for contributing. We really appreciate that
 
 [Contributing](#contributing)
 
+[Development](#development-guide)
+
 [Style Guides](#style-guides)
-  * [Git Style Guide](#git-style-guide)
-  * [Java Style Guide](#java-style-guide)
-  * [Python Style Guide](#python-style-guide)
+* [Git Style Guide](#git-style-guide)
+* [Java Style Guide](#java-style-guide)
+* [Python Style Guide](#python-style-guide)
 
 [Code of Conduct](https://github.com/nginxinc/nginx-wrapper/blob/master/CODE_OF_CONDUCT.md)
 
@@ -35,6 +37,10 @@ To suggest an enhancement, please create an issue on GitHub with the label `enha
 * Fill in [our pull request template](/.github/PULL_REQUEST_TEMPLATE.md)
 
 Note: if you’d like to implement a new feature, please consider creating a feature request issue first to start a discussion about the feature.
+
+## Development Guide
+
+Please see the [development guide](docs/development.md) for how to set up your local environment.
 
 ## Style Guides
 
