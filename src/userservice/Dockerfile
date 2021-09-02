@@ -16,7 +16,7 @@
 # and various os-level packages to allow installation of popular Python
 # libraries. The source is on github at:
 #   https://github.com/nginxinc/python-docker
-FROM bos-python3
+FROM bos-python
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
