@@ -48,3 +48,13 @@ release: ## Release container images to registry
 			$(DOCKER) push "$${image_name}:latest"; \
 		fi; \
 	done
+
+.PHONY: changelog
+.ONESHELL: changelog
+changelog: ## Outputs the changes since the last version committed
+	$Q echo 'Changes since $(LAST_VERSION):'
+	git log --format="%s	(%h)" "$(LAST_VERSION_HASH)..HEAD" | \
+		$(GREP) -Ev '^(ci|chore|docs|build): .*' | \
+		$(SED) 's/: /:\t/g1' | \
+		column -s "	" -t | \
+		$(SED) -e 's/^/ * /'
