@@ -30,9 +30,9 @@ version-update: ## Prompts for a new version
 .ONESHELL: release
 release: ## Release container images to registry
 	$Q $(info $(M) pushing container images)
-	latest_tag="$$(git tag -l | $(SED) 's/^v//' | $(SORT) --version-sort --reverse | head -n1)"
+	latest_tag="$$(git tag -l | tr -d ' ' | $(SED) 's/^v//' | $(SORT) --version-sort --reverse | head -n1)"
 	echo "latest tag: $${latest_tag}"
-	latest_release="$$(gh release list | $(GREP) -Eo '^v[0-9]+\.[0-9]+\.[0-9]+' | $(SORT) --version-sort --reverse | head -n1)"
+	latest_release="$$(gh release list | $(GREP) -Eo '^v?[0-9]+\.[0-9]+\.[0-9]+' | $(SED) 's/^v//' | $(SORT) --version-sort --reverse | head -n1)"
 	echo "latest release: $${latest_release}"
 
 	for dir in $(IMAGES_TO_PUBLISH); do \
