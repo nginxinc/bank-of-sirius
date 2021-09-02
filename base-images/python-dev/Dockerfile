@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM bos-python3
+FROM bos-python
 
 RUN set -eux; \
     apt-get -q update; \

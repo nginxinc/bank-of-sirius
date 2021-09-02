@@ -1,7 +1,7 @@
 .PHONY: python-checkstyle
 python-checkstyle: docker-python-dev-images ## Python code style check
 	$Q $(DOCKER) run --tty --rm -v "$(CURDIR):/project" --workdir "/project" \
-		$(IMAGE_NAME_PREFIX)python3-dev \
+		$(IMAGE_NAME_PREFIX)python-dev \
 		pylint --exit-zero --rcfile=./.pylintrc ./src/*/*.py ./build/bin/*.py
 
 .PHONY: python-preproc-requirements
@@ -18,7 +18,7 @@ python-preproc-requirements: docker-python-dev-images ## Run pip-compile for all
 		cd "$${dir}"; \
 		echo "Transforming $${req} into $${dir}/requirements.txt"
 		$(DOCKER) run --rm -v "$${dir}:/$${workdir}" --workdir "/$${workdir}" \
-			$(IMAGE_NAME_PREFIX)python3-dev \
+			$(IMAGE_NAME_PREFIX)python-dev \
 			pip-compile --quiet --output-file=- --pip-args '--no-color --prefer-binary' requirements.in | $(TEE) --output-error=exit requirements.txt > /dev/null; \
 		checksum_output="$$($(GREP) -v '^# requirements checksum:' requirements.in | openssl md5 -r)"; \
 		checksum="$${checksum_output:0:32}"; \

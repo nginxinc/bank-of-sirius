@@ -5,10 +5,10 @@ docker-base-images: $(foreach dir,$(BASE_IMAGES),docker-image-build/$(dir)) ## B
 docker-java-images: docker-image-build/base-images/java java-build $(foreach project,$(JAVA_PROJECTS),docker-image-build/src/$(project)) ## Build Java container images
 
 .PHONY: docker-python-images
-docker-python-images: docker-image-build/base-images/python3 $(foreach project,$(PYTHON_PROJECTS),docker-image-build/src/$(project)) ## Build Python container images
+docker-python-images: docker-image-build/base-images/python $(foreach project,$(PYTHON_PROJECTS),docker-image-build/src/$(project)) ## Build Python container images
 
 .PHONY: docker-python-dev-images
-docker-python-dev-images: docker-image-build/base-images/python3 docker-image-build/base-images/python3-dev
+docker-python-dev-images: docker-image-build/base-images/python docker-image-build/base-images/python-dev
 
 .PHONY: docker-db-images
 docker-db-images: $(foreach project,$(DB_PROJECTS),docker-image-build/src/$(project)) ## Build database container images
