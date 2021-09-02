@@ -83,5 +83,8 @@ clean: ; $(info $(M) cleaning...)	@ ## Cleanup everything
 .PHONY: test
 test: java-test python-test ## Run all automated tests
 
+.PHONY: all
+all: java-build docker-all-images
+
 .PHONY: checkstyle
 checkstyle: java-checkstyle python-checkstyle ## Run all code style checks
