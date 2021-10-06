@@ -1,17 +1,4 @@
-# Copyright 2019 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,14 +16,14 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: balancereader
-        image: ghcr.io/nginxinc/bos-balancereader:v1.0.0
+        image: ghcr.io/nginxinc/bos-balancereader:latest
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
           readOnly: true
         env:
         - name: VERSION
-          value: "v0.5.0"
+          value: "v0.4.3"
         - name: PORT
           value: "8080"
         # toggle Cloud Trace export
@@ -65,13 +52,6 @@ spec:
         # add ledger-db credentials from ConfigMap
         - configMapRef:
             name: ledger-db-config
-        resources:
-          requests:
-            cpu: 100m
-            memory: 512Mi
-          limits:
-            cpu: 500m
-            memory: 1Gi
         readinessProbe:
           httpGet:
             path: /ready

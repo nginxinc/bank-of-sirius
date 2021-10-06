@@ -14,6 +14,11 @@ The intention is for it to me a more *productionized* example.
 
 If you’re using this app, please ★Star the repository to show your interest!
 
+## Important Note
+This repository is intended to be used with the NGINX Modern Application Architecture (MARA) project [kic-reference-architectures](https://github.com/nginxinc/kic-reference-architectures). This includes modifications to the deployment process, as well as the inclusion of OTEL elements that work with the above project.
+
+If you wish to run this outside of the NGINX MARA project you may run into issues, so it is recommended in this case you either fork this project or the original [Google Bank of Anthos](https://github.com/GoogleCloudPlatform/bank-of-anthos) project. 
+
 
 ## Screenshots
 
