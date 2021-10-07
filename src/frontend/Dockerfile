@@ -49,4 +49,11 @@ COPY *.py /app/
 COPY logging.conf /logging.conf
 
 # Start server using gunicorn
-CMD gunicorn -b :$PORT --threads $THREADS --log-config /logging.conf --log-level=$LOG_LEVEL "frontend:create_app()"
+CMD gunicorn \
+    -b :$PORT \
+    --threads $THREADS \
+    --statsd-host=statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125 \
+    --statsd-prefix=bos.frontend \
+    --log-config /logging.conf \
+    --log-level=$LOG_LEVEL \
+    "frontend:create_app()"
