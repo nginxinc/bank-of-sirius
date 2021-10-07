@@ -52,8 +52,8 @@ COPY logging.conf /logging.conf
 CMD gunicorn \
     -b :$PORT \
     --threads $THREADS \
-    --statsd-host=statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125 \
-    --statsd-prefix=bos.frontend \
+    --statsd-host=$STATSD_HOST \
+    --statsd-prefix=$STATSD_PREFIX \
     --log-config /logging.conf \
     --log-level=$LOG_LEVEL \
     "frontend:create_app()"
