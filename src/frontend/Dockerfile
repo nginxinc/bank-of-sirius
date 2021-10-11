@@ -49,4 +49,11 @@ COPY *.py /app/
 COPY logging.conf /logging.conf
 
 # Start server using gunicorn
-CMD gunicorn -b :$PORT --threads $THREADS --log-config /logging.conf --log-level=$LOG_LEVEL "frontend:create_app()"
+CMD gunicorn \
+    -b :$PORT \
+    --threads $THREADS \
+    --statsd-host=$STATSD_HOST \
+    --statsd-prefix=$STATSD_PREFIX \
+    --log-config /logging.conf \
+    --log-level=$LOG_LEVEL \
+    "frontend:create_app()"

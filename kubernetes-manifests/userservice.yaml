@@ -25,6 +25,10 @@ spec:
         - name: http-server
           containerPort: 8080
         env:
+        - name: STATSD_HOST
+          value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
+        - name: STATSD_PREFIX
+          value: bos.userservice
         - name: VERSION
           value: "v0.4.3"
         - name: PORT

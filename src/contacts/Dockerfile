@@ -52,5 +52,8 @@ COPY logging.conf /logging.conf
 CMD gunicorn \
     -b :$PORT \
     --threads $THREADS \
+    --statsd-host=$STATSD_HOST \
+    --statsd-prefix=$STATSD_PREFIX \
     --log-config /logging.conf \
     --log-level=$LOG_LEVEL "contacts:create_app()"
+

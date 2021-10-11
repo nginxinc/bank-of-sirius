@@ -22,6 +22,10 @@ spec:
           mountPath: "/root/.ssh"
           readOnly: true
         env:
+        - name: STATSD_HOST
+          value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
+        - name: STATSD_PREFIX
+          value: bos.frontend
         - name: VERSION
           value: "v0.4.3"
         - name: PORT
