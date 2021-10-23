@@ -1,0 +1,10 @@
+{
+  "properties": [
+    {
+      "name": "jwt.account.authentication.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable JWT token authentication of account ids.",
+      "defaultValue": true
+    }
+  ]
+}
