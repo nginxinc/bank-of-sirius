@@ -18,4 +18,4 @@ LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
 COPY target/balancereader.jar /app/libs/balancereader.jar
 
-CMD ["java", "-jar", "/app/libs/balancereader.jar"]
+CMD ["java", "-Dlogging.config=/app/log4j2.xml", "-jar", "/app/libs/balancereader.jar"]
