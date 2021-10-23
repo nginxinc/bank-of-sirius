@@ -49,7 +49,7 @@ RUN set -eux; \
     apt-get -qq -y purge curl gnupg software-properties-common; \
     apt-get autoremove -y; \
     apt-get clean; \
-    rm /var/lib/apt/lists/*_* /tmp/zulu-repo.deb; \
+    rm /var/lib/apt/lists/*_* /tmp/zulu-repo.deb /etc/machine-id; \
     # Use a non-blocking PRNG in order to conserve entropy on containized systems
     sed -i 's/^\(securerandom.strongAlgorithms\)=.*$/\1=NativePRNGNonBlocking:SUN/' $JAVA_HOME/jre/lib/security/java.security; \
     mkdir --parents /app/libs /app/resources /app/classes; \
