@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package sirius.samples.bankofsirius.ledgerwriter;
+package sirius.samples.bankofsirius.ledger;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.
-        EXCEPTION_MESSAGE_INVALID_NUMBER;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.
-        EXCEPTION_MESSAGE_NOT_AUTHENTICATED;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.
-        EXCEPTION_MESSAGE_SEND_TO_SELF;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.
-        EXCEPTION_MESSAGE_INVALID_AMOUNT;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -39,6 +38,10 @@ class TransactionValidatorTest {
 
     @Mock
     private Transaction transaction;
+    @Mock
+    private Tracer tracer;
+    @Mock
+    Span.Builder spanBuilder;
 
     private static final String LOCAL_ROUTING_NUM = "123456789";
     private static final String AUTHED_ACCOUNT_NUM = "1234567890";
@@ -88,13 +91,16 @@ class TransactionValidatorTest {
     @BeforeEach
     void setUp() {
         initMocks(this);
-        transactionValidator = new TransactionValidator();
+        transactionValidator = new TransactionValidator(tracer);
 
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
         when(transaction.getToAccountNum()).thenReturn(TO_ACCOUNT_NUM);
         when(transaction.getToRoutingNum()).thenReturn(TO_ROUTING_NUM);
         when(transaction.getAmount()).thenReturn(VALID_AMOUNT);
+        when(tracer.spanBuilder()).thenReturn(spanBuilder);
+        when(spanBuilder.name(anyString())).thenReturn(spanBuilder);
+        when(spanBuilder.start()).thenReturn(mock(Span.class));
     }
 
     @Test
@@ -173,16 +179,16 @@ class TransactionValidatorTest {
                 NON_AUTHED_ACCOUNT_NUM);
 
         // When
-        IllegalArgumentException exceptionThrown = assertThrows(
-                IllegalArgumentException.class, () -> {
+        TransactionValidationException exceptionThrown = assertThrows(
+                TransactionValidationException.class, () -> {
                     transactionValidator.validateTransaction(
                             LOCAL_ROUTING_NUM, AUTHED_ACCOUNT_NUM, transaction);
                 });
 
         // Then
         assertNotNull(exceptionThrown);
-        assertEquals(EXCEPTION_MESSAGE_NOT_AUTHENTICATED,
-                exceptionThrown.getMessage());
+        Assertions.assertEquals(ExceptionMessages.EXCEPTION_MESSAGE_NOT_AUTHENTICATED,
+                exceptionThrown.getHttpErrorMessage());
     }
 
     @Test
@@ -194,16 +200,16 @@ class TransactionValidatorTest {
         when(transaction.getToRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
 
         // When
-        IllegalArgumentException exceptionThrown = assertThrows(
-                IllegalArgumentException.class, () -> {
+        TransactionValidationException exceptionThrown = assertThrows(
+                TransactionValidationException.class, () -> {
                     transactionValidator.validateTransaction(
                             LOCAL_ROUTING_NUM, AUTHED_ACCOUNT_NUM, transaction);
                 });
 
         // Then
         assertNotNull(exceptionThrown);
-        assertEquals(EXCEPTION_MESSAGE_SEND_TO_SELF,
-                exceptionThrown.getMessage());
+        Assertions.assertEquals(ExceptionMessages.EXCEPTION_MESSAGE_SEND_TO_SELF,
+                exceptionThrown.getHttpErrorMessage());
     }
 
     @Test
@@ -214,30 +220,30 @@ class TransactionValidatorTest {
             when(transaction.getAmount()).thenReturn(INVALID_TRANSACTION_AMOUNT[i]);
 
             // When
-            IllegalArgumentException exceptionThrown = assertThrows(
-                IllegalArgumentException.class, () -> {
+            TransactionValidationException exceptionThrown = assertThrows(
+                TransactionValidationException.class, () -> {
                     transactionValidator.validateTransaction(
                         LOCAL_ROUTING_NUM, AUTHED_ACCOUNT_NUM, transaction);
                 });
 
             // Then
             assertNotNull(exceptionThrown);
-            assertEquals(EXCEPTION_MESSAGE_INVALID_AMOUNT,
-                exceptionThrown.getMessage());
+            Assertions.assertEquals(ExceptionMessages.EXCEPTION_MESSAGE_INVALID_AMOUNT,
+                exceptionThrown.getHttpErrorMessage());
         }
     }
 
     void assertInvalidNumberHelper() {
         // When
-        IllegalArgumentException exceptionThrown = assertThrows(
-                IllegalArgumentException.class, () -> {
+        TransactionValidationException exceptionThrown = assertThrows(
+                TransactionValidationException.class, () -> {
                     transactionValidator.validateTransaction(
                             LOCAL_ROUTING_NUM, AUTHED_ACCOUNT_NUM, transaction);
                 });
 
         // Then
         assertNotNull(exceptionThrown);
-        assertEquals(EXCEPTION_MESSAGE_INVALID_NUMBER,
-                exceptionThrown.getMessage());
+        Assertions.assertEquals(ExceptionMessages.EXCEPTION_MESSAGE_INVALID_NUMBER,
+                exceptionThrown.getHttpErrorMessage());
     }
 }
