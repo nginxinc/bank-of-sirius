@@ -50,7 +50,7 @@ RUN set -eux; \
     # Download wheels for frequently needed Python packages
     /env/bin/pip3 download --dest /env/wheels/pytest pytest; \
     /env/bin/pip3 download --dest /env/wheels/grpcio grpcio==1.39.0; \
-    rm -rf /var/lib/apt/lists/* /root/.cache /env/cache/*
+    rm -rf /var/lib/apt/lists/* /root/.cache /env/cache/* /etc/machine-id
 
 EXPOSE 8080
 WORKDIR /app
