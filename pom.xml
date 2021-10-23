@@ -30,6 +30,7 @@
         <module>src/telemetry-common</module>
         <module>src/security-common</module>
         <module>src/spring-boot-parent</module>
+        <module>src/ledger-common</module>
         <module>src/ledgerwriter</module>
         <module>src/transactionhistory</module>
         <module>src/balancereader</module>

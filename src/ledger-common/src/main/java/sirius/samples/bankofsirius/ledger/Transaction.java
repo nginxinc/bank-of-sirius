@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package sirius.samples.bankofsirius.balancereader;
+package sirius.samples.bankofsirius.ledger;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,10 +26,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.CreationTimestamp;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import javax.persistence.Transient;
+import java.util.Date;
 
 /**
  * Defines a banking transaction.
@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Entity
 @Table(name = "TRANSACTIONS")
-public final class Transaction {
+public class Transaction {
     @Id
     @Column(name = "TRANSACTION_ID", nullable = false, updatable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,6 +60,12 @@ public final class Transaction {
     @CreationTimestamp
     @JsonProperty("timestamp")
     private Date timestamp;
+    // UUID is used for preventing duplicate requests from client
+    // Do not persist to database
+    @Transient
+    @JsonProperty(value = "uuid")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private String requestUuid;
 
     private static final double CENTS_PER_DOLLAR = 100.0;
 
@@ -86,6 +92,15 @@ public final class Transaction {
     public Integer getAmount() {
         return amount;
     }
+
+    public String getRequestUuid() {
+        if (requestUuid == null) {
+            return "";
+        } else {
+            return requestUuid;
+        }
+    }
+
     /**
      * String representation.
      *
