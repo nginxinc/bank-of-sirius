@@ -19,18 +19,23 @@ package sirius.samples.bankofsirius.transactionhistory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import java.util.Deque;
-import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.client.ResourceAccessException;
+import sirius.samples.bankofsirius.ledger.Transaction;
+import sirius.samples.bankofsirius.ledger.TransactionRepository;
+
+import java.util.Deque;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -41,41 +46,61 @@ import org.springframework.web.client.ResourceAccessException;
 public class TransactionCache {
 
     private static final Logger LOGGER =
-        LogManager.getLogger(TransactionCache.class);
+            LogManager.getLogger(TransactionCache.class);
+
+    private final TransactionRepository dbRepo;
+    private final Tracer tracer;
 
     @Autowired
-    private TransactionRepository dbRepo;
-
+    public TransactionCache(final TransactionRepository dbRepo,
+                            final Tracer tracer) {
+        this.dbRepo = dbRepo;
+        this.tracer = tracer;
+    }
 
     /**
      * Initializes the LoadingCache for the TransactionHistoryController
      *
-     * @param expireSize max size of the cache
+     * @param expireSize      max size of the cache
      * @param localRoutingNum bank routing number for account
      * @return the LoadingCache storing accountIds and their transactions
      */
-    @Bean(name = "cache")
+    @Bean
     public LoadingCache<String, Deque<Transaction>> initializeCache(
-        @Value("${CACHE_SIZE:1000000}") final Integer expireSize,
-        @Value("${CACHE_MINUTES:60}") final Integer expireMinutes,
-        @Value("${LOCAL_ROUTING_NUM}") String localRoutingNum,
-        @Value("${HISTORY_LIMIT:100}") Integer historyLimit) {
-        CacheLoader load = new CacheLoader<String, Deque<Transaction>>() {
-          @Override
-          public Deque<Transaction> load(String accountId)
-              throws ResourceAccessException,
-              DataAccessResourceFailureException  {
-            LOGGER.debug("Cache loaded from db");
-            Pageable request = PageRequest.of(0, historyLimit);
-            return dbRepo.findForAccount(accountId,
-                localRoutingNum,
-                request);
-          }
-        };
-      return CacheBuilder.newBuilder()
-          .recordStats()
-          .maximumSize(expireSize)
-          .expireAfterWrite(expireMinutes, TimeUnit.MINUTES)
-          .build(load);
+            @Value("${CACHE_SIZE:1000000}") final Integer expireSize,
+            @Value("${CACHE_MINUTES:60}") final Integer expireMinutes,
+            @Value("${LOCAL_ROUTING_NUM}") final String localRoutingNum,
+            @Value("${HISTORY_LIMIT:100}") final Integer historyLimit) {
+
+        final CacheLoader<String, Deque<Transaction>> loader =
+                new CacheLoader<String, Deque<Transaction>>() {
+                    @Override
+                    public Deque<Transaction> load(final String accountId)
+                            throws ResourceAccessException, DataAccessResourceFailureException {
+                        final Span span = tracer.spanBuilder().name("load_cache").start();
+
+                        try {
+                            Pageable request = PageRequest.of(0, historyLimit);
+                            Deque<Transaction> transactions = dbRepo.findForAccount(
+                                    accountId, localRoutingNum, request);
+
+                            if (LOGGER.isDebugEnabled()) {
+                                String msg = "Loaded from db into cache [count={}, accountId={}]";
+                                LOGGER.debug(msg, transactions.size(), accountId);
+                            }
+
+                            span.tag("cache.miss", "true");
+                            return transactions;
+                        } finally {
+                            span.end();
+                        }
+                    }
+                };
+
+        return CacheBuilder.newBuilder()
+                .recordStats()
+                .maximumSize(expireSize)
+                .expireAfterWrite(expireMinutes, TimeUnit.MINUTES)
+                .build(loader);
     }
 }

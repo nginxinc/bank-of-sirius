@@ -16,18 +16,20 @@
 
 package sirius.samples.bankofsirius.balancereader;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.web.client.ResourceAccessException;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import sirius.samples.bankofsirius.ledger.TransactionRepository;
 
 /**
  * BalanceCache creates the LoadingCache that handles caching
@@ -39,8 +41,15 @@ public class BalanceCache {
     private static final Logger LOGGER =
         LogManager.getLogger(BalanceCache.class);
 
+    private final TransactionRepository dbRepo;
+    private final Tracer tracer;
+
     @Autowired
-    private TransactionRepository dbRepo;
+    public BalanceCache(final TransactionRepository dbRepo,
+                        final Tracer tracer) {
+        this.dbRepo = dbRepo;
+        this.tracer = tracer;
+    }
 
     /**
      * Initializes the LoadingCache for the BalanceReaderController
@@ -49,21 +58,31 @@ public class BalanceCache {
      * @param localRoutingNum bank routing number for account
      * @return the LoadingCache storing accountIds and their balances
      */
-    @Bean (name = "cache")
+    @Bean(name = "cache")
     public LoadingCache<String, Long> initializeCache(
         @Value("${CACHE_SIZE:1000000}") final Integer expireSize,
         @Value("${LOCAL_ROUTING_NUM}") String localRoutingNum) {
-        CacheLoader loader =  new CacheLoader<String, Long>() {
+        CacheLoader<String, Long> loader =  new CacheLoader<String, Long>() {
             @Override
             public Long load(String accountId)
-                throws ResourceAccessException,
-                DataAccessResourceFailureException {
-                LOGGER.debug("Cache loaded from db");
-                Long balance = dbRepo.findBalance(accountId, localRoutingNum);
-                if (balance == null) {
-                    balance = 0L;
+                throws ResourceAccessException, DataAccessResourceFailureException {
+                final Span span = tracer.nextSpan().name("load_cache");
+
+                try {
+                    LOGGER.debug("Balance loaded into cache [accountId={}, localRoutingNum={}]",
+                            accountId, localRoutingNum);
+                    Long balance = dbRepo.findBalance(accountId, localRoutingNum);
+                    if (balance == null) {
+                        balance = 0L;
+                        LOGGER.warn("No balance found in database for account [accountId={}]",
+                                accountId);
+                    }
+
+                    span.tag("cache.miss", "true");
+                    return balance;
+                } finally {
+                    span.end();
                 }
-                return balance;
             }
         };
         return CacheBuilder.newBuilder()

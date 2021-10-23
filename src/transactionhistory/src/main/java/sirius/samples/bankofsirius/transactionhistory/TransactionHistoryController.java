@@ -16,27 +16,29 @@
 
 package sirius.samples.bankofsirius.transactionhistory;
 
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.cache.LoadingCache;
-import com.google.common.util.concurrent.UncheckedExecutionException;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
-import io.micrometer.stackdriver.StackdriverMeterRegistry;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import sirius.samples.bankofsirius.ledger.Transaction;
+import sirius.samples.bankofsirius.security.AuthenticationException;
+import sirius.samples.bankofsirius.security.Authenticator;
+
+import java.util.Collection;
+import java.util.Deque;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Controller for the TransactionHistory service.
@@ -45,22 +47,14 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public final class TransactionHistoryController {
-
     private static final Logger LOGGER =
         LogManager.getLogger(TransactionHistoryController.class);
 
-    @Autowired
-    private TransactionRepository dbRepo;
+    private final Integer extraLatencyMillis;
 
-    @Value("${EXTRA_LATENCY_MILLIS:#{null}}")
-    private Integer extraLatencyMillis;
-    @Value("${HISTORY_LIMIT:100}")
-    private Integer historyLimit;
-    private String version;
-
-    private JWTVerifier verifier;
-    private LedgerReader ledgerReader;
-    private LoadingCache<String, Deque<Transaction>> cache;
+    private final Tracer tracer;
+    private final Authenticator authenticator;
+    private final LoadingCache<String, Deque<Transaction>> cache;
 
     /**
      * Constructor.
@@ -68,125 +62,60 @@ public final class TransactionHistoryController {
      * Initializes JWT verifier and a connection to the bank ledger.
      */
     @Autowired
-    public TransactionHistoryController(LedgerReader reader,
-            StackdriverMeterRegistry meterRegistry,
-            JWTVerifier verifier,
-            @Value("${PUB_KEY_PATH}") final String publicKeyPath,
-            LoadingCache<String, Deque<Transaction>> cache,
-            @Value("${LOCAL_ROUTING_NUM}") final String localRoutingNum,
-            @Value("${VERSION}") final String version) {
-        this.version = version;
-        // Initialize JWT verifier.
-        this.verifier = verifier;
-        // Initialize cache
+    public TransactionHistoryController(final Authenticator authenticator,
+                                        final MeterRegistry meterRegistry,
+                                        final LoadingCache<String, Deque<Transaction>> cache,
+                                        final Tracer tracer,
+                                        @Value("${EXTRA_LATENCY_MILLIS:#{null}}") final Integer extraLatencyMillis) {
+        this.authenticator = authenticator;
         this.cache = cache;
-        GuavaCacheMetrics.monitor(meterRegistry, this.cache, "Guava");
+        this.extraLatencyMillis = extraLatencyMillis;
+        this.tracer = tracer;
+
+        if (meterRegistry != null) {
+            GuavaCacheMetrics.monitor(meterRegistry, this.cache, "Guava");
+        }
+
         // Initialize transaction processor.
-        this.ledgerReader = reader;
         LOGGER.debug("Initialized transaction processor");
-        this.ledgerReader.startWithCallback(transaction -> {
-            final String fromId = transaction.getFromAccountNum();
-            final String fromRouting = transaction.getFromRoutingNum();
-            final String toId = transaction.getToAccountNum();
-            final String toRouting = transaction.getToRoutingNum();
-
-            if (fromRouting.equals(localRoutingNum)
-                    && this.cache.asMap().containsKey(fromId)) {
-                processTransaction(fromId, transaction);
-            }
-            if (toRouting.equals(localRoutingNum)
-                    && this.cache.asMap().containsKey(toId)) {
-                processTransaction(toId, transaction);
-            }
-        });
-    }
-
-    /**
-     * Helper function to add a single transaction to the internal cache
-     *
-     * @param accountId   the accountId associated with the transaction
-     * @param transaction the full transaction object
-     */
-    private void processTransaction(String accountId, Transaction transaction) {
-        LOGGER.debug("Modifying transaction cache: " + accountId);
-        Deque<Transaction> tList = this.cache.asMap()
-                                             .get(accountId);
-        tList.addFirst(transaction);
-        // Drop old transactions
-        if (tList.size() > historyLimit) {
-            tList.removeLast();
-        }
-    }
-
-   /**
-     * Version endpoint.
-     *
-     * @return  service version string
-     */
-    @GetMapping("/version")
-    public ResponseEntity version() {
-        return new ResponseEntity<String>(version, HttpStatus.OK);
-    }
-
-    /**
-     * Readiness probe endpoint.
-     *
-     * @return HTTP Status 200 if server is ready to receive requests.
-     */
-    @GetMapping("/ready")
-    @ResponseStatus(HttpStatus.OK)
-    public String readiness() {
-        return "ok";
-    }
-
-    /**
-     * Liveness probe endpoint.
-     *
-     * @return HTTP Status 200 if server is healthy and serving requests.
-     */
-    @GetMapping("/healthy")
-    public ResponseEntity liveness() {
-        if (!ledgerReader.isAlive()) {
-            // background thread died.
-            LOGGER.error("Ledger reader not healthy");
-            return new ResponseEntity<String>("Ledger reader not healthy",
-                                              HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<String>("ok", HttpStatus.OK);
     }
 
     /**
      * Return a list of transactions for the specified account.
      *
      * The currently authenticated user must be allowed to access the account.
-     * @param bearerToken  HTTP request 'Authorization' header
+     * @param authorization  HTTP request 'Authorization' header
      * @param accountId    the account to get transactions for.
      * @return             a list of transactions for this account.
      */
     @GetMapping("/transactions/{accountId}")
     public ResponseEntity<?> getTransactions(
-            @RequestHeader("Authorization") String bearerToken,
+            @RequestHeader("Authorization") String authorization,
             @PathVariable String accountId) {
-
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            bearerToken = bearerToken.split("Bearer ")[1];
+        if (authorization == null || authorization.isEmpty()) {
+            return new ResponseEntity<>("HTTP request 'Authorization' header is null",
+                    HttpStatus.BAD_REQUEST);
         }
-        try {
-            DecodedJWT jwt = verifier.verify(bearerToken);
-            // Check that the authenticated user can access this account.
-            if (!accountId.equals(jwt.getClaim("acct").asString())) {
-                LOGGER.error("Failed to retrieve account transactions: "
-                    + "not authorized");
-                return new ResponseEntity<String>("not authorized",
-                                                  HttpStatus.UNAUTHORIZED);
-            }
 
+        try {
+            authenticator.verify(authorization, accountId);
+        } catch (AuthenticationException e) {
+            LOGGER.error("Authentication failed: {}", e.getMessage());
+            return new ResponseEntity<>("not authorized",
+                    HttpStatus.UNAUTHORIZED);
+        }
+
+        final Span span = tracer.spanBuilder().name("cache_lookup").start();
+        cache.refresh(accountId);
+
+        try {
             // Load from cache
             Deque<Transaction> historyList = cache.get(accountId);
 
-            // Set artificial extra latency.
-            LOGGER.debug("Setting artificial latency");
-            if (extraLatencyMillis != null) {
+            if (extraLatencyMillis != null && extraLatencyMillis > 0) {
+                // Set artificial extra latency.
+                LOGGER.debug("Setting artificial latency [extraLatencyMillis={}]",
+                        extraLatencyMillis);
                 try {
                     Thread.sleep(extraLatencyMillis);
                 } catch (InterruptedException e) {
@@ -196,15 +125,24 @@ public final class TransactionHistoryController {
 
             return new ResponseEntity<Collection<Transaction>>(
                     historyList, HttpStatus.OK);
-        } catch (JWTVerificationException e) {
-            LOGGER.error("Failed to retrieve account transactions: "
-                + "not authorized");
-            return new ResponseEntity<String>("not authorized",
-                                              HttpStatus.UNAUTHORIZED);
-        } catch (ExecutionException | UncheckedExecutionException e) {
-            LOGGER.error("Cache error");
-            return new ResponseEntity<String>("cache error",
-                                              HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (ExecutionException | RuntimeException e) {
+            final ResponseEntity<String> response;
+
+            if (e.getCause() instanceof DataAccessResourceFailureException) {
+                response = new ResponseEntity<>("unable to load data into cache",
+                        HttpStatus.SERVICE_UNAVAILABLE);
+            } else {
+                response = new ResponseEntity<>("cache error",
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+            String msg = String.format("Unable to read transactions from cache [accountId=%s]",
+                    accountId);
+            span.error(e);
+            LOGGER.error(msg, e);
+            return response;
+        } finally {
+            span.end();
         }
     }
 }

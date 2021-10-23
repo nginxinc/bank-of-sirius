@@ -16,18 +16,27 @@
 
 package sirius.samples.bankofsirius.transactionhistory;
 
-import com.google.cloud.MetadataConfig;
-import io.micrometer.stackdriver.StackdriverConfig;
-import io.micrometer.stackdriver.StackdriverMeterRegistry;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.PreDestroy;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Scope;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import sirius.samples.bankofsirius.health.ScheduledTaskHealthIndicator;
+import sirius.samples.bankofsirius.ledger.LedgerReader;
+import sirius.samples.bankofsirius.ledger.LedgerReaderCallback;
+import sirius.samples.bankofsirius.ledger.TransactionRepository;
+
+import javax.annotation.PreDestroy;
+import java.time.Duration;
 
 /**
  * Entry point for the TransactionHistory Spring Boot application.
@@ -35,6 +44,10 @@ import org.springframework.context.annotation.Bean;
  * Microservice to track the transaction history for each bank account.
  */
 @SpringBootApplication
+@EnableScheduling
+@EnableJpaRepositories(basePackages = "sirius.samples.bankofsirius.ledger")
+@EntityScan(basePackages = "sirius.samples.bankofsirius.ledger")
+@ComponentScan(basePackages = "sirius.samples.bankofsirius")
 public class TransactionHistoryApplication {
 
     private static final Logger LOGGER =
@@ -66,66 +79,28 @@ public class TransactionHistoryApplication {
                 + "Log level is: %s", LOGGER.getLevel().toString()));
     }
 
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public LedgerReader ledgerReader(final TransactionRepository dbRepo,
+                                     final LedgerReaderCallback processTransactionCallback,
+                                     final Tracer tracer) {
+        return new LedgerReader(dbRepo, processTransactionCallback, tracer);
+    }
+
+    @Bean
+    public ScheduledTaskHealthIndicator ledgerReaderHealth(@Value("${POLL_MS:100}") final Integer pollMs,
+                                                           final LedgerReader ledgerReader) {
+        final Duration expectedRuntimeOfTask = Duration.ofSeconds(50L);
+        final Duration acceptableVariance = Duration.ofSeconds(30L);
+        final Duration expectedIntervalBetweenRuns = Duration.ofMillis(pollMs);
+
+        return new ScheduledTaskHealthIndicator("LedgerReader",
+                expectedRuntimeOfTask, acceptableVariance, expectedIntervalBetweenRuns,
+                ledgerReader::getLastRun);
+    }
+
     @PreDestroy
     public void destroy() {
         LOGGER.info("TransactionHistory service shutting down");
-    }
-
-    /**
-     * Initializes Meter Registry with custom Stackdriver configuration
-     *
-     * @return the StackdriverMeterRegistry with configuration
-     */
-    @Bean
-    public static StackdriverMeterRegistry stackdriver() {
-
-        return StackdriverMeterRegistry.builder(new StackdriverConfig() {
-            @Override
-            public boolean enabled() {
-                boolean enableMetricsExport = true;
-
-                if (System.getenv("ENABLE_METRICS") != null
-                    && System.getenv("ENABLE_METRICS").equals("false")) {
-                    enableMetricsExport = false;
-                }
-
-                LOGGER.info(String.format("Enable metrics export: %b",
-                    enableMetricsExport));
-                return enableMetricsExport;
-            }
-
-
-            @Override
-            public String projectId() {
-                String id = MetadataConfig.getProjectId();
-                if (id == null) {
-                    id = "";
-                }
-                return id;
-            }
-
-            @Override
-            public String get(String key) {
-                return null;
-            }
-            @Override
-            public String resourceType() {
-                return "k8s_container";
-            }
-
-            @Override
-            public Map<String, String> resourceLabels() {
-                Map<String, String> map = new HashMap<>();
-                String podName = System.getenv("HOSTNAME");
-                String containerName = podName.substring(0,
-                    podName.indexOf("-"));
-                map.put("location", MetadataConfig.getZone());
-                map.put("container_name", containerName);
-                map.put("pod_name", podName);
-                map.put("cluster_name", MetadataConfig.getClusterName());
-                map.put("namespace_name", System.getenv("NAMESPACE"));
-                return map;
-            }
-        }).build();
     }
 }
