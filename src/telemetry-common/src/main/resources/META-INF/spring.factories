@@ -1,0 +1,4 @@
+# Auto Configuration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+sirius.samples.bankofsirius.tracing.TracingAutoConfiguration,\
+  sirius.samples.bankofsirius.metrics.MetricsAutoConfiguration

@@ -1,0 +1,22 @@
+{
+  "properties": [
+    {
+      "name": "spring.sleuth.web.trace.naming.convert-to-underscores.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables the conversation from camel case method names to underscore delimited method names.",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.sleuth.web.trace.naming.mvc-method-names-as-span-names.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables MVC web handler method name as trace span name.",
+      "defaultValue": true
+    },
+    {
+      "name": "spring.sleuth.hibernate.inject-tracing-ids-in-queries.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enables adding trace and span ids to hibernate queries.",
+      "defaultValue": false
+    }
+  ]
+}
