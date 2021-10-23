@@ -16,29 +16,21 @@
 
 package sirius.samples.bankofsirius.ledgerwriter;
 
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.EXCEPTION_MESSAGE_DUPLICATE_TRANSACTION;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.EXCEPTION_MESSAGE_WHEN_AUTHORIZATION_HEADER_NULL;
-
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.cache.GuavaCacheMetrics;
-import io.micrometer.stackdriver.StackdriverMeterRegistry;
-import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -46,7 +38,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
+import sirius.samples.bankofsirius.ledger.Transaction;
+import sirius.samples.bankofsirius.ledger.TransactionRepository;
+import sirius.samples.bankofsirius.ledger.TransactionValidationException;
+import sirius.samples.bankofsirius.ledger.TransactionValidator;
+import sirius.samples.bankofsirius.security.AuthenticationException;
+import sirius.samples.bankofsirius.security.Authenticator;
+
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import static sirius.samples.bankofsirius.ledger.ExceptionMessages.EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE;
 
 @RestController
 public final class LedgerWriterController {
@@ -54,22 +57,17 @@ public final class LedgerWriterController {
     private static final Logger LOGGER =
         LogManager.getLogger(LedgerWriterController.class);
 
-    private TransactionRepository transactionRepository;
-    private TransactionValidator transactionValidator;
-    private JWTVerifier verifier;
-
-    private String localRoutingNum;
-    private String balancesApiUri;
-    private String version;
-
-    private Cache<String, Long> cache;
-
     public static final String READINESS_CODE = "ok";
     public static final String UNAUTHORIZED_CODE = "not authorized";
-    public static final String JWT_ACCOUNT_KEY = "acct";
 
-    @Autowired
-    RestTemplate restTemplate;
+    private final TransactionRepository transactionRepository;
+    private final TransactionValidator transactionValidator;
+    private final Authenticator authenticator;
+    private final String localRoutingNum;
+    private final String balancesApiUri;
+    private final Cache<String, Long> cache;
+    private final RestOperations restOperations;
+    private final Tracer tracer;
 
     /**
     * Constructor.
@@ -78,53 +76,38 @@ public final class LedgerWriterController {
     */
     @Autowired
     public LedgerWriterController(
-            JWTVerifier verifier,
-            StackdriverMeterRegistry meterRegistry,
-            TransactionRepository transactionRepository,
-            TransactionValidator transactionValidator,
-            @Value("${LOCAL_ROUTING_NUM}") String localRoutingNum,
-            @Value("http://${BALANCES_API_ADDR}/balances")
-                    String balancesApiUri,
-            @Value("${VERSION}") String version) {
-        this.verifier = verifier;
+            final Authenticator authenticator,
+            final MeterRegistry meterRegistry,
+            final TransactionRepository transactionRepository,
+            final TransactionValidator transactionValidator,
+            @Value("${LOCAL_ROUTING_NUM}") final String localRoutingNum,
+            @Value("http://${BALANCES_API_ADDR}/balances") final String balancesApiUri,
+            final RestOperations restOperations,
+            final Tracer tracer) {
+
+        this.authenticator = authenticator;
         this.transactionRepository = transactionRepository;
         this.transactionValidator = transactionValidator;
         this.localRoutingNum = localRoutingNum;
         this.balancesApiUri = balancesApiUri;
-        this.version = version;
+        this.restOperations = restOperations;
+        this.tracer = tracer;
+
         // Initialize cache to ignore duplicate transactions
         this.cache = CacheBuilder.newBuilder()
                             .recordStats()
                             .expireAfterWrite(1, TimeUnit.HOURS)
                             .build();
-        GuavaCacheMetrics.monitor(meterRegistry, this.cache, "Guava");
-    }
 
-    /**
-     * Version endpoint.
-     *
-     * @return  service version string
-     */
-    @GetMapping("/version")
-    public ResponseEntity version() {
-        return new ResponseEntity<String>(version, HttpStatus.OK);
-    }
-
-    /**
-     * Readiness probe endpoint.
-     *
-     * @return HTTP Status 200 if server is ready to receive requests.
-     */
-    @GetMapping("/ready")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> readiness() {
-        return new ResponseEntity<String>(READINESS_CODE, HttpStatus.OK);
+        if (meterRegistry != null) {
+            GuavaCacheMetrics.monitor(meterRegistry, this.cache, "Guava");
+        }
     }
 
     /**
      * Submit a new transaction to the ledger.
      *
-     * @param bearerToken  HTTP request 'Authorization' header
+     * @param authorization  HTTP request 'Authorization' header
      * @param transaction  transaction to submit
      *
      * @return  HTTP Status 200 if transaction was successfully submitted
@@ -132,66 +115,107 @@ public final class LedgerWriterController {
     @PostMapping(value = "/transactions", consumes = "application/json")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> addTransaction(
-            @RequestHeader("Authorization") String bearerToken,
+            @RequestHeader("Authorization") String authorization,
             @RequestBody Transaction transaction) {
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            bearerToken = bearerToken.split("Bearer ")[1];
+        if (authorization == null || authorization.isEmpty()) {
+            return new ResponseEntity<>("HTTP request 'Authorization' header is null",
+                    HttpStatus.BAD_REQUEST);
         }
+        final String accountId = transaction.getFromAccountNum();
+
         try {
-            if (bearerToken == null) {
-                LOGGER.error("Transaction submission failed: "
-                    + "Authorization header null");
-                throw new IllegalArgumentException(
-                        EXCEPTION_MESSAGE_WHEN_AUTHORIZATION_HEADER_NULL);
-            }
-            final DecodedJWT jwt = this.verifier.verify(bearerToken);
+            authenticator.verify(authorization, accountId);
+        } catch (AuthenticationException e) {
+            LOGGER.error("Authentication failed: {}", e.getMessage());
+            return new ResponseEntity<>("not authorized",
+                    HttpStatus.UNAUTHORIZED);
+        }
 
-            // Check against cache for duplicate transactions
+
+        final Span span = tracer.currentSpan();
+        Objects.requireNonNull(span);
+        span.tag("transaction.id", Long.toString(transaction.getTransactionId()));
+
+        // Check against cache for duplicate transactions
+        final Span cacheSpan = tracer.spanBuilder().name("cache_lookup").start();
+        try {
             if (this.cache.asMap().containsKey(transaction.getRequestUuid())) {
-                throw new IllegalStateException(
-                        EXCEPTION_MESSAGE_DUPLICATE_TRANSACTION);
+                LOGGER.error("Duplicate transaction add attempted [requestUuid={}]",
+                        transaction.getRequestUuid());
+                cacheSpan.tag("error", "true");
+                cacheSpan.tag("request.uuid", transaction.getRequestUuid());
+                cacheSpan.tag("transaction", transaction.toString());
+                cacheSpan.event("Duplicate transaction add attempted");
+                return new ResponseEntity<>("unable to add duplicate transaction",
+                        HttpStatus.BAD_REQUEST);
             }
+        } finally {
+            cacheSpan.end();
+        }
 
-            // validate transaction
-            transactionValidator.validateTransaction(localRoutingNum,
-                    jwt.getClaim(JWT_ACCOUNT_KEY).asString(), transaction);
-            // Ensure sender balance can cover transaction.
-            if (transaction.getFromRoutingNum().equals(localRoutingNum)) {
-                int balance = getAvailableBalance(
-                        bearerToken, transaction.getFromAccountNum());
+        // Validate transaction
+        try {
+            transactionValidator.validateTransaction(localRoutingNum, accountId, transaction);
+        } catch (NullPointerException e) {
+            String msg = String.format("Invalid transaction properties [transaction=%s]",
+                    transaction);
+            LOGGER.error(msg);
+            return new ResponseEntity<>("invalid transaction", HttpStatus.BAD_REQUEST);
+        } catch (TransactionValidationException e) {
+            String msg = String.format("Transaction failed validation check [transaction=%s]",
+                    transaction);
+            LOGGER.error(msg);
+            return new ResponseEntity<>(e.getHttpErrorMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        // Ensure sender balance can cover transaction.
+        try {
+            if (localRoutingNum.equals(transaction.getFromRoutingNum())) {
+                int balance = getAvailableBalance(authorization, transaction.getFromAccountNum());
                 if (balance < transaction.getAmount()) {
-                    LOGGER.error("Transaction submission failed: "
-                        + "Insufficient balance");
-                    throw new IllegalStateException(
-                            EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE);
+                    String msg = String.format("Transaction submission failed: Insufficient balance [balance=%d]", balance);
+                    LOGGER.error(msg);
+                    span.tag("error", "true");
+                    span.tag("transaction", transaction.toString());
+                    span.tag("account.balance", Integer.toString(balance));
+                    span.tag("account.id", transaction.getFromAccountNum());
+                    span.event(msg);
+                    return new ResponseEntity<>(EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE,
+                            HttpStatus.BAD_REQUEST);
                 }
             }
+        } catch (ReadAvailableBalanceException e) {
+            final ResponseEntity<String> response;
+            if (e.getCause() instanceof ResourceAccessException) {
+                response = new ResponseEntity<>("remote resource unavailable",
+                        HttpStatus.SERVICE_UNAVAILABLE);
+            } else {
+                response = new ResponseEntity<>("unable to read available balance",
+                        HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-            // No exceptions thrown. Add to ledger
+            LOGGER.error("Failed to retrieve account balance", e);
+            span.error(e);
+            return response;
+        }
+
+        // Add to ledger
+        try {
             transactionRepository.save(transaction);
             this.cache.put(transaction.getRequestUuid(),
                     transaction.getTransactionId());
             LOGGER.info("Submitted transaction successfully");
-            return new ResponseEntity<String>(READINESS_CODE,
-                    HttpStatus.CREATED);
-
-        } catch (JWTVerificationException e) {
-            LOGGER.error("Failed to submit transaction: "
-                + "not authorized");
-            return new ResponseEntity<String>(UNAUTHORIZED_CODE,
-                                              HttpStatus.UNAUTHORIZED);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            LOGGER.error("Failed to retrieve account balance: "
-                + "bad request");
-            return new ResponseEntity<String>(e.getMessage(),
-                                              HttpStatus.BAD_REQUEST);
-        } catch (ResourceAccessException
-                | CannotCreateTransactionException
-                | HttpServerErrorException e) {
-            LOGGER.error("Failed to retrieve account balance");
-            return new ResponseEntity<String>(e.getMessage(),
-                                              HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (RuntimeException e) {
+            String msg = String.format("Unable to persist transaction [transaction=%s]",
+                    transaction);
+            LOGGER.error(msg, e);
+            return new ResponseEntity<>("unable to persist transaction",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        // If we made it this far, there have been no problems, so we let the
+        // user know it was created successfully.
+        return new ResponseEntity<>(READINESS_CODE, HttpStatus.CREATED);
     }
 
     /**
@@ -205,16 +229,30 @@ public final class LedgerWriterController {
      * @throws HttpServerErrorException  if balance service returns 500
      */
     protected int getAvailableBalance(String token, String fromAcct)
-            throws HttpServerErrorException {
+            throws ReadAvailableBalanceException {
         LOGGER.debug("Retrieving balance for transaction sender");
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
-        HttpEntity entity = new HttpEntity(headers);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
         String uri = balancesApiUri + "/" + fromAcct;
-        ResponseEntity<Integer> response = restTemplate.exchange(
-            uri, HttpMethod.GET, entity, Integer.class);
-        Integer senderBalance = response.getBody();
-        return senderBalance.intValue();
+
+        try {
+            final ResponseEntity<Integer> response = restOperations.exchange(
+                    uri, HttpMethod.GET, entity, Integer.class);
+            final Integer senderBalance = response.getBody();
+            if (senderBalance == null) {
+                final String msg = String.format("Null response for getBalance from remote api [uri=%s]", uri);
+                throw new ReadAvailableBalanceException(msg);
+            }
+
+            return senderBalance;
+        } catch (IllegalArgumentException e) {
+            final String msg = String.format("Invalid URI for getBalance from remote api [uri=%s]", uri);
+            throw new ReadAvailableBalanceException(msg, e);
+        } catch (RuntimeException e) {
+            final String msg = String.format("Unable to read balance from remote api [uri=%s]", uri);
+            throw new ReadAvailableBalanceException(msg, e);
+        }
     }
 }

@@ -16,35 +16,42 @@
 
 package sirius.samples.bankofsirius.ledgerwriter;
 
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.EXCEPTION_MESSAGE_DUPLICATE_TRANSACTION;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE;
-import static sirius.samples.bankofsirius.ledgerwriter.ExceptionMessages.EXCEPTION_MESSAGE_WHEN_AUTHORIZATION_HEADER_NULL;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import io.micrometer.core.instrument.Clock;
-import io.micrometer.core.lang.Nullable;
-import io.micrometer.stackdriver.StackdriverConfig;
-import io.micrometer.stackdriver.StackdriverMeterRegistry;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import org.mockito.Mock;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestOperations;
+import sirius.samples.bankofsirius.ledger.Transaction;
+import sirius.samples.bankofsirius.ledger.TransactionRepository;
+import sirius.samples.bankofsirius.ledger.TransactionValidationException;
+import sirius.samples.bankofsirius.ledger.TransactionValidator;
+import sirius.samples.bankofsirius.security.AuthenticationException;
+import sirius.samples.bankofsirius.security.Authenticator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static sirius.samples.bankofsirius.ledger.ExceptionMessages.EXCEPTION_MESSAGE_WHEN_AUTHORIZATION_HEADER_NULL;
 
 class LedgerWriterControllerTest {
 
@@ -55,20 +62,22 @@ class LedgerWriterControllerTest {
     @Mock
     private TransactionRepository transactionRepository;
     @Mock
-    private JWTVerifier verifier;
+    private Authenticator authenticator;
+    @Mock
+    private RestOperations restOperations;
     @Mock
     private Transaction transaction;
     @Mock
-    private DecodedJWT jwt;
+    private Tracer tracer;
     @Mock
-    private Claim claim;
+    private Span span;
     @Mock
-    private Clock clock;
+    Span.Builder spanBuilder;
 
-    private static final String VERSION = "v0.1.0";
+    private static final MeterRegistry METER_REGISTRY = null;
     private static final String LOCAL_ROUTING_NUM = "123456789";
     private static final String NON_LOCAL_ROUTING_NUM = "987654321";
-    private static final String BALANCES_API_ADDR = "balancereader:8080";
+    private static final String BALANCES_API_ADDR = "http://balancereader:8080";
     private static final String AUTHED_ACCOUNT_NUM = "1234567890";
     private static final String BEARER_TOKEN = "Bearer abc";
     private static final String TOKEN = "abc";
@@ -80,58 +89,18 @@ class LedgerWriterControllerTest {
     @BeforeEach
     void setUp() {
         initMocks(this);
-        StackdriverMeterRegistry meterRegistry = new StackdriverMeterRegistry(new StackdriverConfig() {
-              @Override
-              public boolean enabled() {
-                return false;
-              }
 
-              @Override
-              public String projectId() {
-                return "test";
-              }
-
-              @Override
-              @Nullable
-              public String get(String key) {
-                return null;
-              }
-          }, clock);
-
-        ledgerWriterController = new LedgerWriterController(verifier,
-                meterRegistry,
-                transactionRepository, transactionValidator,
-                LOCAL_ROUTING_NUM, BALANCES_API_ADDR, VERSION);
-
-        when(verifier.verify(TOKEN)).thenReturn(jwt);
-        when(jwt.getClaim(
-                LedgerWriterController.JWT_ACCOUNT_KEY)).thenReturn(claim);
-    }
-
-    @Test
-    @DisplayName("Given version number in the environment, " +
-            "return a ResponseEntity with the version number")
-    void version() {
-        // When
-        final ResponseEntity actualResult = ledgerWriterController.version();
-
-        // Then
-        assertNotNull(actualResult);
-        assertEquals(VERSION, actualResult.getBody());
-        assertEquals(HttpStatus.OK, actualResult.getStatusCode());
-    }
-
-    @Test
-    @DisplayName("Given the server is serving requests, return HTTP Status 200")
-    void readiness() {
-        // When
-        final ResponseEntity actualResult = ledgerWriterController.readiness();
-
-        // Then
-        assertNotNull(actualResult);
-        assertEquals(ledgerWriterController.READINESS_CODE,
-                actualResult.getBody());
-        assertEquals(HttpStatus.OK, actualResult.getStatusCode());
+        ledgerWriterController = new LedgerWriterController(authenticator,
+                METER_REGISTRY, transactionRepository, transactionValidator,
+                LOCAL_ROUTING_NUM, BALANCES_API_ADDR, restOperations,
+                tracer);
+        doThrow(AuthenticationException.class).when(authenticator)
+                .verify(nullable(String.class), anyString());
+        doNothing().when(authenticator).verify(BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
+        when(tracer.currentSpan()).thenReturn(span);
+        when(tracer.spanBuilder()).thenReturn(spanBuilder);
+        when(spanBuilder.name(anyString())).thenReturn(spanBuilder);
+        when(spanBuilder.start()).thenReturn(span);
     }
 
     @Test
@@ -142,13 +111,12 @@ class LedgerWriterControllerTest {
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
 
         // When
-        final ResponseEntity actualResult =
-                ledgerWriterController.addTransaction(
-                        BEARER_TOKEN, transaction);
+        final ResponseEntity<?> actualResult =
+                ledgerWriterController.addTransaction(BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(ledgerWriterController.READINESS_CODE,
+        assertEquals(LedgerWriterController.READINESS_CODE,
                 actualResult.getBody());
         assertEquals(HttpStatus.CREATED, actualResult.getStatusCode());
     }
@@ -169,13 +137,13 @@ class LedgerWriterControllerTest {
                 TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
-        final ResponseEntity actualResult =
+        final ResponseEntity<?> actualResult =
                 spyLedgerWriterController.addTransaction(
                         BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(ledgerWriterController.READINESS_CODE,
+        assertEquals(LedgerWriterController.READINESS_CODE,
                 actualResult.getBody());
         assertEquals(HttpStatus.CREATED, actualResult.getStatusCode());
     }
@@ -196,13 +164,13 @@ class LedgerWriterControllerTest {
                 TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
-        final ResponseEntity actualResult =
+        final ResponseEntity<?> actualResult =
                 spyLedgerWriterController.addTransaction(
                         BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(ledgerWriterController.READINESS_CODE,
+        assertEquals(LedgerWriterController.READINESS_CODE,
                 actualResult.getBody());
         assertEquals(HttpStatus.CREATED, actualResult.getStatusCode());
     }
@@ -218,19 +186,18 @@ class LedgerWriterControllerTest {
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getAmount()).thenReturn(LARGER_THAN_SENDER_BALANCE);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
-        doReturn(SENDER_BALANCE).when(
-                spyLedgerWriterController).getAvailableBalance(
-                TOKEN, AUTHED_ACCOUNT_NUM);
+        doReturn(new ResponseEntity<>(SENDER_BALANCE, HttpStatus.OK))
+                .when(restOperations).exchange(anyString(), eq(HttpMethod.GET),
+                        any(HttpEntity.class), eq(Integer.class));
 
         // When
-        final ResponseEntity actualResult =
+        final ResponseEntity<?> actualResult =
                 spyLedgerWriterController.addTransaction(
                         BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(
-                EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE,
+        assertEquals("insufficient balance",
                 actualResult.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, actualResult.getStatusCode());
     }
@@ -240,34 +207,32 @@ class LedgerWriterControllerTest {
             "return HTTP Status 401")
     void addTransactionWhenJWTVerificationExceptionThrown() {
         // Given
-        when(verifier.verify(TOKEN)).thenThrow(
-                JWTVerificationException.class);
+        final String badBearerToken = "Bearer foobar";
 
         // When
-        final ResponseEntity actualResult =
-                ledgerWriterController.addTransaction(
-                        BEARER_TOKEN, transaction);
+        when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        final ResponseEntity<?> actualResult = ledgerWriterController
+                .addTransaction(badBearerToken, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(ledgerWriterController.UNAUTHORIZED_CODE,
+        assertEquals(LedgerWriterController.UNAUTHORIZED_CODE,
                 actualResult.getBody());
         assertEquals(HttpStatus.UNAUTHORIZED, actualResult.getStatusCode());
     }
 
     @Test
     @DisplayName("Given exception thrown on validation, return HTTP Status 400")
-    void addTransactionWhenIllegalArgumentExceptionThrown() {
+    void addTransactionWhenIllegalArgumentExceptionThrown() throws TransactionValidationException {
         // Given
-        when(claim.asString()).thenReturn(AUTHED_ACCOUNT_NUM);
-        doThrow(new IllegalArgumentException(EXCEPTION_MESSAGE)).
+        when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        doThrow(new TransactionValidationException("Unit test controlled failure", EXCEPTION_MESSAGE)).
                 when(transactionValidator).validateTransaction(
                         LOCAL_ROUTING_NUM, AUTHED_ACCOUNT_NUM, transaction);
 
         // When
-        final ResponseEntity actualResult =
-                ledgerWriterController.addTransaction(
-                BEARER_TOKEN, transaction);
+        final ResponseEntity<?> actualResult = ledgerWriterController
+                .addTransaction(BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
@@ -281,7 +246,7 @@ class LedgerWriterControllerTest {
             "return HTTP Status 400")
     void addTransactionWhenBearerTokenNull() {
         // When
-        final ResponseEntity actualResult =
+        final ResponseEntity<?> actualResult =
                 ledgerWriterController.addTransaction(
                         null, transaction);
 
@@ -297,25 +262,21 @@ class LedgerWriterControllerTest {
             "reader throws an error, return HTTP Status 500")
     void addTransactionWhenResourceAccessExceptionThrown(TestInfo testInfo) {
         // Given
-        LedgerWriterController spyLedgerWriterController =
-                spy(ledgerWriterController);
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
-        doThrow(new ResourceAccessException(EXCEPTION_MESSAGE)).when(
-                spyLedgerWriterController).getAvailableBalance(
-                TOKEN, AUTHED_ACCOUNT_NUM);
+        doThrow(new ResourceAccessException(EXCEPTION_MESSAGE))
+                .when(restOperations).exchange(anyString(), eq(HttpMethod.GET),
+                        any(HttpEntity.class), eq(Integer.class));
 
         // When
-        final ResponseEntity actualResult =
-                spyLedgerWriterController.addTransaction(
-                        BEARER_TOKEN, transaction);
+        final ResponseEntity<?> actualResult = ledgerWriterController
+                .addTransaction(BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(EXCEPTION_MESSAGE, actualResult.getBody());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-                actualResult.getStatusCode());
+        assertEquals("remote resource unavailable", actualResult.getBody());
+        assertEquals(HttpStatus.SERVICE_UNAVAILABLE, actualResult.getStatusCode());
     }
 
     @Test
@@ -329,13 +290,14 @@ class LedgerWriterControllerTest {
                 transactionRepository).save(transaction);
 
         // When
-        final ResponseEntity actualResult =
+        final ResponseEntity<?> actualResult =
                 ledgerWriterController.addTransaction(
                         TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(EXCEPTION_MESSAGE, actualResult.getBody());
+        assertEquals("unable to persist transaction",
+                actualResult.getBody());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
                 actualResult.getStatusCode());
     }
@@ -356,14 +318,13 @@ class LedgerWriterControllerTest {
                 TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
-        final ResponseEntity actualResult =
+        final ResponseEntity<?> actualResult =
                 spyLedgerWriterController.addTransaction(
                         BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.toString(),
-                actualResult.getBody());
+        assertEquals("unable to read available balance", actualResult.getBody());
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
                 actualResult.getStatusCode());
     }
@@ -384,22 +345,22 @@ class LedgerWriterControllerTest {
                 TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
-        final ResponseEntity originalResult =
+        final ResponseEntity<?> originalResult =
                 spyLedgerWriterController.addTransaction(
                         BEARER_TOKEN, transaction);
-        final ResponseEntity duplicateResult =
+        final ResponseEntity<?> duplicateResult =
                 spyLedgerWriterController.addTransaction(
                         BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(originalResult);
-        assertEquals(ledgerWriterController.READINESS_CODE,
+        assertEquals(LedgerWriterController.READINESS_CODE,
                 originalResult.getBody());
         assertEquals(HttpStatus.CREATED, originalResult.getStatusCode());
 
         assertNotNull(duplicateResult);
         assertEquals(
-                EXCEPTION_MESSAGE_DUPLICATE_TRANSACTION,
+                "unable to add duplicate transaction",
                 duplicateResult.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, duplicateResult.getStatusCode());
     }
