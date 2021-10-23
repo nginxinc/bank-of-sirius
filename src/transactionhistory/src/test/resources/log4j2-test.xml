@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- The default log4j2 configuration is optimized for production usage.
+     This configuration is meant to be easy to read by developers -->
+
+<Configuration status="WARN">
+    <CustomLevels>
+        <CustomLevel name="STARTUP" intLevel="100" />
+    </CustomLevels>
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT" follow="true">
+            <PatternLayout disableAnsi="false" pattern="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} %highlight{${LOG_LEVEL_PATTERN:-%5p}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=cyan, DEBUG=green, TRACE=blue, STARTUP=magenta} %style{}{magenta} |%X{traceId}| [%M] %style{%40C}{blue} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%xEx}" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="${env:LOG_LEVEL:-WARN}" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+        </Root>
+    </Loggers>
+</Configuration>
