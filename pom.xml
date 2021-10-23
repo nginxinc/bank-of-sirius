@@ -27,6 +27,7 @@
     <name>Bank of Sirius Parent</name>
 
     <modules>
+        <module>src/spring-boot-parent</module>
         <module>src/ledgerwriter</module>
         <module>src/transactionhistory</module>
         <module>src/balancereader</module>
