@@ -1,5 +1,6 @@
 .PHONY: java-build
-java-build: $(JARS) ## Builds all Java applications
+java-build: ## Builds all Java applications
+	$Q $(MVN) --update-snapshots --file $(CURDIR)/pom.xml install -DskipTests
 
 .PHONY: java-test
 java-test: $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/surefire-reports) ## Runs unit tests for all Java applications
