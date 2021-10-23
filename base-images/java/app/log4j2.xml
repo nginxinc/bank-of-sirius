@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="ConsoleAppender" target="SYSTEM_OUT">
+            <PatternLayout
+                pattern='{"timestamp": "%d{yyyy-MM-dd HH:mm:ss}", "message": "%M | %msg", "severity": "%level" traceId: "%X{traceId}"}%n' />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.hibernate" level="WARN" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+        </Logger>
+        <Root level="${env:LOG_LEVEL:-INFO}" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+        </Root>
+    </Loggers>
+</Configuration>

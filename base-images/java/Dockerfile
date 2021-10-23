@@ -57,6 +57,8 @@ RUN set -eux; \
     useradd --home-dir /app --uid 1919 --gid 1919 --shell /bin/bash app; \
     chown "app:app" /app
 
+COPY app/log4j2.xml /app/log4j2.xml
+
 EXPOSE 8080
 WORKDIR /app
 
