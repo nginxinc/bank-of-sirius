@@ -30,8 +30,6 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu8
 # 3. Set heap size on almost 50% of the total of the memory limit.
 ENV JAVA_TOOL_OPTIONS "-Djava.security.egd=file:/dev/urandom -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2"
 
-RUN echo "$ZULU_REPO_VER"
-
 RUN set -eux; \
     ZULU_REPO_VER=1.0.0-2; \
     ZULU_REPO_DEB_CHECKSUM=b8d11979d9b1959b5ff621f1021ff0dba40c7d47d948ae6ec4a4bbde98cf71f5; \
