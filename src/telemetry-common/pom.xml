@@ -139,6 +139,11 @@
             <version>${dependency.opentelemetry-api.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-extension-resources</artifactId>
+            <version>${dependency.opentelemetry-api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
             <version>${dependency.micrometer.version}</version>
