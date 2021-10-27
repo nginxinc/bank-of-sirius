@@ -36,9 +36,7 @@
         <checkstyle.config.location>./checkstyle.xml</checkstyle.config.location>
         <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M2</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
         <dependency.opentelemetry-api.version>1.7.0</dependency.opentelemetry-api.version>
-        <dependency.opentelemetry-sdk-common.version>1.6.0</dependency.opentelemetry-sdk-common.version>
         <dependency.micrometer.version>1.8.0-M3</dependency.micrometer.version>
-        <dependency.opentelemetry-exporter-otlp.version>1.7.0</dependency.opentelemetry-exporter-otlp.version>
         <dependency.grpc-netty.version>1.41.0</dependency.grpc-netty.version>
         <dependency.p6spy.version>3.9.1</dependency.p6spy.version>
     </properties>
@@ -128,7 +126,7 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>${dependency.opentelemetry-exporter-otlp.version}</version>
+            <version>${dependency.opentelemetry-api.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -138,7 +136,7 @@
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk-common</artifactId>
-            <version>${dependency.opentelemetry-sdk-common.version}</version>
+            <version>${dependency.opentelemetry-api.version}</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
