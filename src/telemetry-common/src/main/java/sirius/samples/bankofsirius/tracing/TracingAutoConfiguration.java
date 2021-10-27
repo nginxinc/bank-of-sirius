@@ -1,5 +1,9 @@
 package sirius.samples.bankofsirius.tracing;
 
+import io.opentelemetry.sdk.extension.resources.HostResource;
+import io.opentelemetry.sdk.extension.resources.OsResource;
+import io.opentelemetry.sdk.extension.resources.ProcessResource;
+import io.opentelemetry.sdk.extension.resources.ProcessRuntimeResource;
 import io.opentelemetry.sdk.resources.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +82,11 @@ public class TracingAutoConfiguration {
 
     @Bean
     public Supplier<Resource> applicationDetails(final TracingAttributes tracingAttributes) {
-        return () -> Resource.create(tracingAttributes);
+        return () -> Resource.empty()
+                .merge(OsResource.get())
+                .merge(ProcessResource.get())
+                .merge(ProcessRuntimeResource.get())
+                .merge(HostResource.get())
+                .merge(Resource.create(tracingAttributes));
     }
 }
