@@ -36,11 +36,11 @@ ARCH              := $(shell uname -m | $(SED) -e 's/x86_64/amd64/g' -e 's/i686/
 PLATFORM          := $(shell uname | tr '[:upper:]' '[:lower:]')
 SHELL             := bash
 
-JAVA_PROJECTS     := java-common/telemetry-common java-common/security-common java-common/spring-boot-parent \
-                     java-common/ledger-common balancereader ledgerwriter transactionhistory
+JAVA_PROJECTS        := java-common/telemetry-common java-common/security-common java-common/spring-boot-parent \
+                        java-common/ledger-common balancereader ledgerwriter transactionhistory
 JAVA_DOCKER_PROJECTS := balancereader ledgerwriter transactionhistory
-PYTHON_PROJECTS   := contacts frontend loadgenerator userservice
-DB_PROJECTS       := accounts-db ledger-db
+PYTHON_PROJECTS      := contacts frontend loadgenerator userservice
+DB_PROJECTS          := accounts-db ledger-db
 
 MVN               := $(CURDIR)/mvnw -q
 JARS              := $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/$(project).jar)
