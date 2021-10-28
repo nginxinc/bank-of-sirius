@@ -14,8 +14,19 @@ java-test-coverage: $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/sit
 	$Q $(MVN) -pl $(dir $(@D)) package -DskipTests
 
 .PRECIOUS: %/target/surefire-reports
-%/target/surefire-reports: ; $(info $(M) running unit tests for project: $(dir $(@D))) @
-	$Q $(MVN) -pl $(dir $(@D)) test
+.ONESHELL: %/target/surefire-reports
+%/target/surefire-reports: ; $Q
+	MODULE="$$(basename $(dir $(@D)))"
+	POM_PATH='$(dir $(@D))pom.xml'
+	POM_NS='http://maven.apache.org/POM/4.0.0'
+	POM_SEL="/pom:project/pom:packaging[text()='pom']"
+# Skip modules that are pom only - if we have a tool to parse xml
+	if command -v xmlstarlet > /dev/null && xmlstarlet sel -Q -N "pom=$${POM_NS}" -t -v "$${POM_SEL}" "$${POM_PATH}"; then \
+		echo "$(M) skipping unit tests for pom only module: $${MODULE}"; \
+	else \
+	  	echo "$(M) running unit tests for module: $${MODULE}"; \
+		$(MVN) -pl $(dir $(@D)) test; \
+	fi
 
 .PRECIOUS: %/target/site/jacoco
 %/target/site/jacoco: %/target/surefire-reports
