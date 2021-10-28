@@ -38,6 +38,7 @@ SHELL             := bash
 
 JAVA_PROJECTS     := telemetry-common security-common spring-boot-parent \
                      ledger-common balancereader ledgerwriter transactionhistory
+JAVA_DOCKER_PROJECTS := balancereader ledgerwriter transactionhistory
 PYTHON_PROJECTS   := contacts frontend loadgenerator userservice
 DB_PROJECTS       := accounts-db ledger-db
 
