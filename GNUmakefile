@@ -36,8 +36,8 @@ ARCH              := $(shell uname -m | $(SED) -e 's/x86_64/amd64/g' -e 's/i686/
 PLATFORM          := $(shell uname | tr '[:upper:]' '[:lower:]')
 SHELL             := bash
 
-JAVA_PROJECTS     := telemetry-common security-common spring-boot-parent \
-                     ledger-common balancereader ledgerwriter transactionhistory
+JAVA_PROJECTS     := java-common/telemetry-common java-common/security-common java-common/spring-boot-parent \
+                     java-common/ledger-common balancereader ledgerwriter transactionhistory
 JAVA_DOCKER_PROJECTS := balancereader ledgerwriter transactionhistory
 PYTHON_PROJECTS   := contacts frontend loadgenerator userservice
 DB_PROJECTS       := accounts-db ledger-db
