@@ -32,10 +32,6 @@
         <relativePath>../java-common/spring-boot-parent/pom.xml</relativePath>
     </parent>
 
-    <properties>
-        <checkstyle.config.location>./checkstyle.xml</checkstyle.config.location>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>sirius.samples.bankofsirius</groupId>

@@ -43,14 +43,11 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
-        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-checkstyle-plugin.version>3.1.0</maven-checkstyle-plugin.version>
-        <maven-jacoco-plugin.version>0.8.5</maven-jacoco-plugin.version>
 
         <spring.boot.version>2.6.0-M3</spring.boot.version>
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
 
+        <!-- Dependency versions -->
         <dependency.spring-cloud-sleuth.version>3.1.0-M2</dependency.spring-cloud-sleuth.version>
         <dependency.hibernate-core.version>5.5.7.Final</dependency.hibernate-core.version>
         <dependency.hibernate-annotations.version>5.5.6.Final</dependency.hibernate-annotations.version>
@@ -60,10 +57,15 @@
         <dependency.guava.version>31.0.1-jre</dependency.guava.version>
         <dependency.jackson.version>2.11.0</dependency.jackson.version>
 
-        <!-- Test dependencies -->
+        <!-- Test dependency versions -->
         <dependency.junit-jupiter-engine.version>5.6.2</dependency.junit-jupiter-engine.version>
         <dependency.mockito-core.version>2.7.2</dependency.mockito-core.version>
-        <!-- Plugin dependencies -->
+        <!-- Plugin versions -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+        <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
+        <maven-jacoco-plugin.version>0.8.5</maven-jacoco-plugin.version>
+        <!-- Plugin dependency versions -->
         <dependency.puppycrawl.tools.checkstyle.version>9.0.1</dependency.puppycrawl.tools.checkstyle.version>
     </properties>
 
@@ -112,15 +114,16 @@
                         </dependency>
                     </dependencies>
                     <configuration>
-                        <configLocation>checkstyle.xml</configLocation>
-                        <consoleOutput>true</consoleOutput>
+                        <configLocation>${session.executionRootDirectory}/checkstyle.xml</configLocation>
+                        <consoleOutput>false</consoleOutput>
                         <violationSeverity>warning</violationSeverity>
+                        <failOnViolation>false</failOnViolation>
                         <excludes>**/generated/**/*</excludes>
                     </configuration>
                     <executions>
                         <execution>
                             <id>checkstyle</id>
-                            <phase>compile</phase>
+                            <phase>process-classes</phase>
                             <goals>
                                 <goal>check</goal>
                             </goals>
@@ -129,7 +132,56 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                    </compilerArgs>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${maven-jacoco-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <inherited>false</inherited>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>checkstyle</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
     <!-- Dependencies used only for testing -->
     <dependencies>

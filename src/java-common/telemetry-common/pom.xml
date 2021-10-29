@@ -33,7 +33,6 @@
     </parent>
 
     <properties>
-        <checkstyle.config.location>./checkstyle.xml</checkstyle.config.location>
         <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M2</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
         <dependency.opentelemetry-api.version>1.7.0</dependency.opentelemetry-api.version>
         <dependency.micrometer.version>1.8.0-M3</dependency.micrometer.version>
@@ -201,4 +200,12 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 </project>
