@@ -186,15 +186,16 @@ public final class LedgerWriterController {
             }
         } catch (ReadAvailableBalanceException e) {
             final ResponseEntity<String> response;
-            if (e.getCause() instanceof ResourceAccessException) {
-                response = new ResponseEntity<>("remote resource unavailable",
-                        HttpStatus.SERVICE_UNAVAILABLE);
-            } else {
+            if (e.isCauseFromRemoteAccessFailure()) {
                 response = new ResponseEntity<>("unable to read available balance",
                         HttpStatus.INTERNAL_SERVER_ERROR);
+                LOGGER.error("Failed to retrieve account balance", e);
+            } else {
+                response = new ResponseEntity<>("remote resource unavailable",
+                        HttpStatus.SERVICE_UNAVAILABLE);
+                LOGGER.error(e.getMessage());
             }
 
-            LOGGER.error("Failed to retrieve account balance", e);
             span.error(e);
             return response;
         }
