@@ -105,4 +105,25 @@ public class TracingStatementInspectorTest {
         String actual = inspector.inspect(sql);
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void invalidIdEmptyFails() {
+        String badTraceId = "";
+        boolean actual = TracingStatementInspector.isInvalidId(badTraceId);
+        assertTrue(actual, "empty trace id should fail validity check");
+    }
+
+    @Test
+    public void invalidIdWithOddLengthFails() {
+        String badTraceId = "0101a";
+        boolean actual = TracingStatementInspector.isInvalidId(badTraceId);
+        assertTrue(actual, "trace id with non-hex chars should fail validity check");
+    }
+
+    @Test
+    public void invalidIdWithNonHexCharacterFails() {
+        String badTraceId = "gg";
+        boolean actual = TracingStatementInspector.isInvalidId(badTraceId);
+        assertTrue(actual, "trace id with non-hex chars should fail validity check");
+    }
 }
