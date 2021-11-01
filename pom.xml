@@ -114,7 +114,7 @@
                         </dependency>
                     </dependencies>
                     <configuration>
-                        <configLocation>${session.executionRootDirectory}/checkstyle.xml</configLocation>
+                        <configLocation>checkstyle.xml</configLocation>
                         <consoleOutput>false</consoleOutput>
                         <violationSeverity>warning</violationSeverity>
                         <failOnViolation>false</failOnViolation>
