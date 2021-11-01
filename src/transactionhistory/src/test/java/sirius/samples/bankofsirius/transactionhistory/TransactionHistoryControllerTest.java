@@ -60,11 +60,9 @@ class TransactionHistoryControllerTest {
     private Deque<Transaction> transactions;
 
     private static final MeterRegistry METER_REGISTRY = null;
-    private static final String JWT_ACCOUNT_KEY = "acct";
     private static final String AUTHED_ACCOUNT_NUM = "1234567890";
     private static final String NON_AUTHED_ACCOUNT_NUM = "9876543210";
     private static final String BEARER_TOKEN = "Bearer abc";
-    private static final String TOKEN = "abc";
     private static final Integer EXTRA_LATENCY_MILLIS = 0;
 
     @BeforeEach
@@ -72,7 +70,8 @@ class TransactionHistoryControllerTest {
         initMocks(this);
 
         when(cache.stats()).thenReturn(stats);
-        transactionHistoryController = new TransactionHistoryController(authenticator, METER_REGISTRY, cache, tracer, EXTRA_LATENCY_MILLIS);
+        transactionHistoryController = new TransactionHistoryController(authenticator, METER_REGISTRY, cache,
+                tracer, EXTRA_LATENCY_MILLIS);
         doThrow(AuthenticationException.class).when(authenticator)
                 .verify(anyString(), anyString());
         doNothing().when(authenticator).verify(BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
@@ -102,7 +101,8 @@ class TransactionHistoryControllerTest {
         // Given
 
         // When
-        final ResponseEntity<?> actualResult = transactionHistoryController.getTransactions(BEARER_TOKEN, NON_AUTHED_ACCOUNT_NUM);
+        final ResponseEntity<?> actualResult = transactionHistoryController.getTransactions(
+                BEARER_TOKEN, NON_AUTHED_ACCOUNT_NUM);
 
         // Then
         assertNotNull(actualResult);
@@ -116,7 +116,8 @@ class TransactionHistoryControllerTest {
         final String badBearerToken = "Bearer foobar";
 
         // When
-        final ResponseEntity<?> actualResult = transactionHistoryController.getTransactions(badBearerToken, AUTHED_ACCOUNT_NUM);
+        final ResponseEntity<?> actualResult = transactionHistoryController.getTransactions(
+                badBearerToken, AUTHED_ACCOUNT_NUM);
 
         // Then
         assertNotNull(actualResult);

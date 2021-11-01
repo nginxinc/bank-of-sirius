@@ -31,8 +31,8 @@ public class TraceNamingHandlerInterceptor implements HandlerInterceptor {
 
         final Method handlerMethod = ((HandlerMethod) handler).getMethod();
         final String handlerMethodName = handlerMethod.getName();
-        final String methodName = convertToUnderscores ?
-                toUnderscoreDelimitedText(handlerMethodName) : handlerMethodName;
+        final String methodName = convertToUnderscores
+                ? toUnderscoreDelimitedText(handlerMethodName) : handlerMethodName;
 
         return methodName;
     }

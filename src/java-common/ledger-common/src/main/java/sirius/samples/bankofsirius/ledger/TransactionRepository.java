@@ -29,37 +29,34 @@ import java.util.List;
 @Repository
 @Component
 public interface TransactionRepository extends CrudRepository<Transaction, Long> {
-
     @Query(value = "--find_balance \n"
-    + "SELECT "
-    + "(SELECT SUM(amount) FROM transactions t "
-    + "     WHERE (to_acct = ?1 AND to_route = ?2)) - "
-    + " (SELECT COALESCE((SELECT SUM(amount) FROM transactions t "
-    + "     WHERE (from_acct = ?1 AND from_route = ?2)),0))",
-        nativeQuery = true)
+            + "SELECT "
+            + "(SELECT SUM(amount) FROM transactions t "
+            + "     WHERE (to_acct = ?1 AND to_route = ?2)) - "
+            + " (SELECT COALESCE((SELECT SUM(amount) FROM transactions t "
+            + "     WHERE (from_acct = ?1 AND from_route = ?2)),0))",
+            nativeQuery = true)
     Long findBalance(String accountNum, String routeNum);
 
     @Query(value = "--find_latest \n"
-        + "SELECT * FROM transactions t "
-        + "WHERE t.transaction_id > ?1 "
-        + "ORDER BY t.transaction_id ASC",
-        nativeQuery = true)
+            + "SELECT * FROM transactions t "
+            + "WHERE t.transaction_id > ?1 "
+            + "ORDER BY t.transaction_id ASC",
+            nativeQuery = true)
     List<Transaction> findLatest(long latestTransaction);
 
     /**
      * Returns the id of the latest transaction, or NULL if none exist.
      */
     @Query(value = "--latest_transaction_id \n"
-        + "SELECT MAX(transaction_id) FROM transactions",
-        nativeQuery = true)
+            + "SELECT MAX(transaction_id) FROM transactions",
+            nativeQuery = true)
     Long latestTransactionId();
 
     @Query(value = "--find_for_account \n"
-            + "SELECT * FROM transactions t\n" +
-            " WHERE (t.from_acct=?1 AND t.from_route=?2) OR (t.to_acct=?1 AND t.to_route=?2)\n" +
-            " ORDER BY t.timestamp DESC",
+            + "SELECT * FROM transactions t\n"
+            + " WHERE (t.from_acct=?1 AND t.from_route=?2) OR (t.to_acct=?1 AND t.to_route=?2)\n"
+            + " ORDER BY t.timestamp DESC",
             nativeQuery = true)
-    LinkedList<Transaction> findForAccount(final String accountNum,
-                                           final String routingNum,
-                                           final Pageable pager);
+    LinkedList<Transaction> findForAccount(String accountNum, String routingNum, Pageable pager);
 }

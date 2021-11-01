@@ -62,7 +62,7 @@ public class LedgerReader implements Runnable {
                 .name("poll_ledger_init")
                 .start();
 
-        try (final Tracer.SpanInScope ignored = tracer.withSpan(span)) {
+        try (Tracer.SpanInScope ignored = tracer.withSpan(span)) {
             this.latestTransactionId = getLatestTransactionId();
         } finally {
             span.tag("latest_transaction_id", Long.toString(this.latestTransactionId));

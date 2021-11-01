@@ -58,7 +58,7 @@ public class JWTVerifierGenerator {
             final byte[] keyBytes = Base64.getDecoder().decode(keyStr);
             final KeyFactory kf = KeyFactory.getInstance("RSA");
             final X509EncodedKeySpec keySpecX509 = new X509EncodedKeySpec(keyBytes);
-            final RSAPublicKey publicKey = (RSAPublicKey)kf.generatePublic(keySpecX509);
+            final RSAPublicKey publicKey = (RSAPublicKey) kf.generatePublic(keySpecX509);
 
             // Initialize JWT verifier.
             final Algorithm algorithm = Algorithm.RSA256(publicKey, null);

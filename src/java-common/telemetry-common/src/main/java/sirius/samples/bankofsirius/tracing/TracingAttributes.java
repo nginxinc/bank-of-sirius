@@ -162,8 +162,8 @@ public class TracingAttributes implements Attributes {
 
     protected Optional<String> podName(final Map<String, String> environment) {
         final String hostnameEnv = environment.get("HOSTNAME");
-        if (hostnameEnv != null && !hostnameEnv.isEmpty() &&
-                POD_NAME_PATTERN.matcher(hostnameEnv).matches()) {
+        if (hostnameEnv != null && !hostnameEnv.isEmpty()
+                && POD_NAME_PATTERN.matcher(hostnameEnv).matches()) {
             return Optional.of(hostnameEnv);
         }
 
@@ -228,17 +228,19 @@ public class TracingAttributes implements Attributes {
         return Optional.empty();
     }
 
-    protected Optional<String> readFirstLineFromFile(Function<Path, InputStream> fileContentsStreamProvider,final String filePath) throws IOException {
+    protected Optional<String> readFirstLineFromFile(final Function<Path, InputStream> fileContentsStreamProvider,
+                                                     final String filePath) throws IOException {
         return readFirstLineFromFile(fileContentsStreamProvider, Paths.get(filePath));
     }
 
-    protected Optional<String> readFirstLineFromFile(Function<Path, InputStream> fileContentsStreamProvider, final Path path) throws IOException {
+    protected Optional<String> readFirstLineFromFile(final Function<Path, InputStream> fileContentsStreamProvider,
+                                                     final Path path) throws IOException {
         if (path == null) {
             throw new NullPointerException("path must not be null");
         }
 
-        try (final InputStream fileStream = fileContentsStreamProvider.apply(path);
-             final Scanner scanner = new Scanner(fileStream, StandardCharsets.UTF_8.name())) {
+        try (InputStream fileStream = fileContentsStreamProvider.apply(path);
+             Scanner scanner = new Scanner(fileStream, StandardCharsets.UTF_8.name())) {
             if (scanner.hasNextLine()) {
                 final String firstLine = scanner.nextLine();
                 if (firstLine != null && !firstLine.isEmpty()) {

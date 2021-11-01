@@ -8,6 +8,7 @@ import org.springframework.cloud.sleuth.TraceContext;
 import org.springframework.cloud.sleuth.Tracer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -66,9 +67,9 @@ public class TracingStatementInspectorTest {
         TracingStatementInspector inspector = new TracingStatementInspector(tracer);
         String sql = "--latest_transaction_id \n"
                 + "SELECT MAX(transaction_id) FROM transactions";
-        String expected = String.format("--latest_transaction_id \n" +
-                "-- span_id: %s\n" +
-                "SELECT MAX(transaction_id) FROM transactions", spanId);
+        String expected = String.format("--latest_transaction_id \n"
+                + "-- span_id: %s\n"
+                + "SELECT MAX(transaction_id) FROM transactions", spanId);
         String actual = inspector.inspect(sql);
         assertEquals(expected, actual);
     }
@@ -82,9 +83,9 @@ public class TracingStatementInspectorTest {
         TracingStatementInspector inspector = new TracingStatementInspector(tracer);
         String sql = "--latest_transaction_id \n"
                 + "SELECT MAX(transaction_id) FROM transactions";
-        String expected = String.format("--latest_transaction_id \n" +
-                "-- trace_id: %s\n" +
-                "SELECT MAX(transaction_id) FROM transactions", traceId);
+        String expected = String.format("--latest_transaction_id \n"
+                + "-- trace_id: %s\n"
+                + "SELECT MAX(transaction_id) FROM transactions", traceId);
         String actual = inspector.inspect(sql);
         assertEquals(expected, actual);
     }
@@ -99,9 +100,9 @@ public class TracingStatementInspectorTest {
         TracingStatementInspector inspector = new TracingStatementInspector(tracer);
         String sql = "--latest_transaction_id \n"
                 + "SELECT MAX(transaction_id) FROM transactions";
-        String expected = String.format("--latest_transaction_id \n" +
-                "-- trace_id: %s span_id: %s\n" +
-                "SELECT MAX(transaction_id) FROM transactions", traceId, spanId);
+        String expected = String.format("--latest_transaction_id \n"
+                + "-- trace_id: %s span_id: %s\n"
+                + "SELECT MAX(transaction_id) FROM transactions", traceId, spanId);
         String actual = inspector.inspect(sql);
         assertEquals(expected, actual);
     }

@@ -29,7 +29,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 import sirius.samples.bankofsirius.ledger.Transaction;
@@ -48,6 +47,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -122,8 +122,8 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given the transaction is internal and the transaction amount == sender balance, " +
-            "return HTTP Status 201")
+    @DisplayName("Given the transaction is internal and the "
+            + "transaction amount == sender balance, return HTTP Status 201")
     void addTransactionSuccessWhenAmountEqualToBalance(TestInfo testInfo) {
         // Given
         LedgerWriterController spyLedgerWriterController =
@@ -149,8 +149,9 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given the transaction is internal and the transaction amount < sender balance, " +
-            "return HTTP Status 201")
+    @DisplayName("Given the transaction is internal and the "
+            + "transaction amount < sender balance, "
+            + "return HTTP Status 201")
     void addTransactionSuccessWhenAmountSmallerThanBalance(TestInfo testInfo) {
         // Given
         LedgerWriterController spyLedgerWriterController =
@@ -176,8 +177,8 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given the transaction is internal and the transaction amount > sender balance, " +
-            "return HTTP Status 400")
+    @DisplayName("Given the transaction is internal and the transaction "
+            + "amount > sender balance, return HTTP Status 400")
     void addTransactionFailWhenWhenAmountLargerThanBalance(TestInfo testInfo) {
         // Given
         LedgerWriterController spyLedgerWriterController =
@@ -203,8 +204,8 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given JWT verifier cannot verify the given bearer token, " +
-            "return HTTP Status 401")
+    @DisplayName("Given JWT verifier cannot verify the given bearer token, "
+            + "return HTTP Status 401")
     void addTransactionWhenJWTVerificationExceptionThrown() {
         // Given
         final String badBearerToken = "Bearer foobar";
@@ -242,8 +243,8 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given HTTP request 'Authorization' header is null, " +
-            "return HTTP Status 400")
+    @DisplayName("Given HTTP request 'Authorization' header is null, "
+            + "return HTTP Status 400")
     void addTransactionWhenBearerTokenNull() {
         // When
         final ResponseEntity<?> actualResult =
@@ -258,8 +259,9 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given the transaction is internal, check available balance and the balance " +
-            "reader throws an error, return HTTP Status 500")
+    @DisplayName("Given the transaction is internal, check available "
+            + "balance and the balance reader throws an error, return "
+            + "HTTP Status 500")
     void addTransactionWhenResourceAccessExceptionThrown(TestInfo testInfo) {
         // Given
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
@@ -280,8 +282,9 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given the transaction is external and the transaction cannot be saved to the " +
-            "transaction repository, return HTTP Status 500")
+    @DisplayName("Given the transaction is external and the transaction "
+            + "cannot be saved to the transaction repository, return HTTP"
+            + " Status 500")
     void addTransactionWhenCannotCreateTransactionExceptionExceptionThrown(TestInfo testInfo) {
         // Given
         when(transaction.getFromRoutingNum()).thenReturn(NON_LOCAL_ROUTING_NUM);
@@ -303,8 +306,8 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("Given the transaction is internal, check available balance and the balance " +
-            "service returns 500, return HTTP Status 500")
+    @DisplayName("Given the transaction is internal, check available balance and the balance "
+            + "service returns 500, return HTTP Status 500")
     void addTransactionWhenHttpServerErrorExceptionThrown(TestInfo testInfo) {
         // Given
         LedgerWriterController spyLedgerWriterController =
@@ -332,8 +335,8 @@ class LedgerWriterControllerTest {
     }
 
     @Test
-    @DisplayName("When duplicate UUID transactions are sent, " +
-            "second one is rejected with HTTP status 400")
+    @DisplayName("When duplicate UUID transactions are sent, "
+            + "second one is rejected with HTTP status 400")
     void addTransactionWhenDuplicateUuidExceptionThrown(TestInfo testInfo) {
         // Given
         LedgerWriterController spyLedgerWriterController =
