@@ -312,10 +312,12 @@ class LedgerWriterControllerTest {
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
-        doThrow(new HttpServerErrorException(
-                HttpStatus.INTERNAL_SERVER_ERROR)).when(
-                        spyLedgerWriterController).getAvailableBalance(
-                TOKEN, AUTHED_ACCOUNT_NUM);
+
+        ResponseEntity<Integer> badResponse = mock(ResponseEntity.class);
+        Throwable throwable = new ExpectedUnitTestException();
+        when(badResponse.getBody()).thenThrow(throwable);
+        when(restOperations.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
+                eq(Integer.class))).thenReturn(badResponse);
 
         // When
         final ResponseEntity<?> actualResult =
