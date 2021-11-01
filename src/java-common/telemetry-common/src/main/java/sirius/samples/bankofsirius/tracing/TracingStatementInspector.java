@@ -25,14 +25,23 @@ public class TracingStatementInspector implements StatementInspector {
      * @param id string to check
      * @return true if not a valid hex string
      */
-    private static boolean isInvalidId(final String id) {
+    static boolean isInvalidId(final String id) {
         if (id == null || id.isEmpty()) {
             return true;
         }
 
+        if (id.length() % 2 != 0) {
+            return true;
+        }
+
+        final int beforeZero = ((int) '0') - 1;
+        final int afterNine = ((int) '9') + 1;
+        final int beforeA = ((int) 'a') - 1;
+        final int afterF = ((int) 'f') + 1;
+
         for (final int charCode : id.toCharArray()) {
-            final boolean isNumberOrHexLetter = (charCode > 47 && charCode < 58) ||
-                    (charCode > 96 && charCode < 103);
+            final boolean isNumberOrHexLetter = (charCode > beforeZero && charCode < afterNine)
+                    || (charCode > beforeA && charCode < afterF);
             if (!isNumberOrHexLetter) {
                 return true;
             }
