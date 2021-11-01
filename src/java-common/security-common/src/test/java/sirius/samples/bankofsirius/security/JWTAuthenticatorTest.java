@@ -48,12 +48,6 @@ public class JWTAuthenticatorTest {
         this.instance = new JWTAuthenticator(tracer, verifier);
     }
 
-    /*
-            when(verifier.verify(TOKEN)).thenReturn(jwt);
-        when(jwt.getClaim(JWT_ACCOUNT_KEY)).thenReturn(claim);
-        when(claim.asString()).thenReturn(AUTHED_ACCOUNT_NUM);
-     */
-
     @Test
     @DisplayName("Given the authorization is valid, no exceptions are thrown")
     void validAuthorization() {

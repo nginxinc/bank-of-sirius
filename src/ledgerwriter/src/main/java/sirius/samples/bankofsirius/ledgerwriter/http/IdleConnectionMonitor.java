@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class IdleConnectionMonitor implements Runnable {
-    private static Logger LOGGER = LoggerFactory.getLogger(IdleConnectionMonitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IdleConnectionMonitor.class);
     private final PoolingHttpClientConnectionManager pool;
     private final Duration idleTimeout;
     private final Tracer tracer;

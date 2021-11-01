@@ -119,9 +119,8 @@ class TransactionValidatorTest {
     }
 
     @Test
-    @DisplayName("Given invalid sender account number, " +
-            "IllegalArgumentException is thrown")
-    void validationFail_WhenSenderAccountNumber_IsInvalid() {
+    @DisplayName("Given invalid sender account number, IllegalArgumentException is thrown")
+    void validationFailWhenSenderAccountNumberIsInvalid() {
         for (int i = 0; i < INVALID_ACCT_NUM.length; i++) {
             // Given
             when(transaction.getFromAccountNum()).thenReturn(INVALID_ACCT_NUM[i]);
@@ -132,9 +131,8 @@ class TransactionValidatorTest {
     }
 
     @Test
-    @DisplayName("Given invalid sender routing number, " +
-            "IllegalArgumentException is thrown")
-    void validationFail_WhenSenderRoutingNumber_IsInvalid() {
+    @DisplayName("Given invalid sender routing number, IllegalArgumentException is thrown")
+    void validationFailWhenSenderRoutingNumberIsInvalid() {
         for (int i = 0; i < INVALID_ROUTING_NUM.length; i++) {
             // Given
             when(transaction.getFromRoutingNum()).thenReturn(INVALID_ROUTING_NUM[i]);
@@ -145,9 +143,8 @@ class TransactionValidatorTest {
     }
 
     @Test
-    @DisplayName("Given invalid receiver account number, " +
-        "IllegalArgumentException is thrown")
-    void validationFail_WhenReceiverAccountNumber_IsValid() {
+    @DisplayName("Given invalid receiver account number, IllegalArgumentException is thrown")
+    void validationFailWhenReceiverAccountNumberIsValid() {
         for (int i = 0; i < INVALID_ACCT_NUM.length; i++) {
             // Given
             when(transaction.getToAccountNum()).thenReturn(INVALID_ACCT_NUM[i]);
@@ -158,9 +155,8 @@ class TransactionValidatorTest {
     }
 
     @Test
-    @DisplayName("Given invalid receiver routing number, " +
-        "IllegalArgumentException is thrown")
-    void validationFail_WhenReceiverRoutingNumber_IsValid() {
+    @DisplayName("Given invalid receiver routing number, IllegalArgumentException is thrown")
+    void validationFailWhenReceiverRoutingNumberIsValid() {
         for (int i = 0; i < INVALID_ROUTING_NUM.length; i++) {
             // Given
             when(transaction.getToRoutingNum()).thenReturn(INVALID_ROUTING_NUM[i]);
@@ -171,8 +167,7 @@ class TransactionValidatorTest {
     }
 
     @Test
-    @DisplayName("Given the sender is not authenticated, " +
-            "IllegalArgumentException is thrown")
+    @DisplayName("Given the sender is not authenticated, IllegalArgumentException is thrown")
     void validateTransactionFailWhenNotAuthenticated() {
         // Given
         when(transaction.getFromAccountNum()).thenReturn(
@@ -192,8 +187,7 @@ class TransactionValidatorTest {
     }
 
     @Test
-    @DisplayName("Given the sender is the receiver, " +
-            "IllegalArgumentException is thrown")
+    @DisplayName("Given the sender is the receiver, IllegalArgumentException is thrown")
     void validateTransactionFailWhenSenderIsReceiver() {
         // Given
         when(transaction.getToAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
@@ -214,7 +208,7 @@ class TransactionValidatorTest {
 
     @Test
     @DisplayName("Given transaction amount is invalid, IllegalArgumentException is thrown")
-    void validationFail_WhenTransactionAmount_IsInvalid() {
+    void validationFailWhenTransactionAmountIsInvalid() {
         for (int i = 0; i < INVALID_TRANSACTION_AMOUNT.length; i++) {
             // Given
             when(transaction.getAmount()).thenReturn(INVALID_TRANSACTION_AMOUNT[i]);

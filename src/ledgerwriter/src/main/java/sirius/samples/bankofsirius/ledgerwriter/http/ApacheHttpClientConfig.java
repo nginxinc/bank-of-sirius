@@ -88,10 +88,13 @@ public class ApacheHttpClientConfig {
     public TaskScheduler taskScheduler(final ErrorHandler errorHandler,
                                        final HttpClientConnectionManager manager,
                                        final PoolingProperties poolingProperties,
-                                       final Tracer tracer) {
+                                       final Tracer tracer,
+                                       @Value("${http.client.pooling.idle-connect-check-interval-ms:20000}")
+                                           final Integer idleEvictionCheckms) {
         if (manager instanceof PoolingHttpClientConnectionManager) {
             final int checkInterval = poolingProperties.getIdleConnectionCheckInterval();
-            final PoolingHttpClientConnectionManager pool = (PoolingHttpClientConnectionManager)manager;
+            final PoolingHttpClientConnectionManager pool =
+                    (PoolingHttpClientConnectionManager) manager;
             final Duration idleConnectionWaitTime = Duration.ofMillis(checkInterval);
             final IdleConnectionMonitor idleConnectionMonitor =
                     new IdleConnectionMonitor(pool, idleConnectionWaitTime, tracer);
@@ -101,7 +104,7 @@ public class ApacheHttpClientConfig {
             scheduler.setErrorHandler(errorHandler);
             scheduler.initialize();
 
-            scheduler.scheduleWithFixedDelay(idleConnectionMonitor, 20_000);
+            scheduler.scheduleWithFixedDelay(idleConnectionMonitor, idleEvictionCheckms);
 
             return scheduler;
         }

@@ -45,8 +45,8 @@ public class ScheduledTaskHealthIndicator extends AbstractHealthIndicator {
         builder.withDetail("timeSinceLastRunMs", timeSinceLastRun.toMillis());
 
         if (maxIntervalBetweenRuns.minus(timeSinceLastRun).isNegative()) {
-            String msg = String.format("%s is not running with the " +
-                    "expected schedule", this.taskName);
+            String msg = String.format("%s is not running with the "
+                    + "expected schedule", this.taskName);
             builder.withDetail("error", msg);
             builder.down();
         } else {

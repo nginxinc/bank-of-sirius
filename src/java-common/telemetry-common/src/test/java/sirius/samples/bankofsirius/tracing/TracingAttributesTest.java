@@ -86,7 +86,8 @@ public class TracingAttributesTest {
 
     @Test
     void readContainerIdK8s() {
-        final String rawCpuSetInfo = "/kubepods/besteffort/pod72832d24-7655-487c-8b85-3f01844639a9/5046b447f1dacb1849cff896e47e3d9b1aa5bcfd513a98e382eae3343e6ab5c2";
+        final String rawCpuSetInfo = "/kubepods/besteffort/pod72832d24-7655-487c-8b85-3f01844639a9/"
+                + "5046b447f1dacb1849cff896e47e3d9b1aa5bcfd513a98e382eae3343e6ab5c2";
         final String expected = "5046b447f1dacb1849cff896e47e3d9b1aa5bcfd513a98e382eae3343e6ab5c2";
         final TracingAttributes attributes = instance(rawCpuSetInfo);
         final String actual = attributes.get(ResourceAttributes.CONTAINER_ID);

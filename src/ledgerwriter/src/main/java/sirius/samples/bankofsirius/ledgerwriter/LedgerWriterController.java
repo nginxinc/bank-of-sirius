@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 import sirius.samples.bankofsirius.ledger.Transaction;
 import sirius.samples.bankofsirius.ledger.TransactionRepository;
@@ -75,6 +74,7 @@ public final class LedgerWriterController {
     * Initializes JWT verifier.
     */
     @Autowired
+    @SuppressWarnings("checkstyle:ParameterNumber")
     public LedgerWriterController(
             final Authenticator authenticator,
             final MeterRegistry meterRegistry,
@@ -173,7 +173,8 @@ public final class LedgerWriterController {
             if (localRoutingNum.equals(transaction.getFromRoutingNum())) {
                 int balance = getAvailableBalance(authorization, transaction.getFromAccountNum());
                 if (balance < transaction.getAmount()) {
-                    String msg = String.format("Transaction submission failed: Insufficient balance [balance=%d]", balance);
+                    String msg = String.format("Transaction submission failed: Insufficient balance [balance=%d]",
+                            balance);
                     LOGGER.error(msg);
                     span.tag("error", "true");
                     span.tag("transaction", transaction.toString());
@@ -209,7 +210,13 @@ public final class LedgerWriterController {
         } catch (RuntimeException e) {
             String msg = String.format("Unable to persist transaction [transaction=%s]",
                     transaction);
-            LOGGER.error(msg, e);
+
+            if (e instanceof ReadAvailableBalanceException) {
+                LOGGER.error(msg);
+            } else {
+                LOGGER.error(msg, e);
+            }
+
             return new ResponseEntity<>("unable to persist transaction",
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }

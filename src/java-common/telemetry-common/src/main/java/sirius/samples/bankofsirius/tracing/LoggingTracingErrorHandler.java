@@ -27,8 +27,8 @@ public class LoggingTracingErrorHandler implements ErrorHandler, Thread.Uncaught
         }
 
         logger.error("Unexpected error occurred", throwable);
-        final Thread invokingThread = thread == null ?
-                Thread.currentThread() : thread;
+        final Thread invokingThread = thread == null
+                ? Thread.currentThread() : thread;
 
         span.tag("thread", invokingThread.getName());
         span.error(throwable);
