@@ -105,6 +105,8 @@ public final class TransactionHistoryController {
                     HttpStatus.UNAUTHORIZED);
         }
 
+        LOGGER.debug("Transaction history requested [accountId={}]", accountId);
+
         final Span span = tracer.spanBuilder().name("cache_lookup").start();
         cache.refresh(accountId);
 
