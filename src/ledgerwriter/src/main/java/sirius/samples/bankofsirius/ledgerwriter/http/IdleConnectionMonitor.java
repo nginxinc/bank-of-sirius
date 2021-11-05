@@ -39,7 +39,7 @@ public class IdleConnectionMonitor implements Runnable {
         try {
             pool.closeExpiredConnections();
             pool.closeIdleConnections(idleTimeout.toMillis(), TimeUnit.MILLISECONDS);
-            LOGGER.info("Idle connection monitor: Closed expired and idle connections");
+            LOGGER.debug("Idle connection monitor: Closed expired and idle connections");
             tagPoolStats(span, "after");
         } finally {
             span.end();

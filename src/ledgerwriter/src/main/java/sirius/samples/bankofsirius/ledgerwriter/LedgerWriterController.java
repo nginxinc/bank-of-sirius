@@ -131,10 +131,11 @@ public final class LedgerWriterController {
                     HttpStatus.UNAUTHORIZED);
         }
 
-
         final Span span = tracer.currentSpan();
         Objects.requireNonNull(span);
-        span.tag("transaction.id", Long.toString(transaction.getTransactionId()));
+        span.tag("transaction", transaction.toString());
+
+        LOGGER.debug("Adding new transaction [transaction={}]", transaction);
 
         // Check against cache for duplicate transactions
         final Span cacheSpan = tracer.spanBuilder().name("cache_lookup").start();
@@ -144,7 +145,6 @@ public final class LedgerWriterController {
                         transaction.getRequestUuid());
                 cacheSpan.tag("error", "true");
                 cacheSpan.tag("request.uuid", transaction.getRequestUuid());
-                cacheSpan.tag("transaction", transaction.toString());
                 cacheSpan.event("Duplicate transaction add attempted");
                 return new ResponseEntity<>("unable to add duplicate transaction",
                         HttpStatus.BAD_REQUEST);
@@ -206,7 +206,8 @@ public final class LedgerWriterController {
             transactionRepository.save(transaction);
             this.cache.put(transaction.getRequestUuid(),
                     transaction.getTransactionId());
-            LOGGER.info("Submitted transaction successfully");
+            LOGGER.info("Submitted transaction successfully [transactionId={}]",
+                    transaction.getTransactionId());
         } catch (RuntimeException e) {
             String msg = String.format("Unable to persist transaction [transaction=%s]",
                     transaction);

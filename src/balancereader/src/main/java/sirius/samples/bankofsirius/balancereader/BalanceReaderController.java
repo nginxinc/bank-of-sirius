@@ -95,6 +95,8 @@ public final class BalanceReaderController {
                     HttpStatus.UNAUTHORIZED);
         }
 
+        LOGGER.debug("Balance requested [accountId={}]", accountId);
+
         final Span span = tracer.spanBuilder().name("cache_lookup").start();
         try {
             // Load from cache
