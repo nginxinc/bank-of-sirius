@@ -30,6 +30,8 @@ ENV PYTHONUNBUFFERED 1
 # source /env/bin/activate. This ensures the application is executed within
 # the context of the virtualenv and will have access to its dependencies.
 ENV VIRTUAL_ENV /env
+# Python grpc libraries should use the host's native DNS resolution
+ENV GRPC_DNS_RESOLVER native
 ENV PIP_CONFIG_FILE /env/etc/pip.conf
 ENV PATH /env/bin:$PATH
 
