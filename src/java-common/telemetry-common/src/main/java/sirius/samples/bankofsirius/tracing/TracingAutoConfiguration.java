@@ -82,11 +82,13 @@ public class TracingAutoConfiguration {
 
     @Bean
     public Supplier<Resource> applicationDetails(final TracingAttributes tracingAttributes) {
-        return () -> Resource.empty()
+        final Resource resource = Resource.empty()
                 .merge(OsResource.get())
                 .merge(ProcessResource.get())
                 .merge(ProcessRuntimeResource.get())
                 .merge(HostResource.get())
                 .merge(Resource.create(tracingAttributes));
+
+        return () -> resource;
     }
 }
