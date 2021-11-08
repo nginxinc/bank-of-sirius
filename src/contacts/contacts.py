@@ -31,13 +31,15 @@ from db import ContactsDb
 
 from flask_management_endpoints import ManagementEndpoints, Info
 
+from grpc import Compression
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.propagators import set_global_textmap
-from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from opentelemetry.tools.cloud_trace_propagator import CloudTraceFormatPropagator
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
+
 
 def create_app():
     """Flask application factory to create instances
@@ -55,6 +57,8 @@ def create_app():
 
         Return: a list of contacts
         """
+        span = trace.get_current_span()
+        span.set_attribute('username', username)
         auth_header = request.headers.get("Authorization")
         if auth_header:
             token = auth_header.split(" ")[-1]
@@ -65,16 +69,19 @@ def create_app():
                 token, key=app.config["PUBLIC_KEY"], algorithms="RS256"
             )
             if username != auth_payload["user"]:
+                span.set_attribute('auth_payload.user', auth_payload["user"])
                 raise PermissionError
 
             contacts_list = contacts_db.get_contacts(username)
-            app.logger.debug("Succesfully retrieved contacts.")
+            app.logger.debug("Successfully retrieved contacts")
             return jsonify(contacts_list), 200
         except (PermissionError, jwt.exceptions.InvalidTokenError) as err:
             app.logger.error("Error retrieving contacts list: %s", str(err))
+            span.record_exception(err)
             return "authentication denied", 401
         except SQLAlchemyError as err:
             app.logger.error("Error retrieving contacts list: %s", str(err))
+            span.record_exception(err)
             return "failed to retrieve contacts list", 500
 
     @app.route("/contacts/<username>", methods=["POST"])
@@ -90,6 +97,8 @@ def create_app():
         - label
         - is_external
         """
+        span = trace.get_current_span()
+        span.set_attribute('username', username)
         auth_header = request.headers.get("Authorization")
         if auth_header:
             token = auth_header.split(" ")[-1]
@@ -100,6 +109,7 @@ def create_app():
                 token, key=app.config["PUBLIC_KEY"], algorithms="RS256"
             )
             if username != auth_payload["user"]:
+                span.set_attribute('auth_payload.user', auth_payload["user"])
                 raise PermissionError
             req = {
                 k: (bleach.clean(v) if isinstance(v, str) else v)
@@ -124,15 +134,19 @@ def create_app():
 
         except (PermissionError, jwt.exceptions.InvalidTokenError) as err:
             app.logger.error("Error adding contact: %s", str(err))
+            span.record_exception(err)
             return "authentication denied", 401
         except UserWarning as warn:
             app.logger.error("Error adding contact: %s", str(warn))
+            span.add_event(str(warn))
             return str(warn), 400
         except ValueError as err:
             app.logger.error("Error adding contact: %s", str(err))
+            span.record_exception(err)
             return str(err), 409
         except SQLAlchemyError as err:
             app.logger.error("Error adding contact: %s", str(err))
+            span.record_exception(err)
             return "failed to add contact", 500
 
     def _validate_new_contact(req):
@@ -176,27 +190,12 @@ def create_app():
     @atexit.register
     def _shutdown():
         """Executed when web app is terminated."""
-        app.logger.info("Stopping contacts service.")
+        app.logger.info("Stopping contacts service")
 
     # set up logger
     app.logger.handlers = logging.getLogger("gunicorn.error").handlers
     app.logger.setLevel(logging.getLogger("gunicorn.error").level)
     app.logger.info("Starting contacts service.")
-
-    # Set up tracing and export spans to Cloud Trace.
-    if os.environ['ENABLE_TRACING'] == "true":
-        app.logger.info("✅ Tracing enabled.")
-        # Set up tracing and export spans to Cloud Trace
-        trace.set_tracer_provider(TracerProvider())
-        cloud_trace_exporter = CloudTraceSpanExporter()
-        trace.get_tracer_provider().add_span_processor(
-            BatchExportSpanProcessor(cloud_trace_exporter)
-        )
-        set_global_textmap(CloudTraceFormatPropagator())
-        FlaskInstrumentor().instrument_app(app)
-    else:
-        app.logger.info("🚫 Tracing disabled.")
-
 
     # setup global variables
     app.config["VERSION"] = os.environ.get("VERSION")
