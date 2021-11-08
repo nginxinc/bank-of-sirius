@@ -74,14 +74,14 @@ spec:
             memory: 1Gi
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness
+            path: /z/health/readiness
             port: 8080
           initialDelaySeconds: 60
           periodSeconds: 5
           timeoutSeconds: 10
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /z/health/liveness
             port: 8080
           initialDelaySeconds: 120
           periodSeconds: 5

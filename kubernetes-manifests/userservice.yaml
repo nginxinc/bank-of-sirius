@@ -49,7 +49,14 @@ spec:
             name: accounts-db-config
         readinessProbe:
           httpGet:
-            path: /ready
+            path: /z/health/readiness
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /z/health/liveness
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 5

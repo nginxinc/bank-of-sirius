@@ -69,14 +69,14 @@ spec:
             name: service-api-config
         readinessProbe:
           httpGet:
-            path: /ready
+            path: /z/health/readiness
             port: 8080
           initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 10
         livenessProbe:
           httpGet:
-            path: /ready
+            path: /z/health/liveness
             port: 8080
           initialDelaySeconds: 60
           periodSeconds: 15
