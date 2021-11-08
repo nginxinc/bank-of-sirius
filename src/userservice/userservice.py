@@ -30,12 +30,13 @@ import bleach
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from db import UserDb
 
+from grpc import Compression
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.propagators import set_global_textmap
-from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from opentelemetry.tools.cloud_trace_propagator import CloudTraceFormatPropagator
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
 from flask_management_endpoints import ManagementEndpoints, Info
@@ -68,9 +69,14 @@ def create_app():
         - zip
         - ssn
         """
+        span = trace.get_current_span()
         try:
-            app.logger.debug('Sanitizing input.')
+            app.logger.debug('Sanitizing input')
             req = {k: bleach.clean(v) for k, v in request.form.items()}
+
+            if 'username' in req:
+                span.set_attribute('username', req['username'])
+
             __validate_new_user(req)
             # Check if user already exists
             if users_db.get_user(req['username']) is not None:
@@ -101,16 +107,19 @@ def create_app():
             # Add user_data to database
             app.logger.debug("Adding user to the database")
             users_db.add_user(user_data)
-            app.logger.info("Successfully created user.")
+            app.logger.info("Successfully created user")
 
         except UserWarning as warn:
             app.logger.error("Error creating new user: %s", str(warn))
+            span.add_event(str(warn))
             return str(warn), 400
         except NameError as err:
             app.logger.error("Error creating new user: %s", str(err))
+            span.record_exception(err)
             return str(err), 409
         except SQLAlchemyError as err:
             app.logger.error("Error creating new user: %s", str(err))
+            span.record_exception(err)
             return 'failed to create user', 500
 
         return jsonify({}), 201
@@ -155,19 +164,21 @@ def create_app():
         - username
         - password
         """
-        app.logger.debug('Sanitizing login input.')
+        span = trace.get_current_span()
+        app.logger.debug('Sanitizing login input')
         username = bleach.clean(request.args.get('username'))
+        span.set_attribute('username', username)
         password = bleach.clean(request.args.get('password'))
 
         # Get user data
         try:
-            app.logger.debug('Getting the user data.')
+            app.logger.debug('Getting the user data')
             user = users_db.get_user(username)
             if user is None:
                 raise LookupError('user {} does not exist'.format(username))
 
             # Validate the password
-            app.logger.debug('Validating the password.')
+            app.logger.debug('Validating the password')
             if not bcrypt.checkpw(password.encode('utf-8'), user['passhash']):
                 raise PermissionError('invalid login')
 
@@ -182,17 +193,20 @@ def create_app():
             }
             app.logger.debug('Creating jwt token.')
             token = jwt.encode(payload, app.config['PRIVATE_KEY'], algorithm='RS256')
-            app.logger.info('Login Successful.')
+            app.logger.info('Login Successful')
             return jsonify({'token': token.decode("utf-8")}), 200
 
         except LookupError as err:
             app.logger.error('Error logging in: %s', str(err))
+            span.record_exception(err)
             return str(err), 404
         except PermissionError as err:
             app.logger.error('Error logging in: %s', str(err))
+            span.record_exception(err)
             return str(err), 401
         except SQLAlchemyError as err:
             app.logger.error('Error logging in: %s', str(err))
+            span.record_exception(err)
             return 'failed to retrieve user information', 500
 
     @atexit.register
@@ -204,22 +218,6 @@ def create_app():
     app.logger.handlers = logging.getLogger('gunicorn.error').handlers
     app.logger.setLevel(logging.getLogger('gunicorn.error').level)
     app.logger.info('Starting userservice.')
-
-
-    # Set up tracing and export spans to Cloud Trace.
-    if os.environ['ENABLE_TRACING'] == "true":
-        app.logger.info("✅ Tracing enabled.")
-        # Set up tracing and export spans to Cloud Trace
-        trace.set_tracer_provider(TracerProvider())
-        cloud_trace_exporter = CloudTraceSpanExporter()
-        trace.get_tracer_provider().add_span_processor(
-            BatchExportSpanProcessor(cloud_trace_exporter)
-        )
-        set_global_textmap(CloudTraceFormatPropagator())
-        FlaskInstrumentor().instrument_app(app)
-    else:
-        app.logger.info("🚫 Tracing disabled.")
-
 
     app.config['VERSION'] = os.environ.get('VERSION')
     app.config['EXPIRY_SECONDS'] = int(os.environ.get('TOKEN_EXPIRY_SECONDS'))

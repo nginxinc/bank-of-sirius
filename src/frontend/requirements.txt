@@ -4,9 +4,9 @@
 #
 #    pip-compile --output-file=- --pip-args='--no-color --prefer-binary' requirements.in
 #
-cachetools==4.2.2
-    # via google-auth
-certifi==2021.5.30
+backoff==1.10.0
+    # via opentelemetry-exporter-otlp-proto-grpc
+certifi==2021.10.8
     # via requests
 cffi==1.14.5
     # via
@@ -14,70 +14,64 @@ cffi==1.14.5
     #   cryptography
 chardet==3.0.4
     # via requests
-click==8.0.1
+click==8.0.3
     # via flask
 cryptography==3.3.2
     # via -r requirements.in
+deprecated==1.2.13
+    # via opentelemetry-api
 flask==1.1.2
     # via -r requirements.in
 flask-management-endpoints==1.0.0
     # via -r requirements.in
 googleapis-common-protos==1.53.0
-    # via google-api-core
-greenlet==1.1.1
-    # via sqlalchemy
+    # via opentelemetry-exporter-otlp-proto-grpc
 grpcio==1.39.0
     # via
     #   -r requirements.in
-    #   google-api-core
+    #   opentelemetry-exporter-otlp-proto-grpc
 gunicorn==20.1.0
     # via -r requirements.in
 idna==2.10
     # via requests
 itsdangerous==2.0.1
     # via flask
-jinja2==2.11.3
-    # via
-    #   flask
-    #   opentelemetry-instrumentation-jinja2
+jinja2==3.0.2
+    # via flask
 markupsafe==2.0.1
     # via jinja2
-opentelemetry-api==0.13b0
+opentelemetry-api==1.6.2
     # via
-    #   opentelemetry-exporter-google-cloud
+    #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-jinja2
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
-    #   opentelemetry-tools-google-cloud
-opentelemetry-exporter-google-cloud==0.13b0
+opentelemetry-exporter-otlp-proto-grpc==1.6.2
     # via -r requirements.in
-opentelemetry-instrumentation==0.13b0
+opentelemetry-instrumentation==0.25b2
     # via
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-jinja2
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-wsgi
-opentelemetry-instrumentation-flask==0.13b0
+opentelemetry-instrumentation-flask==0.25b2
     # via -r requirements.in
-opentelemetry-instrumentation-jinja2==0.13b0
+opentelemetry-instrumentation-jinja2==0.25b2
     # via -r requirements.in
-opentelemetry-instrumentation-requests==0.13b0
+opentelemetry-instrumentation-requests==0.25b2
     # via -r requirements.in
 opentelemetry-instrumentation-wsgi==0.25b2
     # via opentelemetry-instrumentation-flask
-opentelemetry-sdk==0.13b0
+opentelemetry-proto==1.6.2
+    # via opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-sdk==1.6.2
     # via
     #   -r requirements.in
-    #   opentelemetry-exporter-google-cloud
-    #   opentelemetry-tools-google-cloud
-opentelemetry-tools-google-cloud==0.13b0
-    # via -r requirements.in
-packaging==21.0
-    # via google-api-core
-protobuf==3.17.3
+    #   opentelemetry-exporter-otlp-proto-grpc
+opentelemetry-semantic-conventions==0.25b2
     # via
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-requests
@@ -97,31 +91,20 @@ pycparser==2.21
 pyjwt==1.7.1
     # via -r requirements.in
 requests==2.23.0
-    # via
-    #   -r requirements.in
-    #   google-api-core
-    #   opentelemetry-instrumentation-requests
-    #   opentelemetry-tools-google-cloud
-rsa==4.7.2
-    # via google-auth
+    # via -r requirements.in
 six==1.16.0
     # via
     #   -r requirements.in
     #   cryptography
-    #   google-api-core
-    #   google-auth
-    #   google-cloud-core
     #   grpcio
-    #   protobuf
-sqlalchemy==1.4.23
-    # via opentelemetry-instrumentation-sqlalchemy
 urllib3==1.25.11
     # via requests
-werkzeug==2.0.1
+werkzeug==2.0.2
     # via flask
 wrapt==1.12.1
     # via
     #   -r requirements.in
+    #   deprecated
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-jinja2
 

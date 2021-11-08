@@ -3,13 +3,15 @@ requests==2.23.0
 pyjwt==1.7.1
 cryptography==3.3.2
 gunicorn==20.1.0
-opentelemetry-sdk==0.13b0
-opentelemetry-exporter-google-cloud==0.13b0
-opentelemetry-tools-google-cloud==0.13b0
-opentelemetry-instrumentation-flask==0.13b0
-opentelemetry-instrumentation-sqlalchemy==0.13b0
-opentelemetry-instrumentation-jinja2==0.13b0
-opentelemetry-instrumentation-requests==0.13b0
+opentelemetry-sdk==1.6.2
+opentelemetry-exporter-otlp-proto-grpc==1.6.2
+opentelemetry-instrumentation-flask==0.25b2
+opentelemetry-instrumentation-jinja2==0.25b2
+opentelemetry-instrumentation-requests==0.25b2
+
+# Provides Spring Actuator like health endpoints and Open Telemetry compatible
+# trace attributes
+flask-management-endpoints==1.0.0
 
 # Hard-code the following to the pre-installed wheel versions
 grpcio==1.39.0
@@ -19,4 +21,4 @@ six==1.16.0
 cffi==1.14.5
 wrapt==1.12.1
 
-# requirements checksum: 1af689d81fabdf88f3750d593b568f6c
+# requirements checksum: 82bacc08050ce05fa7b5c84c7f318fdb
