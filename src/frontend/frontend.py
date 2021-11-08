@@ -19,7 +19,7 @@ import datetime
 import json
 import logging
 import os
-import socket
+
 from decimal import Decimal
 
 import requests
@@ -38,6 +38,7 @@ from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.instrumentation.jinja2 import Jinja2Instrumentor
 
+from flask_management_endpoints import Info, ManagementEndpoints
 
 
 # pylint: disable-msg=too-many-locals
@@ -45,33 +46,11 @@ def create_app():
     """Flask application factory to create instances
     of the Frontend Flask App
     """
-    app = Flask(__name__)
+    app = Flask('frontend')
 
     # Disabling unused-variable for lines with route decorated functions
     # as pylint thinks they are unused
     # pylint: disable=unused-variable
-    @app.route('/version', methods=['GET'])
-    def version():
-        """
-        Service version endpoint
-        """
-        return os.environ.get('VERSION'), 200
-
-    @app.route('/ready', methods=['GET'])
-    def readiness():
-        """
-        Readiness probe
-        """
-        return 'ok', 200
-
-    @app.route('/whereami', methods=['GET'])
-    def whereami():
-        """
-        Returns the cluster name + zone name where this Pod is running.
-
-        """
-        return "Cluster: " + cluster_name + ", Pod: " + pod_name + ", Zone: " + pod_zone, 200
-
     @app.route("/")
     def root():
         """
@@ -515,32 +494,15 @@ def create_app():
     app.config['TIMESTAMP_FORMAT'] = '%Y-%m-%dT%H:%M:%S.%f%z'
     app.config['SCHEME'] = os.environ.get('SCHEME', 'http')
 
-    # where am I?
-    metadata_url = 'http://metadata.google.internal/computeMetadata/v1/'
-    metadata_headers = {'Metadata-Flavor': 'Google'}
-    # get GKE cluster name
+    k8s_info = Info.k8s()
+    # We do not have a good portable way to get the cluster name
     cluster_name = "unknown"
-    try:
-        req = requests.get(metadata_url + 'instance/attributes/cluster-name',
-                           headers=metadata_headers)
-        if req.ok:
-            cluster_name = str(req.text)
-    except (RequestException, HTTPError) as err:
-        app.logger.warning("Unable to capture GKE cluster name.")
-
-    # get GKE pod name
-    pod_name = "unknown"
-    pod_name = socket.gethostname()
-
+    if k8s_info and 'k8s.pod.name' in k8s_info:
+        pod_name = k8s_info['k8s.pod.name']
+    else:
+        pod_name = "unknown"
     # get GKE node zone
     pod_zone = "unknown"
-    try:
-        req = requests.get(metadata_url + 'instance/zone',
-                           headers=metadata_headers)
-        if req.ok:
-            pod_zone = str(req.text.split("/")[3])
-    except (RequestException, HTTPError) as err:
-        app.logger.warning("Unable to capture GKE node zone.")
 
     # register formater functions
     app.jinja_env.globals.update(format_currency=format_currency)
@@ -566,7 +528,23 @@ def create_app():
         RequestsInstrumentor().instrument()
         Jinja2Instrumentor().instrument()
     else:
-        app.logger.info("🚫 Tracing disabled.")
+        app.logger.info("🚫 Tracing disabled")
+
+    tracer = trace.get_tracer(app.name)
+
+    # Setup health checks and management endpoints
+    ManagementEndpoints(app)
+    app.config.update(
+        Z_ENDPOINTS={
+            "service_dependencies": {
+                'balance_api': os.environ.get('BALANCES_API_ADDR'),
+                'transactions_api': os.environ.get('TRANSACTIONS_API_ADDR'),
+                'history_api': os.environ.get('HISTORY_API_ADDR'),
+                'user_service_api': os.environ.get('USERSERVICE_API_ADDR'),
+                'contacts_api': os.environ.get('CONTACTS_API_ADDR')
+            }
+        }
+    )
 
     return app
 

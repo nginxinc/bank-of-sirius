@@ -46,6 +46,10 @@ webencodings==0.5.1
 Werkzeug==1.0.1
 zipp==1.2.0
 
+# Provides Spring Actuator like health endpoints and Open Telemetry compatible
+# trace attributes
+flask-management-endpoints==1.0.0
+
 # Hard-code the following to the pre-installed wheel versions
 grpcio==1.39.0
 six==1.16.0

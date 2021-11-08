@@ -19,25 +19,9 @@ click==8.0.1
 cryptography==3.3.2
     # via -r requirements.in
 flask==1.1.2
-    # via
-    #   -r requirements.in
-    #   opentelemetry-instrumentation-flask
-google-api-core[grpc]==1.31.2
-    # via
-    #   google-cloud-core
-    #   google-cloud-monitoring
-    #   google-cloud-trace
-google-auth==1.35.0
-    # via
-    #   google-api-core
-    #   google-cloud-core
-    #   opentelemetry-tools-google-cloud
-google-cloud-core==1.7.2
-    # via google-cloud-trace
-google-cloud-monitoring==1.1.0
-    # via opentelemetry-exporter-google-cloud
-google-cloud-trace==0.24.0
-    # via opentelemetry-exporter-google-cloud
+    # via -r requirements.in
+flask-management-endpoints==1.0.0
+    # via -r requirements.in
 googleapis-common-protos==1.53.0
     # via google-api-core
 greenlet==1.1.1
@@ -65,7 +49,6 @@ opentelemetry-api==0.13b0
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-jinja2
     #   opentelemetry-instrumentation-requests
-    #   opentelemetry-instrumentation-sqlalchemy
     #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
     #   opentelemetry-tools-google-cloud
@@ -76,7 +59,6 @@ opentelemetry-instrumentation==0.13b0
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-jinja2
     #   opentelemetry-instrumentation-requests
-    #   opentelemetry-instrumentation-sqlalchemy
     #   opentelemetry-instrumentation-wsgi
 opentelemetry-instrumentation-flask==0.13b0
     # via -r requirements.in
@@ -84,9 +66,7 @@ opentelemetry-instrumentation-jinja2==0.13b0
     # via -r requirements.in
 opentelemetry-instrumentation-requests==0.13b0
     # via -r requirements.in
-opentelemetry-instrumentation-sqlalchemy==0.13b0
-    # via -r requirements.in
-opentelemetry-instrumentation-wsgi==0.13b0
+opentelemetry-instrumentation-wsgi==0.25b2
     # via opentelemetry-instrumentation-flask
 opentelemetry-sdk==0.13b0
     # via
@@ -99,22 +79,23 @@ packaging==21.0
     # via google-api-core
 protobuf==3.17.3
     # via
-    #   google-api-core
-    #   googleapis-common-protos
-pyasn1==0.4.8
+    #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-wsgi
+    #   opentelemetry-sdk
+opentelemetry-util-http==0.25b2
     # via
-    #   pyasn1-modules
-    #   rsa
-pyasn1-modules==0.2.8
-    # via google-auth
-pycparser==2.20
+    #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-requests
+    #   opentelemetry-instrumentation-wsgi
+protobuf==3.19.1
+    # via
+    #   googleapis-common-protos
+    #   opentelemetry-proto
+pycparser==2.21
     # via cffi
 pyjwt==1.7.1
     # via -r requirements.in
-pyparsing==2.4.7
-    # via packaging
-pytz==2021.1
-    # via google-api-core
 requests==2.23.0
     # via
     #   -r requirements.in
@@ -143,7 +124,6 @@ wrapt==1.12.1
     #   -r requirements.in
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-jinja2
-    #   opentelemetry-instrumentation-sqlalchemy
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

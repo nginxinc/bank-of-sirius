@@ -38,31 +38,14 @@ from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 from opentelemetry.tools.cloud_trace_propagator import CloudTraceFormatPropagator
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
+from flask_management_endpoints import ManagementEndpoints, Info
 
 
 def create_app():
     """Flask application factory to create instances
     of the Userservice Flask App
     """
-    app = Flask(__name__)
-
-
-    # Disabling unused-variable for lines with route decorated functions
-    # as pylint thinks they are unused
-    # pylint: disable=unused-variable
-    @app.route('/version', methods=['GET'])
-    def version():
-        """
-        Service version endpoint
-        """
-        return app.config['VERSION'], 200
-
-    @app.route('/ready', methods=['GET'])
-    def readiness():
-        """
-        Readiness probe
-        """
-        return 'ok', 200
+    app = Flask('userservice')
 
     @app.route('/users', methods=['POST'])
     def create_user():
@@ -249,6 +232,48 @@ def create_app():
     except OperationalError:
         app.logger.critical("users_db database connection failed")
         sys.exit(1)
+
+    # Set up tracing and export spans to Open Telemetry
+    if os.environ['ENABLE_TRACING'] == "true" and os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT'):
+        app.logger.info("✅ Tracing enabled.")
+        resource = Resource.create(attributes=Info.trace_attributes(app_name=app.name))
+        trace_provider = TracerProvider(resource=resource)
+        trace.set_tracer_provider(trace_provider)
+        otlp_exporter = OTLPSpanExporter(endpoint=os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT'),
+                                         compression=Compression.Gzip)
+        span_processor = BatchSpanProcessor(otlp_exporter)
+        trace.get_tracer_provider().add_span_processor(span_processor)
+        flask_instrumentor = FlaskInstrumentor()
+        if not flask_instrumentor.is_instrumented_by_opentelemetry:
+            flask_instrumentor.instrument_app(app, tracer_provider=trace_provider)
+        sql_alchemy_instrumentor = SQLAlchemyInstrumentor()
+        if not sql_alchemy_instrumentor.is_instrumented_by_opentelemetry:
+            SQLAlchemyInstrumentor().instrument(engine=users_db.engine)
+    else:
+        app.logger.info("🚫 Tracing disabled.")
+
+    # Setup health checks and management endpoints
+    ManagementEndpoints(app)
+
+    def db_check():
+        try:
+            engine = users_db.engine
+            result = engine.execute('SELECT 1')
+            return result.first()[0] == 1
+        except Exception as err:
+            app.logger.error(f'DB health check failed: {err}')
+            return False
+
+    app.config.update(
+        Z_ENDPOINTS={
+            'check_functions': {
+                'readiness': {
+                    'db': db_check
+                }
+            }
+        }
+    )
+
     return app
 
 
