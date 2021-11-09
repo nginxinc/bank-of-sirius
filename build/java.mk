@@ -3,7 +3,7 @@ java-build: ## Builds all Java applications
 	$Q $(MVN) --update-snapshots --file $(CURDIR)/pom.xml install -DskipTests
 
 .PHONY: java-test
-java-test: $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/surefire-reports) ## Runs unit tests for all Java applications
+java-test: java-build $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/surefire-reports) ## Runs unit tests for all Java applications
 
 .PHONY: java-test-coverage
 java-test-coverage: $(foreach project,$(JAVA_PROJECTS),src/$(project)/target/site/jacoco) ## Creates test coverage reports for all Java applications

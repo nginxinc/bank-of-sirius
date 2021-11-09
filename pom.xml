@@ -48,7 +48,7 @@
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
 
         <!-- Dependency versions -->
-        <dependency.spring-cloud-sleuth.version>3.1.0-M2</dependency.spring-cloud-sleuth.version>
+        <dependency.spring-cloud-sleuth.version>3.1.0-RC1</dependency.spring-cloud-sleuth.version>
         <dependency.hibernate-core.version>5.5.7.Final</dependency.hibernate-core.version>
         <dependency.hibernate-annotations.version>5.5.6.Final</dependency.hibernate-annotations.version>
         <dependency.javax.servlet-api.version>4.0.1</dependency.javax.servlet-api.version>
