@@ -51,8 +51,6 @@ class TestUserservice(unittest.TestCase):
                 {
                     'VERSION': '1',
                     'TOKEN_EXPIRY_SECONDS': '1',
-                    'PRIV_KEY_PATH': '1',
-                    'PUB_KEY_PATH': '1',
                     'ENABLE_TRACING': 'false',
                 },
             ):

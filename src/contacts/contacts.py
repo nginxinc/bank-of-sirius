@@ -22,6 +22,7 @@ import logging
 import os
 import re
 import sys
+from pathlib import Path
 
 import jwt
 from flask import Flask, jsonify, request
@@ -200,7 +201,9 @@ def create_app():
     # setup global variables
     app.config["VERSION"] = os.environ.get("VERSION")
     app.config["LOCAL_ROUTING"] = os.environ.get("LOCAL_ROUTING_NUM")
-    app.config["PUBLIC_KEY"] = open(os.environ.get("PUB_KEY_PATH"), "r").read()
+    public_key_path = os.environ.get("PUB_KEY_PATH")
+    if public_key_path:
+        app.config["PUBLIC_KEY"] = Path(public_key_path).read_text(encoding='ascii')
 
     # Configure database connection
     try:
@@ -236,7 +239,7 @@ def create_app():
             engine = contacts_db.engine
             result = engine.execute('SELECT 1')
             return result.first()[0] == 1
-        except Exception as err:
+        except SQLAlchemyError as err:
             app.logger.error(f'DB health check failed: {err}')
             return False
 

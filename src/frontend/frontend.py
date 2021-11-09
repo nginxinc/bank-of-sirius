@@ -21,22 +21,23 @@ import logging
 import os
 
 from decimal import Decimal
+from pathlib import Path
 
 import requests
 from grpc import Compression
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
 from requests.exceptions import HTTPError, RequestException
 import jwt
 from flask import Flask, abort, jsonify, make_response, redirect, \
     render_template, request, url_for
 
 from opentelemetry import trace
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.flask import FlaskInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.instrumentation.jinja2 import Jinja2Instrumentor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.resources import Resource
 
 from flask_management_endpoints import Info, ManagementEndpoints
 
@@ -84,21 +85,21 @@ def create_app():
         # get balance
         app.logger.debug('Getting account balance')
         balance = read_json_response_from_remote(
-            url='{}/{}'.format(app.config["BALANCES_URI"], account_id),
+            url=f'{app.config["BALANCES_URI"]}/{account_id}',
             service='balance-reader',
             token=token)
 
         # get history
         app.logger.debug('Getting transaction history')
         transaction_list = read_json_response_from_remote(
-            url='{}/{}'.format(app.config["HISTORY_URI"], account_id),
+            url=f'{app.config["HISTORY_URI"]}/{account_id}',
             service='transaction-history',
             token=token)
 
         # get contacts
         app.logger.debug('Getting contacts')
         contacts = read_json_response_from_remote(
-            url='{}/{}'.format(app.config["CONTACTS_URI"], username),
+            url=f'{app.config["CONTACTS_URI"]}/{username}',
             service='contacts',
             token=token)
 
@@ -227,7 +228,7 @@ def create_app():
         except UserWarning as warn:
             app.logger.error('Error submitting payment: %s', str(warn))
             span.add_event(str(warn))
-            msg = 'Payment failed: {}'.format(str(warn))
+            msg = f'Payment failed: {warn}'
             return redirect(url_for('home',
                                     msg=msg,
                                     _external=True,
@@ -294,7 +295,7 @@ def create_app():
         except UserWarning as warn:
             span.add_event(str(warn))
             app.logger.error('Error submitting deposit: %s', str(warn))
-            msg = 'Deposit failed: {}'.format(str(warn))
+            msg = f'Deposit failed: {warn}'
             return redirect(url_for('home',
                                     msg=msg,
                                     _external=True,
@@ -338,7 +339,7 @@ def create_app():
                 'is_external': is_external_acct
             }
             token_data = jwt.decode(token, verify=False)
-            url = '{}/{}'.format(app.config["CONTACTS_URI"], token_data['user'])
+            url = f"{app.config['CONTACTS_URI']}/{token_data['user']}"
             resp = requests.post(url=url,
                                  data=jsonify(contact_data).data,
                                  headers=hed,
@@ -510,30 +511,35 @@ def create_app():
         """ Format the input currency in a human readable way """
         if int_amount is None:
             return '$---'
-        amount_str = '${:0,.2f}'.format(abs(Decimal(int_amount)/100))
+        decimal = abs(Decimal(int_amount)/100)
+        amount_str = f'${decimal:0,.2f}'
         if int_amount < 0:
             amount_str = '-' + amount_str
         return amount_str
 
+    transactions_api = os.environ.get('TRANSACTIONS_API_ADDR')
+    user_service_api = os.environ.get('USERSERVICE_API_ADDR')
+    balances_api = os.environ.get('BALANCES_API_ADDR')
+    history_api = os.environ.get('HISTORY_API_ADDR')
+    contacts_api = os.environ.get('CONTACTS_API_ADDR')
+    scheme = os.environ.get('PREFERRED_URL_SCHEME', os.environ.get('SCHEME', 'http'))
+
     # set up global variables
-    app.config["TRANSACTIONS_URI"] = 'http://{}/transactions'.format(
-        os.environ.get('TRANSACTIONS_API_ADDR'))
-    app.config["USERSERVICE_URI"] = 'http://{}/users'.format(
-        os.environ.get('USERSERVICE_API_ADDR'))
-    app.config["BALANCES_URI"] = 'http://{}/balances'.format(
-        os.environ.get('BALANCES_API_ADDR'))
-    app.config["HISTORY_URI"] = 'http://{}/transactions'.format(
-        os.environ.get('HISTORY_API_ADDR'))
-    app.config["LOGIN_URI"] = 'http://{}/login'.format(
-        os.environ.get('USERSERVICE_API_ADDR'))
-    app.config["CONTACTS_URI"] = 'http://{}/contacts'.format(
-        os.environ.get('CONTACTS_API_ADDR'))
-    app.config['PUBLIC_KEY'] = open(os.environ.get('PUB_KEY_PATH'), 'r').read()
+    app.config['SCHEME'] = scheme
+    app.config["TRANSACTIONS_URI"] = f"{scheme}://{transactions_api}/transactions"
+    app.config["USERSERVICE_URI"] = f"{scheme}://{user_service_api}/users"
+    app.config["BALANCES_URI"] = f"{scheme}://{balances_api}/balances"
+    app.config["HISTORY_URI"] = f"{scheme}://{history_api}/transactions"
+    app.config["LOGIN_URI"] = f"{scheme}://{user_service_api}/login"
+    app.config["CONTACTS_URI"] = f"{scheme}://{contacts_api}/contacts"
     app.config['LOCAL_ROUTING'] = os.getenv('LOCAL_ROUTING_NUM')
     app.config['BACKEND_TIMEOUT'] = 4  # timeout in seconds for calls to the backend
     app.config['TOKEN_NAME'] = 'token'
     app.config['TIMESTAMP_FORMAT'] = '%Y-%m-%dT%H:%M:%S.%f%z'
-    app.config['SCHEME'] = os.environ.get('SCHEME', 'http')
+
+    public_key_path = os.environ.get("PUB_KEY_PATH")
+    if public_key_path:
+        app.config["PUBLIC_KEY"] = Path(public_key_path).read_text(encoding='ascii')
 
     k8s_info = Info.k8s()
     # We do not have a good portable way to get the cluster name

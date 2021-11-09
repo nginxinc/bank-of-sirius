@@ -20,6 +20,8 @@ import atexit
 from datetime import datetime, timedelta
 import logging
 import os
+from pathlib import Path
+
 import sys
 import re
 
@@ -80,7 +82,7 @@ def create_app():
             __validate_new_user(req)
             # Check if user already exists
             if users_db.get_user(req['username']) is not None:
-                raise NameError('user {} already exists'.format(req['username']))
+                raise NameError(f"user {req['username']} already exists")
 
             # Create password hash with salt
             app.logger.debug("Creating password hash.")
@@ -175,14 +177,14 @@ def create_app():
             app.logger.debug('Getting the user data')
             user = users_db.get_user(username)
             if user is None:
-                raise LookupError('user {} does not exist'.format(username))
+                raise LookupError(f"user {username} does not exist")
 
             # Validate the password
             app.logger.debug('Validating the password')
             if not bcrypt.checkpw(password.encode('utf-8'), user['passhash']):
                 raise PermissionError('invalid login')
 
-            full_name = '{} {}'.format(user['firstname'], user['lastname'])
+            full_name = f"{user['firstname']} {user['lastname']}"
             exp_time = datetime.utcnow() + timedelta(seconds=app.config['EXPIRY_SECONDS'])
             payload = {
                 'user': username,
@@ -221,8 +223,12 @@ def create_app():
 
     app.config['VERSION'] = os.environ.get('VERSION')
     app.config['EXPIRY_SECONDS'] = int(os.environ.get('TOKEN_EXPIRY_SECONDS'))
-    app.config['PRIVATE_KEY'] = open(os.environ.get('PRIV_KEY_PATH'), 'r').read()
-    app.config['PUBLIC_KEY'] = open(os.environ.get('PUB_KEY_PATH'), 'r').read()
+    private_key_path = os.environ.get('PRIV_KEY_PATH')
+    if private_key_path:
+        app.config['PRIVATE_KEY'] = Path(private_key_path).read_text(encoding='ascii')
+    public_key_path = os.environ.get('PUB_KEY_PATH')
+    if os.environ.get('PUB_KEY_PATH'):
+        app.config['PUBLIC_KEY'] = Path(public_key_path).read_text(encoding='ascii')
 
     # Configure database connection
     try:
@@ -258,7 +264,7 @@ def create_app():
             engine = users_db.engine
             result = engine.execute('SELECT 1')
             return result.first()[0] == 1
-        except Exception as err:
+        except SQLAlchemyError as err:
             app.logger.error(f'DB health check failed: {err}')
             return False
 

@@ -66,7 +66,7 @@ class ContactsDb:
                 [ {'label': contact1, ...}, {'label': contact2, ...}, ...]
         Raises: SQLAlchemyError if there was an issue with the database
         """
-        contacts = list()
+        contacts = []
         statement = self.contacts_table.select().where(
             self.contacts_table.c.username == username
         )
