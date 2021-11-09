@@ -33,7 +33,7 @@
     </parent>
 
     <properties>
-        <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M2</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
+        <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M3</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
         <dependency.opentelemetry-api.version>1.7.0</dependency.opentelemetry-api.version>
         <dependency.micrometer.version>1.8.0-M3</dependency.micrometer.version>
         <dependency.grpc-netty.version>1.41.0</dependency.grpc-netty.version>
@@ -87,6 +87,11 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-sleuth-instrumentation</artifactId>
+            <version>${dependency.spring-cloud-sleuth.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-sleuth-api</artifactId>
         </dependency>
         <dependency>
@@ -107,6 +112,10 @@
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-sleuth-instrumentation</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -223,4 +232,14 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- as long as we are on a milestone build of spring-sleuth-otel-autoconfigure
+         we must include the snapshots repository in order to pull in its
+         parent pom: spring-cloud-build -->
+    <repositories>
+        <repository>
+            <id>spring-snapshots</id>
+            <url>https://repo.spring.io/snapshot</url>
+        </repository>
+    </repositories>
 </project>
