@@ -76,26 +76,6 @@ class TestContacts(unittest.TestCase):
                     # mock return value of get_contacts to return empty
                     self.mocked_db.return_value.get_contacts.return_value = []
 
-    def test_version_endpoint_returns_200_status_code_correct_version(self):
-        """test if correct version is returned"""
-        # generate a version
-        version = str(random.randint(1, 9))
-        # set version in Flask config
-        self.flask_app.config["VERSION"] = version
-        # send get request to test client
-        response = self.test_app.get("/version")
-        # assert 200 response code
-        self.assertEqual(response.status_code, 200)
-        # assert both versions are equal
-        self.assertEqual(response.data, version.encode())
-
-    def test_ready_endpoint_200_status_code_ok_string(self):
-        """test if correct response is returned from readiness probe"""
-        response = self.test_app.get("/ready")
-        # assert 200 response code
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b"ok")
-
     def test_create_contact_201_status_code_correct_db_contact_object(self):
         """test adding a new contact to a users contact list"""
         # create example contact request
