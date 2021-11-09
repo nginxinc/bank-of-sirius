@@ -66,26 +66,6 @@ class TestUserservice(unittest.TestCase):
                     # create test client
                     self.test_app = self.flask_app.test_client()
 
-    def test_version_endpoint_returns_200_status_code_correct_version(self):
-        """test if correct version is returned"""
-        # generate a version
-        version = str(random.randint(1, 9))
-        # set version in Flask config
-        self.flask_app.config['VERSION'] = version
-        # send get request to test client
-        response = self.test_app.get('/version')
-        # assert 200 response code
-        self.assertEqual(response.status_code, 200)
-        # assert both versions are equal
-        self.assertEqual(response.data, version.encode())
-
-    def test_ready_endpoint_200_status_code_ok_string(self):
-        """test if correct response is returned from readiness probe"""
-        response = self.test_app.get('/ready')
-        # assert 200 response code
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data, b'ok')
-
     def test_create_user_201_status_code_correct_db_user_object(self):
         """test creating a new user who does not exist in the DB"""
         # mock return value of get_user which checks if user exists as None
