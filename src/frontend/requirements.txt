@@ -36,7 +36,7 @@ idna==2.10
     # via requests
 itsdangerous==2.0.1
     # via flask
-jinja2==3.0.2
+jinja2==3.0.3
     # via flask
 markupsafe==2.0.1
     # via jinja2
@@ -46,6 +46,7 @@ opentelemetry-api==1.6.2
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-jinja2
+    #   opentelemetry-instrumentation-logging
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
@@ -55,11 +56,14 @@ opentelemetry-instrumentation==0.25b2
     # via
     #   opentelemetry-instrumentation-flask
     #   opentelemetry-instrumentation-jinja2
+    #   opentelemetry-instrumentation-logging
     #   opentelemetry-instrumentation-requests
     #   opentelemetry-instrumentation-wsgi
 opentelemetry-instrumentation-flask==0.25b2
     # via -r requirements.in
 opentelemetry-instrumentation-jinja2==0.25b2
+    # via -r requirements.in
+opentelemetry-instrumentation-logging==0.25b2
     # via -r requirements.in
 opentelemetry-instrumentation-requests==0.25b2
     # via -r requirements.in

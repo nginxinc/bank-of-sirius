@@ -39,7 +39,7 @@ SHELL             := bash
 JAVA_PROJECTS        := java-common/telemetry-common java-common/security-common java-common/spring-boot-parent \
                         java-common/ledger-common balancereader ledgerwriter transactionhistory
 JAVA_DOCKER_PROJECTS := balancereader ledgerwriter transactionhistory
-PYTHON_PROJECTS      := contacts frontend loadgenerator userservice
+PYTHON_PROJECTS      := python-common contacts frontend loadgenerator userservice
 DB_PROJECTS          := accounts-db ledger-db
 
 MVN               := $(CURDIR)/mvnw -q

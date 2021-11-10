@@ -50,7 +50,7 @@ run-python-tests: docker-python-images
 		fi; \
 
 		echo "testing src/$${project}"; \
-		$(DOCKER) run --tty --rm -v "$(CURDIR)/src/$${project}:/$${project}" --workdir "/$${project}" \
+		$(DOCKER) run --tty --rm -v "$(CURDIR)/src/$${project}:/src/$${project}" --workdir "/src/$${project}" -v "$(CURDIR)/src/python-common:/src/python-common" \
 			"$(IMAGE_NAME_PREFIX)$${project}" \
 			bash -c "$${install_pytest_cmd}; $(TEST_CMD)"; \
 	done

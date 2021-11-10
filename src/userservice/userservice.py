@@ -32,16 +32,13 @@ import bleach
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
 from db import UserDb
 
-from grpc import Compression
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.sdk.resources import Resource
 from opentelemetry import trace
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
-from flask_management_endpoints import ManagementEndpoints, Info
+import tracing
+from tracing import OpenTelemetryConfiguration
+from flask_management_endpoints import ManagementEndpoints
+
+APP_NAME = 'userservice'
 
 
 def create_app():
@@ -238,23 +235,8 @@ def create_app():
         sys.exit(1)
 
     # Set up tracing and export spans to Open Telemetry
-    if os.environ['ENABLE_TRACING'] == "true" and os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT'):
-        app.logger.info("✅ Tracing enabled.")
-        resource = Resource.create(attributes=Info.trace_attributes(app_name=app.name))
-        trace_provider = TracerProvider(resource=resource)
-        trace.set_tracer_provider(trace_provider)
-        otlp_exporter = OTLPSpanExporter(endpoint=os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT'),
-                                         compression=Compression.Gzip)
-        span_processor = BatchSpanProcessor(otlp_exporter)
-        trace.get_tracer_provider().add_span_processor(span_processor)
-        flask_instrumentor = FlaskInstrumentor()
-        if not flask_instrumentor.is_instrumented_by_opentelemetry:
-            flask_instrumentor.instrument_app(app, tracer_provider=trace_provider)
-        sql_alchemy_instrumentor = SQLAlchemyInstrumentor()
-        if not sql_alchemy_instrumentor.is_instrumented_by_opentelemetry:
-            SQLAlchemyInstrumentor().instrument(engine=users_db.engine)
-    else:
-        app.logger.info("🚫 Tracing disabled.")
+    if tracing.config:
+        tracing.config.instrument_app(app)
 
     # Setup health checks and management endpoints
     ManagementEndpoints(app)
@@ -282,6 +264,10 @@ def create_app():
 
 
 if __name__ == "__main__":
+    if not tracing.config:
+        tracing.config = OpenTelemetryConfiguration(APP_NAME)
+        tracing.config.setup_exporter()
+
     # Create an instance of flask server when called directly
     USERSERVICE = create_app()
-    USERSERVICE.run()
+    USERSERVICE.run(port=os.getenv('FLASK_RUN_PORT', 5001))
