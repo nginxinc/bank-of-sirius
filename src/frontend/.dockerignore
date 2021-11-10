@@ -1,3 +1,2 @@
-tests/*
 tracing.py
 gunicorn.conf.py

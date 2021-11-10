@@ -99,6 +99,7 @@ opentelemetry-api==1.6.2
     #   opentelemetry-exporter-otlp-proto-grpc
     #   opentelemetry-instrumentation
     #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-logging
     #   opentelemetry-instrumentation-sqlalchemy
     #   opentelemetry-instrumentation-wsgi
     #   opentelemetry-sdk
@@ -107,9 +108,12 @@ opentelemetry-exporter-otlp-proto-grpc==1.6.2
 opentelemetry-instrumentation==0.25b2
     # via
     #   opentelemetry-instrumentation-flask
+    #   opentelemetry-instrumentation-logging
     #   opentelemetry-instrumentation-sqlalchemy
     #   opentelemetry-instrumentation-wsgi
 opentelemetry-instrumentation-flask==0.25b2
+    # via -r requirements.in
+opentelemetry-instrumentation-logging==0.25b2
     # via -r requirements.in
 opentelemetry-instrumentation-sqlalchemy==0.25b2
     # via -r requirements.in

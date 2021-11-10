@@ -24,30 +24,24 @@ from decimal import Decimal
 from pathlib import Path
 
 import requests
-from grpc import Compression
 from requests.exceptions import HTTPError, RequestException
 import jwt
 from flask import Flask, abort, jsonify, make_response, redirect, \
     render_template, request, url_for
 
 from opentelemetry import trace
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.jinja2 import Jinja2Instrumentor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.sdk.resources import Resource
 
+import tracing
+from tracing import OpenTelemetryConfiguration
 from flask_management_endpoints import Info, ManagementEndpoints
 
+APP_NAME = 'frontend'
 
-# pylint: disable-msg=too-many-locals
 def create_app():
     """Flask application factory to create instances
     of the Frontend Flask App
     """
-    app = Flask('frontend')
+    app = Flask(APP_NAME)
 
     # Disabling unused-variable for lines with route decorated functions
     # as pylint thinks they are unused
@@ -562,27 +556,8 @@ def create_app():
     app.logger.info('Starting frontend service')
 
     # Set up tracing and export spans to Open Telemetry
-    if os.environ['ENABLE_TRACING'] == "true" and os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT'):
-        app.logger.info("✅ Tracing enabled")
-        resource = Resource.create(attributes=Info.trace_attributes(app_name=app.name))
-        trace_provider = TracerProvider(resource=resource)
-        trace.set_tracer_provider(trace_provider)
-        otlp_exporter = OTLPSpanExporter(endpoint=os.getenv('OTEL_EXPORTER_OTLP_ENDPOINT'),
-                                         compression=Compression.Gzip)
-        span_processor = BatchSpanProcessor(otlp_exporter)
-        trace.get_tracer_provider().add_span_processor(span_processor)
-        flask_instrumentor = FlaskInstrumentor()
-        if not flask_instrumentor.is_instrumented_by_opentelemetry:
-            flask_instrumentor.instrument_app(app, tracer_provider=trace_provider)
-        request_instrumentor = RequestsInstrumentor()
-        if not request_instrumentor.is_instrumented_by_opentelemetry:
-            request_instrumentor.instrument()
-        jinja2_instrumentor = Jinja2Instrumentor()
-        if not jinja2_instrumentor.is_instrumented_by_opentelemetry:
-            jinja2_instrumentor.instrument()
-    else:
-        app.logger.info("🚫 Tracing disabled")
-
+    if tracing.config:
+        tracing.config.instrument_app(app)
     tracer = trace.get_tracer(app.name)
 
     # Setup health checks and management endpoints
@@ -603,6 +578,10 @@ def create_app():
 
 
 if __name__ == "__main__":
+    if not tracing.config:
+        tracing.config = OpenTelemetryConfiguration(APP_NAME)
+        tracing.config.setup_exporter()
+
     # Create an instance of flask server when called directly
     FRONTEND = create_app()
-    FRONTEND.run()
+    FRONTEND.run(port=os.getenv('FLASK_RUN_PORT', 5000))

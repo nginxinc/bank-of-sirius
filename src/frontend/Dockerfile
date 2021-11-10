@@ -1,6 +1,3 @@
-# Copyright 2021 Google LLC
-# Copyright 2021 F5
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,7 +9,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 FROM bos-python
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
@@ -21,12 +17,17 @@ ENV PORT 8080
 ENV THREADS 4
 
 # show python logs as they occur
-ENV PYTHONUNBUFFERED=0
+ENV PYTHONUNBUFFERED 0
 
 # explicitly set a fallback log level in case no log level is defined by Kubernetes
 ENV LOG_LEVEL info
 
-# Install dependencies.
+ENV APP_NAME frontend
+
+# Copy over common Python dependencies
+COPY --from=bos-python-common /app/* /app/
+
+# Install dependencies
 COPY requirements.txt /app/requirements.txt
 RUN set -eux; \
     apt-get -q update; \
@@ -40,20 +41,16 @@ RUN set -eux; \
     chown "app:app" /app; \
     rm -rf /var/lib/apt/lists/* /root/.cache /env/cache/*
 
-# Add application code.
+
+# Add application code
 COPY static /app/static
 COPY templates /app/templates
 COPY *.py /app/
 
-# Copy logging configuration for gunicorn
-COPY logging.conf /logging.conf
-
 # Start server using gunicorn
 CMD gunicorn \
-    -b :$PORT \
+    --bind :$PORT \
     --threads $THREADS \
-    --statsd-host=$STATSD_HOST \
-    --statsd-prefix=$STATSD_PREFIX \
-    --log-config /logging.conf \
     --log-level=$LOG_LEVEL \
-    "frontend:create_app()"
+    --statsd-host=$STATSD_HOST \
+    --statsd-prefix=$STATSD_PREFIX
