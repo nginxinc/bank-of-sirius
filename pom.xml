@@ -47,6 +47,8 @@
         <spring.boot.version>2.6.0-M3</spring.boot.version>
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
 
+        <maven.min.version>3.6</maven.min.version>
+
         <!-- Dependency versions -->
         <dependency.spring-cloud-sleuth.version>3.1.0-RC1</dependency.spring-cloud-sleuth.version>
         <dependency.hibernate-core.version>5.5.7.Final</dependency.hibernate-core.version>
@@ -78,6 +80,7 @@
         <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
         <!-- Plugin dependency versions -->
         <dependency.puppycrawl.tools.checkstyle.version>9.1</dependency.puppycrawl.tools.checkstyle.version>
+        <maven-extra-enforcer-rules.version>1.4</maven-extra-enforcer-rules.version>
     </properties>
 
     <build>
@@ -185,6 +188,54 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven-enforcer-plugin.version}</version>
+                    <configuration>
+                        <rules>
+                            <requireMavenVersion>
+                                <version>[${maven.min.version},)</version>
+                            </requireMavenVersion>
+                            <requireJavaVersion>
+                                <version>[${java.version},)</version>
+                            </requireJavaVersion>
+                            <dependencyConvergence/>
+                            <banCircularDependencies/>
+                            <enforceBytecodeVersion>
+                                <maxJdkVersion>${java.version}</maxJdkVersion>
+                                <ignoreClasses>
+                                    <ignoreClass>META-INF.versions.11.*</ignoreClass>
+                                </ignoreClasses>
+                            </enforceBytecodeVersion>
+                            <banDuplicateClasses>
+                                <findAllDuplicates>true</findAllDuplicates>
+                                <scopes>
+                                    <scope>compile</scope>
+                                    <scope>test</scope>
+                                </scopes>
+                                <ignoreClasses>
+                                    <!-- For some reason Hibernate imports duplicate
+                                    jaxb, persistence, transaction dependencies. It seems harmless, so we ignore. -->
+                                    <ignoreClass>javax.xml.bind.*</ignoreClass>
+                                    <ignoreClass>javax.persistence.*</ignoreClass>
+                                    <ignoreClass>javax.transaction.*</ignoreClass>
+                                    <ignoreClass>META-INF.versions.9.javax.xml.bind.*</ignoreClass>
+                                    <!-- AOP leads to other duplicates. This may be
+                                    worth investigating later. -->
+                                    <ignoreClass>org.aspectj.*</ignoreClass>
+                                </ignoreClasses>
+                            </banDuplicateClasses>
+                        </rules>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>extra-enforcer-rules</artifactId>
+                            <version>${maven-extra-enforcer-rules.version}</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
             </plugins>
         </pluginManagement>
