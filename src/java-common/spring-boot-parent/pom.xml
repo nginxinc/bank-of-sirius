@@ -34,7 +34,8 @@
 
     <properties>
         <bootstrap.version>4.2.1</bootstrap.version>
-        <dependency.reactor-core.version>3.3.20.RELEASE</dependency.reactor-core.version>
+        <dependency.reactor-core.version>3.3.22.RELEASE</dependency.reactor-core.version>
+        <dependency.checker-qual.version>3.12.0</dependency.checker-qual.version>
     </properties>
 
     <build>
@@ -125,6 +126,11 @@
                 <groupId>sirius.samples.bankofsirius</groupId>
                 <artifactId>telemetry-common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${dependency.checker-qual.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
