@@ -46,7 +46,7 @@
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-        <spring.boot.version>2.6.0-M3</spring.boot.version>
+        <spring.boot.version>2.6.0-RC1</spring.boot.version>
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
 
         <maven.min.version>3.6</maven.min.version>
@@ -64,10 +64,12 @@
         <dependency.micrometer.version>1.8.0</dependency.micrometer.version>
         <dependency.grpc-netty.version>1.42.1</dependency.grpc-netty.version>
         <dependency.grpc-api.version>1.42.1</dependency.grpc-api.version>
+        <dependency.error-prone.version>2.9.0</dependency.error-prone.version>
 
         <!-- Test dependency versions -->
         <dependency.junit-jupiter-engine.version>5.8.1</dependency.junit-jupiter-engine.version>
         <dependency.mockito-core.version>2.28.2</dependency.mockito-core.version>
+        <dependency.apiguardian-api.version>1.1.2</dependency.apiguardian-api.version>
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -279,6 +281,10 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -402,6 +408,88 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${dependency.jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${dependency.error-prone.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apiguardian</groupId>
+                <artifactId>apiguardian-api</artifactId>
+                <version>${dependency.apiguardian-api.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-sleuth-instrumentation</artifactId>
+                <version>${dependency.spring-cloud-sleuth.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-sleuth-autoconfigure</artifactId>
+                <version>${dependency.spring-cloud-sleuth.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
+                <version>${dependency.micrometer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-semconv</artifactId>
+                <version>${dependency.opentelemetry-api.version}-alpha</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-common</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-trace</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-extension-trace-propagators</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-extension-resources</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporter-otlp</artifactId>
+                <version>${dependency.opentelemetry-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-api</artifactId>
+                <version>${dependency.opentelemetry-api.version}-alpha</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-api</artifactId>
+                <version>${dependency.grpc-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

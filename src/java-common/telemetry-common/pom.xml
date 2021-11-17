@@ -37,9 +37,6 @@
              version ASAP because it will allow us to remove the Spring
              snapshots repository. -->
         <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M3</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
-        <dependency.opentelemetry-api.version>1.7.0</dependency.opentelemetry-api.version>
-        <dependency.micrometer.version>1.8.0-M3</dependency.micrometer.version>
-        <dependency.grpc-netty.version>1.41.0</dependency.grpc-netty.version>
         <dependency.p6spy.version>3.9.1</dependency.p6spy.version>
     </properties>
 
@@ -90,11 +87,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-sleuth-instrumentation</artifactId>
-            <version>${dependency.spring-cloud-sleuth.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-sleuth-api</artifactId>
         </dependency>
         <dependency>
@@ -115,10 +107,6 @@
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-sleuth-instrumentation</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -154,13 +142,7 @@
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-            <version>${dependency.opentelemetry-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
-            <version>${dependency.opentelemetry-api.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -168,24 +150,27 @@
             <version>${dependency.grpc-netty.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk-common</artifactId>
-            <version>${dependency.opentelemetry-api.version}</version>
+            <artifactId>opentelemetry-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-sdk-extension-resources</artifactId>
-            <version>${dependency.opentelemetry-api.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-core</artifactId>
-            <version>${dependency.micrometer.version}</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
             <version>${dependency.micrometer.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.opentelemetry</groupId>
+                    <artifactId>opentelemetry-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
@@ -206,6 +191,11 @@
                 <exclusion>
                     <groupId>io.micrometer</groupId>
                     <artifactId>micrometer-core</artifactId>
+                </exclusion>
+                <!-- This is duplicated by javax.xml.bind:jaxb-api:jar -->
+                <exclusion>
+                    <groupId>jakarta.xml.bind</groupId>
+                    <artifactId>jakarta.xml.bind-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
