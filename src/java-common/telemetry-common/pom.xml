@@ -38,6 +38,7 @@
              snapshots repository. -->
         <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M3</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
         <dependency.p6spy.version>3.9.1</dependency.p6spy.version>
+        <dependency.jimfs.version>1.2</dependency.jimfs.version>
     </properties>
 
     <dependencies>
@@ -211,6 +212,23 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.jimfs</groupId>
+            <artifactId>jimfs</artifactId>
+            <version>${dependency.jimfs.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

@@ -1,11 +1,22 @@
 package sirius.samples.bankofsirius.tracing;
 
+import com.google.common.jimfs.Configuration;
+import com.google.common.jimfs.Jimfs;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.spi.FileSystemProvider;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,28 +26,20 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
 public class TracingAttributesTest {
     public static final String APP_NAME = "unit-test";
 
-    private static TracingAttributes instance(final Properties properties) {
-        return new TracingAttributes(APP_NAME, properties, Collections.emptyMap(),
-                path -> stringToInputStream(""));
+    FileSystem fileSystem;
+
+    @BeforeEach
+    void setUp() {
+        fileSystem = Jimfs.newFileSystem(Configuration.unix());
     }
 
-    private static TracingAttributes instance(final Map<String, String> environment) {
-        final Properties properties = new Properties();
-        return new TracingAttributes(APP_NAME, properties, environment,
-                path -> stringToInputStream(""));
-    }
-
-    private static TracingAttributes instance(final String fileContentsToReturn) {
-        final Properties properties = new Properties();
-        return new TracingAttributes(APP_NAME, properties, Collections.emptyMap(),
-                path -> stringToInputStream(fileContentsToReturn));
-    }
-
-    private static InputStream stringToInputStream(final String string) {
-        return new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8));
+    @AfterEach
+    void cleanUp() throws IOException {
+        fileSystem.close();
     }
 
     @Test
@@ -60,44 +63,49 @@ public class TracingAttributesTest {
     }
 
     @Test
-    public void readServiceInstanceIdK8s() {
+    public void readServiceInstanceIdK8s() throws IOException {
         final String expected = new UUID(0L, 0L).toString();
-        final TracingAttributes attributes = instance(expected);
+        writeStringToFile(expected, TracingAttributes.getServiceIdFilePath(fileSystem, APP_NAME));
+        final TracingAttributes attributes = instance();
         final String actual = attributes.get(ResourceAttributes.SERVICE_INSTANCE_ID);
         assertEquals(expected, actual);
     }
 
     @Test
-    void readContainerIdNone() {
+    void readContainerIdNone() throws IOException {
         final String rawCpuSetInfo = "/";
-        final TracingAttributes attributes = instance(rawCpuSetInfo);
+        writeStringToFile(rawCpuSetInfo, TracingAttributes.PROC_1_CPUSET_FILE_PATH);
+        final TracingAttributes attributes = instance();
         final String actual = attributes.get(ResourceAttributes.CONTAINER_ID);
         assertNull(actual);
     }
 
     @Test
-    void readContainerDocker() {
+    void readContainerDocker() throws IOException {
         final String rawCpuSetInfo = "/docker/1bfde5a828d33da2aeb5aab0d340f3a032b46bc1d0ca5765c502828b6f148c91";
+        writeStringToFile(rawCpuSetInfo, TracingAttributes.PROC_1_CPUSET_FILE_PATH);
         final String expected = "1bfde5a828d33da2aeb5aab0d340f3a032b46bc1d0ca5765c502828b6f148c91";
-        final TracingAttributes attributes = instance(rawCpuSetInfo);
+        final TracingAttributes attributes = instance();
         final String actual = attributes.get(ResourceAttributes.CONTAINER_ID);
         assertEquals(expected, actual);
     }
 
     @Test
-    void readContainerIdK8s() {
+    void readContainerIdK8s() throws IOException {
         final String rawCpuSetInfo = "/kubepods/besteffort/pod72832d24-7655-487c-8b85-3f01844639a9/"
                 + "5046b447f1dacb1849cff896e47e3d9b1aa5bcfd513a98e382eae3343e6ab5c2";
+        writeStringToFile(rawCpuSetInfo, TracingAttributes.PROC_1_CPUSET_FILE_PATH);
         final String expected = "5046b447f1dacb1849cff896e47e3d9b1aa5bcfd513a98e382eae3343e6ab5c2";
-        final TracingAttributes attributes = instance(rawCpuSetInfo);
+        final TracingAttributes attributes = instance();
         final String actual = attributes.get(ResourceAttributes.CONTAINER_ID);
         assertEquals(expected, actual);
     }
 
     @Test
-    void readMachineId() {
+    void readMachineId() throws IOException {
         final String machineId = "9bcc0df29af9454298607489a54040e2";
-        final TracingAttributes attributes = instance(machineId);
+        writeStringToFile(machineId, TracingAttributes.MACHINE_ID_FILE_PATH);
+        final TracingAttributes attributes = instance();
         final String actual = attributes.get(TracingAttributes.MACHINE_ID);
         assertEquals(machineId, actual);
     }
@@ -141,5 +149,36 @@ public class TracingAttributesTest {
         final TracingAttributes attributes = instance(env);
         final String actual = attributes.get(ResourceAttributes.K8S_CONTAINER_NAME);
         assertNull(actual);
+    }
+
+    private TracingAttributes instance(final Properties properties) {
+        return new TracingAttributes(APP_NAME, properties, Collections.emptyMap(),
+                fileSystem);
+    }
+
+    private TracingAttributes instance(final Map<String, String> environment) {
+        final Properties properties = new Properties();
+        return new TracingAttributes(APP_NAME, properties, environment, fileSystem);
+    }
+
+    private TracingAttributes instance() {
+        final Properties properties = new Properties();
+        return new TracingAttributes(APP_NAME, properties, Collections.emptyMap(), fileSystem);
+    }
+
+    private void writeStringToFile(final String string, final String pathString) throws IOException {
+        final Path path = fileSystem.getPath(pathString);
+        writeStringToFile(string, path);
+    }
+
+    private void writeStringToFile(final String string, final Path path) throws IOException {
+        final FileSystemProvider fileSystemProvider = fileSystem.provider();
+        final Path dirPath = path.getParent();
+        Files.createDirectories(dirPath);
+
+        try (OutputStream fileOut = fileSystemProvider.newOutputStream(path);
+             Writer writer = new OutputStreamWriter(fileOut, StandardCharsets.UTF_8.name())) {
+            writer.append(string);
+        }
     }
 }
