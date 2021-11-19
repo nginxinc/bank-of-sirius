@@ -316,7 +316,6 @@ class LedgerWriterControllerTest {
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
 
-        @SuppressWarnings("unchecked")
         ResponseEntity<Integer> badResponse = mock(ResponseEntity.class);
         Throwable throwable = new ExpectedUnitTestException();
         when(badResponse.getBody()).thenThrow(throwable);

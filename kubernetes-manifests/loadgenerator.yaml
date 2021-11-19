@@ -21,6 +21,7 @@ spec:
       containers:
       - name: loadgenerator
         image: ghcr.io/nginxinc/bos-loadgenerator:latest
+        imagePullPolicy: Always
         ports:
           - containerPort: 8089
         command: ["locust"]

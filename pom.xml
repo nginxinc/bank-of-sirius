@@ -25,8 +25,6 @@
     <version>1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Bank of Sirius Parent</name>
-    <description>Example banking application</description>
-    <url>https://github.com/nginxinc/bank-of-sirius</url>
 
     <modules>
         <module>src/java-common/telemetry-common</module>
@@ -46,10 +44,8 @@
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-        <spring.boot.version>2.6.0-RC1</spring.boot.version>
+        <spring.boot.version>2.6.0-M3</spring.boot.version>
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
-
-        <maven.min.version>3.6</maven.min.version>
 
         <!-- Dependency versions -->
         <dependency.spring-cloud-sleuth.version>3.1.0-RC1</dependency.spring-cloud-sleuth.version>
@@ -59,40 +55,18 @@
         <dependency.slf4j-api.version>1.7.32</dependency.slf4j-api.version>
         <dependency.log4j2.version>2.14.1</dependency.log4j2.version>
         <dependency.guava.version>31.0.1-jre</dependency.guava.version>
-        <dependency.jackson.version>2.13.0</dependency.jackson.version>
-        <dependency.opentelemetry-api.version>1.7.1</dependency.opentelemetry-api.version>
-        <dependency.micrometer.version>1.8.0</dependency.micrometer.version>
-        <dependency.grpc-netty.version>1.42.1</dependency.grpc-netty.version>
-        <dependency.grpc-api.version>1.42.1</dependency.grpc-api.version>
-        <dependency.error-prone.version>2.9.0</dependency.error-prone.version>
+        <dependency.jackson.version>2.11.0</dependency.jackson.version>
 
         <!-- Test dependency versions -->
-        <dependency.junit-jupiter-engine.version>5.8.1</dependency.junit-jupiter-engine.version>
-        <dependency.mockito-core.version>2.28.2</dependency.mockito-core.version>
-        <dependency.apiguardian-api.version>1.1.2</dependency.apiguardian-api.version>
+        <dependency.junit-jupiter-engine.version>5.6.2</dependency.junit-jupiter-engine.version>
+        <dependency.mockito-core.version>2.7.2</dependency.mockito-core.version>
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
         <maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
         <maven-jacoco-plugin.version>0.8.5</maven-jacoco-plugin.version>
-        <maven-clean-plugin.version>3.0.0</maven-clean-plugin.version>
-        <maven-jar-plugin.version>3.0.2</maven-jar-plugin.version>
-        <maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
-        <maven-site-plugin.version>3.7</maven-site-plugin.version>
-        <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
-        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
-        <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
-        <maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
-        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
-        <maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>
-        <dependency-check-maven-plugin.version>6.5.0</dependency-check-maven-plugin.version>
-        <!-- Reporting plugins -->
-        <versions-maven-plugin.version>2.8.1</versions-maven-plugin.version>
-        <maven-jxr-plugin.version>3.1.1</maven-jxr-plugin.version>
-        <maven-project-info-reports-plugin.version>3.1.2</maven-project-info-reports-plugin.version>
         <!-- Plugin dependency versions -->
-        <dependency.puppycrawl.tools.checkstyle.version>9.1</dependency.puppycrawl.tools.checkstyle.version>
-        <maven-extra-enforcer-rules.version>1.4</maven-extra-enforcer-rules.version>
+        <dependency.puppycrawl.tools.checkstyle.version>9.0.1</dependency.puppycrawl.tools.checkstyle.version>
     </properties>
 
     <build>
@@ -122,51 +96,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>${maven-clean-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>${maven-jar-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>${maven-resources-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>${maven-site-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>${maven-install-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>${maven-deploy-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-dependency-plugin</artifactId>
-                    <version>${maven-dependency-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <version>${maven-antrun-plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${maven-assembly-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -201,71 +130,6 @@
                         </execution>
                     </executions>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>${maven-enforcer-plugin.version}</version>
-                    <configuration>
-                        <rules>
-                            <requireMavenVersion>
-                                <version>[${maven.min.version},)</version>
-                            </requireMavenVersion>
-                            <requireJavaVersion>
-                                <version>[${java.version},)</version>
-                            </requireJavaVersion>
-                            <dependencyConvergence/>
-                            <banCircularDependencies/>
-                            <enforceBytecodeVersion>
-                                <maxJdkVersion>${java.version}</maxJdkVersion>
-                                <ignoreClasses>
-                                    <ignoreClass>META-INF.versions.11.*</ignoreClass>
-                                </ignoreClasses>
-                            </enforceBytecodeVersion>
-                            <banDuplicateClasses>
-                                <findAllDuplicates>true</findAllDuplicates>
-                                <scopes>
-                                    <scope>compile</scope>
-                                    <scope>test</scope>
-                                </scopes>
-                                <ignoreClasses>
-                                    <!-- For some reason Hibernate imports duplicate
-                                    jaxb, persistence, transaction dependencies. It seems harmless, so we ignore. -->
-                                    <ignoreClass>javax.xml.bind.*</ignoreClass>
-                                    <ignoreClass>javax.persistence.*</ignoreClass>
-                                    <ignoreClass>javax.transaction.*</ignoreClass>
-                                    <ignoreClass>META-INF.versions.9.javax.xml.bind.*</ignoreClass>
-                                    <!-- AOP leads to other duplicates. This may be
-                                    worth investigating later. -->
-                                    <ignoreClass>org.aspectj.*</ignoreClass>
-                                </ignoreClasses>
-                            </banDuplicateClasses>
-                        </rules>
-                    </configuration>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.codehaus.mojo</groupId>
-                            <artifactId>extra-enforcer-rules</artifactId>
-                            <version>${maven-extra-enforcer-rules.version}</version>
-                        </dependency>
-                    </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.owasp</groupId>
-                    <artifactId>dependency-check-maven</artifactId>
-                    <version>${dependency-check-maven-plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>aggregate</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <outputDirectory>target/dependency-check</outputDirectory>
-                        <rubygemsAnalyzerEnabled>false</rubygemsAnalyzerEnabled>
-                        <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
-                    </configuration>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -299,20 +163,11 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 
     <reporting>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>${maven-project-info-reports-plugin.version}</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -324,40 +179,6 @@
                         </reports>
                     </reportSet>
                 </reportSets>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>${versions-maven-plugin.version}</version>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>dependency-updates-report</report>
-                            <report>plugin-updates-report</report>
-                            <report>property-updates-report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <reportSets>
-                    <reportSet>
-                        <reports>
-                            <report>report</report>
-                        </reports>
-                    </reportSet>
-                </reportSets>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jxr-plugin</artifactId>
-                <version>${maven-jxr-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
             </plugin>
         </plugins>
     </reporting>
@@ -430,88 +251,6 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${dependency.jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_annotations</artifactId>
-                <version>${dependency.error-prone.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apiguardian</groupId>
-                <artifactId>apiguardian-api</artifactId>
-                <version>${dependency.apiguardian-api.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-sleuth-instrumentation</artifactId>
-                <version>${dependency.spring-cloud-sleuth.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-sleuth-autoconfigure</artifactId>
-                <version>${dependency.spring-cloud-sleuth.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-core</artifactId>
-                <version>${dependency.micrometer.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-api</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-semconv</artifactId>
-                <version>${dependency.opentelemetry-api.version}-alpha</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-common</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-trace</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-extension-trace-propagators</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-extension-resources</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporter-otlp</artifactId>
-                <version>${dependency.opentelemetry-api.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry.instrumentation</groupId>
-                <artifactId>opentelemetry-instrumentation-api</artifactId>
-                <version>${dependency.opentelemetry-api.version}-alpha</version>
-            </dependency>
-            <dependency>
-                <groupId>io.grpc</groupId>
-                <artifactId>grpc-api</artifactId>
-                <version>${dependency.grpc-api.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

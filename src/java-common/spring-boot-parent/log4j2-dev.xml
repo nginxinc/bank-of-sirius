@@ -26,9 +26,6 @@
         <Logger name="sirius.samples.bankofsirius.security.NoopAuthenticator" level="ERROR" additivity="false">
             <AppenderRef ref="ConsoleAppender" />
         </Logger>
-        <Logger name="org.springframework.cloud.sleuth.instrument.jdbc.TraceListenerStrategy" level="WARN" additivity="false">
-            <AppenderRef ref="ConsoleAppender" />
-        </Logger>
         <Root level="${env:LOG_LEVEL:-INFO}" additivity="false">
             <AppenderRef ref="ConsoleAppender" />
         </Root>
