@@ -19,6 +19,8 @@ ENV THREADS 4
 # show python logs as they occur
 ENV PYTHONUNBUFFERED 0
 
+ENV APP_NAME contacts
+
 # explicitly set a fallback log level in case no log level is defined by Kubernetes
 ENV LOG_LEVEL info
 
