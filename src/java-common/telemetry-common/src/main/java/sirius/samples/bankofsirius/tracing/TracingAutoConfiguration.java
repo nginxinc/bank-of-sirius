@@ -1,10 +1,5 @@
 package sirius.samples.bankofsirius.tracing;
 
-import io.opentelemetry.sdk.extension.resources.HostResource;
-import io.opentelemetry.sdk.extension.resources.OsResource;
-import io.opentelemetry.sdk.extension.resources.ProcessResource;
-import io.opentelemetry.sdk.extension.resources.ProcessRuntimeResource;
-import io.opentelemetry.sdk.resources.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,13 +14,24 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.function.Supplier;
-
 @Configuration
-@ConditionalOnProperty(value = "spring.sleuth.enabled", matchIfMissing = true,
-    havingValue = "true")
+@ConditionalOnProperty(value = "spring.sleuth.enabled", havingValue = "true")
 @ConditionalOnClass(name = {"org.springframework.cloud.sleuth.Tracer"})
 public class TracingAutoConfiguration {
+    {
+        String tracingEnabled = System.getenv().getOrDefault("ENABLE_TRACING", "true");
+
+        if ("true".equalsIgnoreCase(tracingEnabled)) {
+            String otelEndpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
+            if (otelEndpoint == null) {
+//                final Logger logger = LoggerFactory.getLogger(TracingAutoConfiguration.class);
+//                logger.error("OTEL_EXPORTER_OTLP_ENDPOINT environment variable must be set");
+                final String msg = "OTEL_EXPORTER_OTLP_ENDPOINT environment variable must be set if ENABLE_TRACING=true";
+                throw new IllegalArgumentException(msg);
+            }
+        }
+    }
+
     @Bean
     @ConditionalOnClass(name = {"org.hibernate.resource.jdbc.spi.StatementInspector"})
     @ConditionalOnProperty(
@@ -71,24 +77,5 @@ public class TracingAutoConfiguration {
                         convertToUnderscores);
             }
         };
-    }
-
-    @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public TracingAttributes tracingAttributes(
-            @Value("${spring.application.name}") final String springApplicationName) {
-        return new TracingAttributes(springApplicationName);
-    }
-
-    @Bean
-    public Supplier<Resource> applicationDetails(final TracingAttributes tracingAttributes) {
-        final Resource resource = Resource.empty()
-                .merge(OsResource.get())
-                .merge(ProcessResource.get())
-                .merge(ProcessRuntimeResource.get())
-                .merge(HostResource.get())
-                .merge(Resource.create(tracingAttributes));
-
-        return () -> resource;
     }
 }
