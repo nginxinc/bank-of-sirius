@@ -15,63 +15,76 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: ledgerwriter
-        image: ghcr.io/nginxinc/bos-ledgerwriter:latest
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: publickey
-          mountPath: "/root/.ssh"
-          readOnly: true
-        env:
-        - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: http://simplest-collector.observability.svc.cluster.local:9978
-        - name: VERSION
-          value: "v0.4.3"
-        - name: PORT
-          value: "8080"
-        - name: ENABLE_TRACING
-          value: "true"
-        - name: ENABLE_METRICS
-          value: "true"
-         # tell Java to obey container memory limits
-        - name: JVM_OPTS
-          value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-        # service level override of log level
-        - name: LOG_LEVEL
-          value: "info"
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        envFrom:
-        - configMapRef:
-            name: environment-config
-        - configMapRef:
-            name: service-api-config
-        # add ledger-db credentials from ConfigMap
-        - configMapRef:
-            name: ledger-db-config
-        readinessProbe:
-          httpGet:
-            path: /z/health/readiness
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 5
-          timeoutSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /z/health/liveness
-            port: 8080
-          initialDelaySeconds: 120
-          periodSeconds: 5
-          timeoutSeconds: 10
+        - name: ledgerwriter
+          image: ghcr.io/nginxinc/bos-ledgerwriter:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: publickey
+              mountPath: "/root/.ssh"
+              readOnly: true
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: ENABLE_TRACING
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_TRACING
+            - name: ENABLE_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_METRICS
+            - name: VERSION
+              value: "v0.4.3"
+            - name: PORT
+              value: "8080"
+            - name: ENABLE_TRACING
+              value: "true"
+            - name: ENABLE_METRICS
+              value: "true"
+            # tell Java to obey container memory limits
+            - name: JVM_OPTS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+            # service level override of log level
+            - name: LOG_LEVEL
+              value: "info"
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: service-api-config
+            # add ledger-db credentials from ConfigMap
+            - configMapRef:
+                name: ledger-db-config
+          readinessProbe:
+            httpGet:
+              path: /z/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /z/health/liveness
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            timeoutSeconds: 10
       volumes:
-      - name: publickey
-        secret:
-          secretName: jwt-key
-          items:
-          - key: jwtRS256.key.pub
-            path: publickey
+        - name: publickey
+          secret:
+            secretName: jwt-key
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
 ---
 apiVersion: v1
 kind: Service
@@ -82,6 +95,6 @@ spec:
   selector:
     app: ledgerwriter
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
+    - name: http
+      port: 8080
+      targetPort: 8080
