@@ -23,6 +23,10 @@ spec:
       containers:
       - name: accounts-db
         image: ghcr.io/nginxinc/bos-accounts-db:latest
+        imagePullPolicy: Always
+        env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://simplest-collector.observability.svc.cluster.local:9978
         envFrom:
           - configMapRef:
               name: environment-config

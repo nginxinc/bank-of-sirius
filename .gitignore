@@ -111,3 +111,5 @@ extras/asm-multicluster/asm-cluster-2/*
 .key
 .crt
 env
+/src/contacts/.pytest_cache/
+/src/userservice/.pytest_cache/

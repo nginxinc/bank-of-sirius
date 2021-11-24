@@ -17,19 +17,22 @@ spec:
       containers:
       - name: ledgerwriter
         image: ghcr.io/nginxinc/bos-ledgerwriter:latest
+        imagePullPolicy: Always
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
           readOnly: true
         env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://simplest-collector.observability.svc.cluster.local:9978
         - name: VERSION
           value: "v0.4.3"
         - name: PORT
           value: "8080"
         - name: ENABLE_TRACING
-          value: "false"
+          value: "true"
         - name: ENABLE_METRICS
-          value: "false"
+          value: "true"
          # tell Java to obey container memory limits
         - name: JVM_OPTS
           value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"

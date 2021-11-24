@@ -14,11 +14,10 @@ import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.spi.FileSystemProvider;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -26,6 +25,7 @@ import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,40 +45,39 @@ import static io.opentelemetry.semconv.resource.attributes.ResourceAttributes.SE
  */
 public class TracingAttributes implements Attributes {
     public static final AttributeKey<String> MACHINE_ID = AttributeKey.stringKey("machine.id");
-    public static final String MACHINE_ID_FILE_PATH = "/etc/machine-id";
-    public static final String PROC_1_CPUSET_FILE_PATH = "/proc/1/cpuset";
 
     private static final String TMP_DIR = System.getProperty("java.io.tmpdir");
     private static final Pattern POD_NAME_PATTERN = Pattern.compile("(\\w+)-([a-z0-9]{9})-([a-z0-9]{5})");
 
     private final Attributes inner;
     private final String applicationName;
-    private final FileSystem fileSystem;
 
     public TracingAttributes(final String applicationName) {
-        this(applicationName, System.getProperties(), System.getenv(), FileSystems.getDefault());
+        this(applicationName, System.getProperties(), System.getenv(),
+                path -> {
+                    try {
+                        return Files.newInputStream(path);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
     }
 
     public TracingAttributes(final String applicationName,
                              final Properties properties,
                              final Map<String, String> environment,
-                             final FileSystem fileSystem) {
+                             final Function<Path, InputStream> fileContentsStreamProvider) {
         this.applicationName = applicationName;
-        this.fileSystem = fileSystem;
-        this.inner = buildAttributes(properties, environment);
-    }
 
-    protected Attributes buildAttributes(final Properties properties,
-                                         final Map<String, String> environment) {
         final AttributesBuilder builder = Attributes.builder();
         addToBuilder(builder, SERVICE_VERSION, serviceVersion(properties, environment));
-        addToBuilder(builder, SERVICE_INSTANCE_ID, serviceInstanceId());
-        addToBuilder(builder, MACHINE_ID, machineId());
-        addToBuilder(builder, CONTAINER_ID, containerId());
+        addToBuilder(builder, SERVICE_INSTANCE_ID, serviceInstanceId(fileContentsStreamProvider));
+        addToBuilder(builder, MACHINE_ID, machineId(fileContentsStreamProvider));
+        addToBuilder(builder, CONTAINER_ID, containerId(fileContentsStreamProvider));
         addToBuilder(builder, K8S_POD_NAME, podName(environment));
         addToBuilder(builder, K8S_CONTAINER_NAME, containerName(environment));
         addToBuilder(builder, K8S_NAMESPACE_NAME, namespaceName(environment));
-        return builder.build();
+        this.inner = builder.build();
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -111,50 +110,51 @@ public class TracingAttributes implements Attributes {
         return Optional.empty();
     }
 
-    protected Optional<String> serviceInstanceId() {
-        final Path path = getServiceIdFilePath(fileSystem, applicationName);
+    protected Optional<String> serviceInstanceId(final Function<Path, InputStream> fileContentsStreamProvider) {
+        final Path serviceInstanceIdFilePath = Paths.get(TMP_DIR,
+                String.format("%s-service-instance-id", applicationName));
 
         try {
-            return readFirstLineFromFile(path);
+            return readFirstLineFromFile(fileContentsStreamProvider, serviceInstanceIdFilePath);
         } catch (FileNotFoundException | NoSuchFileException e) {
             final Optional<String> serviceInstanceId =
-                    createNewServiceIdFile(path);
+                    createNewServiceIdFile(serviceInstanceIdFilePath);
 
             Logger logger = LoggerFactory.getLogger(TracingAttributes.class);
             logger.debug("No service instance id file found; created new file [path={}",
-                    path);
+                    serviceInstanceIdFilePath);
 
             return serviceInstanceId;
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(TracingAttributes.class);
             String msg = String.format("Unable to read service instance id [path=%s]",
-                    path);
-            logger.debug(msg, e);
+                    serviceInstanceIdFilePath);
+            logger.warn(msg, e);
         }
 
         return Optional.empty();
     }
 
     protected Optional<String> createNewServiceIdFile(final Path serviceInstanceIdFilePath) {
-        try (OutputStream fileOut = writeDataToPath(serviceInstanceIdFilePath);
+        try (OutputStream fileOut = Files.newOutputStream(serviceInstanceIdFilePath);
              Writer writer = new OutputStreamWriter(fileOut, StandardCharsets.UTF_8.name())) {
             final String serviceInstanceId = UUID.randomUUID().toString().replaceAll("-", "");
             writer.append(serviceInstanceId).append("\n");
             return Optional.of(serviceInstanceId);
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(TracingAttributes.class);
-            logger.debug("Unable to write service instance id", e);
+            logger.warn("Unable to write service instance id", e);
         }
 
         return Optional.empty();
     }
 
-    protected Optional<String> machineId() {
+    protected Optional<String> machineId(final Function<Path, InputStream> fileContentsStreamProvider) {
         try {
-            return readFirstLineFromFile(MACHINE_ID_FILE_PATH);
+            return readFirstLineFromFile(fileContentsStreamProvider, "/etc/machine-id");
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(TracingAttributes.class);
-            logger.debug("Unable to read machine id", e);
+            logger.warn("Unable to read machine id", e);
         }
 
         return Optional.empty();
@@ -170,9 +170,9 @@ public class TracingAttributes implements Attributes {
         return Optional.empty();
     }
 
-    protected Optional<String> containerId() {
+    protected Optional<String> containerId(final Function<Path, InputStream> fileContentsStreamProvider) {
         try {
-            return readFirstLineFromFile(PROC_1_CPUSET_FILE_PATH).flatMap(s -> {
+            return readFirstLineFromFile(fileContentsStreamProvider, "/proc/1/cpuset").flatMap(s -> {
                 final String containerId = parseContainerIdFromCpuSet(s);
                 if (containerId.isEmpty()) {
                     return Optional.empty();
@@ -182,7 +182,7 @@ public class TracingAttributes implements Attributes {
             });
         } catch (IOException e) {
             Logger logger = LoggerFactory.getLogger(TracingAttributes.class);
-            logger.debug("Unable to read container id", e);
+            logger.warn("Unable to read container id", e);
         }
 
         return Optional.empty();
@@ -228,17 +228,18 @@ public class TracingAttributes implements Attributes {
         return Optional.empty();
     }
 
-    protected Optional<String> readFirstLineFromFile(final String filePath) throws IOException {
-        final Path path = fileSystem.getPath(filePath);
-        return readFirstLineFromFile(path);
+    protected Optional<String> readFirstLineFromFile(final Function<Path, InputStream> fileContentsStreamProvider,
+                                                     final String filePath) throws IOException {
+        return readFirstLineFromFile(fileContentsStreamProvider, Paths.get(filePath));
     }
 
-    protected Optional<String> readFirstLineFromFile(final Path path) throws IOException {
+    protected Optional<String> readFirstLineFromFile(final Function<Path, InputStream> fileContentsStreamProvider,
+                                                     final Path path) throws IOException {
         if (path == null) {
             throw new NullPointerException("path must not be null");
         }
 
-        try (InputStream fileStream = readDataFromPath(path);
+        try (InputStream fileStream = fileContentsStreamProvider.apply(path);
              Scanner scanner = new Scanner(fileStream, StandardCharsets.UTF_8.name())) {
             if (scanner.hasNextLine()) {
                 final String firstLine = scanner.nextLine();
@@ -251,16 +252,6 @@ public class TracingAttributes implements Attributes {
         }
 
         return Optional.empty();
-    }
-
-    protected InputStream readDataFromPath(final Path path) throws IOException {
-        final FileSystemProvider fileSystemProvider = fileSystem.provider();
-        return fileSystemProvider.newInputStream(path);
-    }
-
-    protected OutputStream writeDataToPath(final Path path) throws IOException {
-        final FileSystemProvider fileSystemProvider = fileSystem.provider();
-        return fileSystemProvider.newOutputStream(path);
     }
 
     @Override
@@ -291,11 +282,5 @@ public class TracingAttributes implements Attributes {
     @Override
     public AttributesBuilder toBuilder() {
         return inner.toBuilder();
-    }
-
-    public static Path getServiceIdFilePath(final FileSystem fileSystem,
-                                              final String applicationName) {
-        String filename = String.format("%s-service-instance-id", applicationName);
-        return fileSystem.getPath(TMP_DIR, filename);
     }
 }

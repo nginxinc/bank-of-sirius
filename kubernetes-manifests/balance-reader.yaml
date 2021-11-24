@@ -17,20 +17,23 @@ spec:
       containers:
       - name: balancereader
         image: ghcr.io/nginxinc/bos-balancereader:latest
+        imagePullPolicy: Always
         volumeMounts:
         - name: publickey
           mountPath: "/root/.ssh"
           readOnly: true
         env:
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://simplest-collector.observability.svc.cluster.local:9978
         - name: VERSION
           value: "v0.4.3"
         - name: PORT
           value: "8080"
         # toggle Cloud Trace export
         - name: ENABLE_TRACING
-          value: "false"
+          value: "true"
         - name: ENABLE_METRICS
-          value: "false"
+          value: "true"
         - name: POLL_MS
           value: "100"
         - name: CACHE_SIZE

@@ -18,8 +18,12 @@ spec:
       containers:
         - name: postgres
           image: ghcr.io/nginxinc/bos-ledger-db:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5432
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://simplest-collector.observability.svc.cluster.local:9978
           envFrom:
             - configMapRef:
                 name: environment-config
