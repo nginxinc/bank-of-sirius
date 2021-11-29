@@ -15,32 +15,48 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: contacts
-        image: ghcr.io/nginxinc/bos-contacts:latest
-        volumeMounts:
-        - name: publickey
-          mountPath: "/root/.ssh"
-          readOnly: true
-        env:
-        - name: STATSD_HOST
-          value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
-        - name: STATSD_PREFIX
-          value: bos.contacts
-        - name: VERSION
-          value: "v0.4.3"
-        - name: PORT
-          value: "8080"
-        - name: ENABLE_TRACING
-          value: "false"
-        # Valid levels are debug, info, warning, error, critical.
-        # If no valid level is set, will default to info.
-        - name: LOG_LEVEL
-          value: "info"
+        - name: contacts
+          image: ghcr.io/nginxinc/bos-contacts:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: publickey
+              mountPath: "/root/.ssh"
+              readOnly: true
+          env:
+            - name: STATSD_HOST
+              value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
+            - name: STATSD_PREFIX
+              value: bos.contacts
+            - name: VERSION
+              value: "v0.4.3"
+            - name: PORT
+              value: "8080"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: ENABLE_TRACING
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_TRACING
+            - name: ENABLE_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_METRICS
+            # Valid levels are debug, info, warning, error, critical.
+            # If no valid level is set, will default to info.
+            - name: LOG_LEVEL
+              value: "info"
+            - name: APP_NAME
+              value: "contacts"
         envFrom:
-        - configMapRef:
-            name: environment-config
-        - configMapRef:
-            name: accounts-db-config
+          - configMapRef:
+              name: environment-config
+          - configMapRef:
+              name: accounts-db-config
         readinessProbe:
           httpGet:
             path: /z/health/readiness
@@ -56,12 +72,12 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 10
       volumes:
-      - name: publickey
-        secret:
-          secretName: jwt-key
-          items:
-          - key: jwtRS256.key.pub
-            path: publickey
+        - name: publickey
+          secret:
+            secretName: jwt-key
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
 ---
 apiVersion: v1
 kind: Service
@@ -72,6 +88,6 @@ spec:
   selector:
     app: contacts
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
+    - name: http
+      port: 8080
+      targetPort: 8080

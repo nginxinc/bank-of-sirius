@@ -19,14 +19,15 @@ spec:
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
       containers:
-      - name: loadgenerator
-        image: ghcr.io/nginxinc/bos-loadgenerator:latest
-        ports:
-          - containerPort: 8089
-        command: ["locust"]
-        env:
-        - name: LOG_LEVEL
-          value: "error"
+        - name: loadgenerator
+          image: ghcr.io/nginxinc/bos-loadgenerator:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8089
+          command: [ "locust" ]
+          env:
+            - name: LOG_LEVEL
+              value: "error"
 ---
 apiVersion: v1
 kind: Service
@@ -37,6 +38,6 @@ spec:
   selector:
     app: loadgenerator
   ports:
-  - name: http
-    port: 8089
-    targetPort: 8089
+    - name: http
+      port: 8089
+      targetPort: 8089

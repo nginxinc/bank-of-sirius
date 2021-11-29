@@ -18,8 +18,25 @@ spec:
       containers:
         - name: postgres
           image: ghcr.io/nginxinc/bos-ledger-db:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5432
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: ENABLE_TRACING
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_TRACING
+            - name: ENABLE_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_METRICS
           envFrom:
             - configMapRef:
                 name: environment-config
@@ -33,7 +50,7 @@ spec:
               subPath: postgres
       volumes:
         - name: postgresdb
-          emptyDir: {}
+          emptyDir: { }
 
 ---
 apiVersion: v1
@@ -45,6 +62,6 @@ spec:
   selector:
     app: ledger-db
   ports:
-  - name: tcp
-    port: 5432
-    targetPort: 5432
+    - name: tcp
+      port: 5432
+      targetPort: 5432

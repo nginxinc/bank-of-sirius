@@ -15,64 +15,80 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: balancereader
-        image: ghcr.io/nginxinc/bos-balancereader:latest
-        volumeMounts:
-        - name: publickey
-          mountPath: "/root/.ssh"
-          readOnly: true
-        env:
-        - name: VERSION
-          value: "v0.4.3"
-        - name: PORT
-          value: "8080"
-        # toggle Cloud Trace export
-        - name: ENABLE_TRACING
-          value: "false"
-        - name: ENABLE_METRICS
-          value: "false"
-        - name: POLL_MS
-          value: "100"
-        - name: CACHE_SIZE
-          value: "1000000"
-        # tell Java to obey container memory limits
-        - name: JVM_OPTS
-          value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-        # Valid levels are debug, info, warn, error, fatal.
-        # If no valid level is set, will default to info.
-        - name: LOG_LEVEL
-          value: "info"
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        envFrom:
-        - configMapRef:
-            name: environment-config
-        # add ledger-db credentials from ConfigMap
-        - configMapRef:
-            name: ledger-db-config
-        readinessProbe:
-          httpGet:
-            path: /z/health/readiness
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 5
-          timeoutSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /z/health/liveness
-            port: 8080
-          initialDelaySeconds: 120
-          periodSeconds: 5
-          timeoutSeconds: 10
+        - name: balancereader
+          image: ghcr.io/nginxinc/bos-balancereader:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: publickey
+              mountPath: "/root/.ssh"
+              readOnly: true
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: OTEL_EXPORTER_OTLP_ENDPOINT
+            - name: ENABLE_TRACING
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_TRACING
+            - name: ENABLE_METRICS
+              valueFrom:
+                configMapKeyRef:
+                  name: tracing-config
+                  key: ENABLE_METRICS
+            - name: VERSION
+              value: "v0.4.3"
+            - name: PORT
+              value: "8080"
+            # toggle Cloud Trace export
+            - name: ENABLE_TRACING
+              value: "true"
+            - name: ENABLE_METRICS
+              value: "true"
+            - name: POLL_MS
+              value: "100"
+            - name: CACHE_SIZE
+              value: "1000000"
+            # tell Java to obey container memory limits
+            - name: JVM_OPTS
+              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+            # Valid levels are debug, info, warn, error, fatal.
+            # If no valid level is set, will default to info.
+            - name: LOG_LEVEL
+              value: "info"
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            # add ledger-db credentials from ConfigMap
+            - configMapRef:
+                name: ledger-db-config
+          readinessProbe:
+            httpGet:
+              path: /z/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /z/health/liveness
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            timeoutSeconds: 10
       volumes:
-      - name: publickey
-        secret:
-          secretName: jwt-key
-          items:
-          - key: jwtRS256.key.pub
-            path: publickey
+        - name: publickey
+          secret:
+            secretName: jwt-key
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
 ---
 apiVersion: v1
 kind: Service
@@ -83,6 +99,6 @@ spec:
   selector:
     app: balancereader
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
+    - name: http
+      port: 8080
+      targetPort: 8080
