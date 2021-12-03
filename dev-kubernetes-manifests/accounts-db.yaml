@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
@@ -20,7 +19,7 @@ metadata:
     app: accounts-db
     tier: db
 spec:
-  serviceName: "accounts-db"
+  serviceName: accounts-db
   replicas: 1
   selector:
     matchLabels:
@@ -34,32 +33,32 @@ spec:
     spec:
       serviceAccountName: default
       containers:
-      - name: accounts-db
-        image: ghcr.io/nginxinc/bos-accounts-db:latest
-        envFrom:
-          - configMapRef:
-              name: environment-config
-          - configMapRef:
-              name: accounts-db-config
-          - configMapRef:
-              name: demo-data-config
-        ports:
-          - containerPort: 5432
-            name: postgredb
-        resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
-          limits:
-            cpu: 500m
-            memory: 1Gi
-        volumeMounts:
-        - name: postgresdb
-          mountPath: /var/lib/postgresql/data
-          subPath: postgres
+        - name: accounts-db
+          image: ghcr.io/nginxinc/bos-accounts-db:latest
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: accounts-db-config
+            - configMapRef:
+                name: demo-data-config
+          ports:
+            - containerPort: 5432
+              name: postgredb
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: postgresdb
+              mountPath: /var/lib/postgresql/data
+              subPath: postgres
       volumes:
-      - name: postgresdb
-        emptyDir: {}
+        - name: postgresdb
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

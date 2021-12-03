@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,11 +15,11 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: balancereader
-          image: ghcr.io/nginxinc/bos-balancereader:latest
+          image: ghcr.io/nginxinc/bos-balancereader:v1.1.0
           imagePullPolicy: Always
           volumeMounts:
             - name: publickey
-              mountPath: "/root/.ssh"
+              mountPath: /root/.ssh
               readOnly: true
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -39,10 +38,10 @@ spec:
                   name: tracing-config
                   key: ENABLE_METRICS
             - name: VERSION
-              value: "v0.4.3"
+              value: v1.1.0
             - name: PORT
               value: "8080"
-            # toggle Cloud Trace export
+              # toggle Cloud Trace export
             - name: ENABLE_TRACING
               value: "true"
             - name: ENABLE_METRICS
@@ -51,13 +50,13 @@ spec:
               value: "100"
             - name: CACHE_SIZE
               value: "1000000"
-            # tell Java to obey container memory limits
+              # tell Java to obey container memory limits
             - name: JVM_OPTS
-              value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-            # Valid levels are debug, info, warn, error, fatal.
-            # If no valid level is set, will default to info.
+              value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+              # Valid levels are debug, info, warn, error, fatal.
+              # If no valid level is set, will default to info.
             - name: LOG_LEVEL
-              value: "info"
+              value: info
             - name: NAMESPACE
               valueFrom:
                 fieldRef:
@@ -65,7 +64,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: environment-config
-            # add ledger-db credentials from ConfigMap
+                # add ledger-db credentials from ConfigMap
             - configMapRef:
                 name: ledger-db-config
           readinessProbe:

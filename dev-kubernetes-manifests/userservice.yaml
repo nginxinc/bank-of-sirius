@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,66 +27,64 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: userservice
-        image: ghcr.io/nginxinc/bos-userservice:latest
-        volumeMounts:
-        - name: keys
-          mountPath: "/root/.ssh"
-          readOnly: true
-        ports:
-        - name: http-server
-          containerPort: 8080
-        env:
-        - name: VERSION
-          value: "v0.2.0"
-        - name: PORT
-          value: "8080"
-        - name: ENABLE_TRACING
-          value: "true"
-        - name: TOKEN_EXPIRY_SECONDS
-          value: "3600"
-        - name: PRIV_KEY_PATH
-          value: "/root/.ssh/privatekey"
-        # Valid levels are debug, info, warning, error, critical. If no valid level is set, gunicorn will default to info.
-        - name: LOG_LEVEL
-          value: "info"
-        envFrom:
-        - configMapRef:
-            name: environment-config
-        - configMapRef:
-            name: accounts-db-config
-        readinessProbe:
-          httpGet:
-            path: /z/health/readiness
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /z/health/liveness
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 10
-        resources:
-          requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
-            cpu: 500m
-            memory: 256Mi
+        - name: userservice
+          image: ghcr.io/nginxinc/bos-userservice:latest
+          volumeMounts:
+            - name: keys
+              mountPath: /root/.ssh
+              readOnly: true
+          ports:
+            - name: http-server
+              containerPort: 8080
+          env:
+            - name: VERSION
+              value: v1.1.0
+            - name: PORT
+              value: "8080"
+            - name: ENABLE_TRACING
+              value: "true"
+            - name: TOKEN_EXPIRY_SECONDS
+              value: "3600"
+            - name: PRIV_KEY_PATH
+              value: /root/.ssh/privatekey
+            # Valid levels are debug, info, warning, error, critical. If no valid level is set, gunicorn will default to info.
+            - name: LOG_LEVEL
+              value: info
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: accounts-db-config
+          readinessProbe:
+            httpGet:
+              path: /z/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /z/health/liveness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
       volumes:
-      - name: keys
-        secret:
-          secretName: jwt-key
-          items:
-          - key: jwtRS256.key
-            path: privatekey
-          - key: jwtRS256.key.pub
-            path: publickey
-
-
+        - name: keys
+          secret:
+            secretName: jwt-key
+            items:
+              - key: jwtRS256.key
+                path: privatekey
+              - key: jwtRS256.key.pub
+                path: publickey
 ---
 apiVersion: v1
 kind: Service
@@ -98,6 +95,6 @@ spec:
   selector:
     app: userservice
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
+    - name: http
+      port: 8080
+      targetPort: 8080

@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,19 +15,19 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: front
-          image: ghcr.io/nginxinc/bos-frontend:latest
+          image: ghcr.io/nginxinc/bos-frontend:v1.1.0
           imagePullPolicy: Always
           volumeMounts:
             - name: publickey
-              mountPath: "/root/.ssh"
+              mountPath: /root/.ssh
               readOnly: true
           env:
             - name: VERSION
-              value: "v0.4.3"
+              value: v1.1.0
             - name: PORT
               value: "8080"
             - name: STATSD_HOST
-              value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
+              value: statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125
             - name: STATSD_PREFIX
               value: bos.frontend
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -47,16 +46,16 @@ spec:
                   name: tracing-config
                   key: ENABLE_METRICS
             - name: SCHEME
-              value: "http"
-            # Valid levels are debug, info, warning, error, critical. If no valid level is set, defaults to info.
+              value: http
+              # Valid levels are debug, info, warning, error, critical. If no valid level is set, defaults to info.
             - name: LOG_LEVEL
-              value: "info"
-            # Set to "true" to enable the CymbalBank logo + title
-            # - name: CYMBAL_LOGO
-            #   value: "false"
-            # Customize the bank name used in the header. Defaults to 'Bank of Anthos' - when CYMBAL_LOGO is true, uses 'CymbalBank'
+              value: info
+              # Set to "true" to enable the CymbalBank logo + title
+              # - name: CYMBAL_LOGO
+              #   value: "false"
+              # Customize the bank name used in the header. Defaults to 'Bank of Anthos' - when CYMBAL_LOGO is true, uses 'CymbalBank'
             - name: BANK_NAME
-              value: "Bank of Sirius"
+              value: Bank of Sirius
             - name: DEFAULT_USERNAME
               valueFrom:
                 configMapKeyRef:
@@ -68,7 +67,7 @@ spec:
                   name: demo-data-config
                   key: DEMO_LOGIN_PASSWORD
             - name: APP_NAME
-              value: "userservice"
+              value: userservice
           envFrom:
             - configMapRef:
                 name: environment-config

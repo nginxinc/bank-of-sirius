@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,22 +15,22 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: userservice
-          image: ghcr.io/nginxinc/bos-userservice:latest
+          image: ghcr.io/nginxinc/bos-userservice:v1.1.0
           imagePullPolicy: Always
           volumeMounts:
             - name: keys
-              mountPath: "/root/.ssh"
+              mountPath: /root/.ssh
               readOnly: true
           ports:
             - name: http-server
               containerPort: 8080
           env:
             - name: VERSION
-              value: "v0.4.3"
+              value: v1.1.0
             - name: PORT
               value: "8080"
             - name: STATSD_HOST
-              value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
+              value: statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125
             - name: STATSD_PREFIX
               value: bos.userservice
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -50,14 +49,14 @@ spec:
                   name: tracing-config
                   key: ENABLE_METRICS
             - name: APP_NAME
-              value: "userservice"
+              value: userservice
             - name: TOKEN_EXPIRY_SECONDS
               value: "3600"
             - name: PRIV_KEY_PATH
-              value: "/root/.ssh/privatekey"
-            # Valid levels are debug, info, warning, error, critical. If no valid level is set, defaults to info.
+              value: /root/.ssh/privatekey
+              # Valid levels are debug, info, warning, error, critical. If no valid level is set, defaults to info.
             - name: LOG_LEVEL
-              value: "info"
+              value: info
           envFrom:
             - configMapRef:
                 name: environment-config
@@ -86,8 +85,6 @@ spec:
                 path: privatekey
               - key: jwtRS256.key.pub
                 path: publickey
-
-
 ---
 apiVersion: v1
 kind: Service

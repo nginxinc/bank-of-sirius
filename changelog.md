@@ -1,5 +1,28 @@
 # Change Log
 
+## v1.1.0
+
+### Add Open Telemetry Support
+
+All applications have been refactored to support Open Telemetry tracing and
+metrics.
+
+### Duplicate Code Removal
+
+Code duplicated across applications has been moved to shared libraries.
+
+### Health Endpoints (/z)
+
+The health endpoint system has been changed to use Spring Actuator in Java
+and Spring Actuator style endpoints in Python. This means that all the
+health endpoints now live under the `/z` prefix and there are some additional
+administrative endpoints available like `/z/info`.
+
+### JWT Authentication Can Now be Disabled
+
+In order to make local development easier, JWT can now be disabled by
+setting `JWT_ENABLED` environment variable to `false`.
+
 ## v1.0.0
 
 ### Rewrite of Build System

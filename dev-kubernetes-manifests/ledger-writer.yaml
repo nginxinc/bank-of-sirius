@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -28,67 +27,67 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       containers:
-      - name: ledgerwriter
-        image: ghcr.io/nginxinc/bos-ledgerwriter:latest
-        volumeMounts:
-        - name: publickey
-          mountPath: "/root/.ssh"
-          readOnly: true
-        env:
-        - name: VERSION
-          value: "v0.2.0"
-        - name: PORT
-          value: "8080"
-        - name: ENABLE_TRACING
-          value: "false"
-        - name: ENABLE_METRICS
-          value: "false"
-         # tell Java to obey container memory limits
-        - name: JVM_OPTS
-          value: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
-        # service level override of log level
-        - name: LOG_LEVEL
-          value: "info"
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        envFrom:
-        - configMapRef:
-            name: environment-config
-        - configMapRef:
-            name: service-api-config
-        # add ledger-db credentials from ConfigMap
-        - configMapRef:
-            name: ledger-db-config
-        resources:
-          requests:
-            cpu: 100m
-            memory: 512Mi
-          limits:
-            cpu: 500m
-            memory: 1Gi
-        readinessProbe:
-          httpGet:
-            path: /z/health/readiness
-            port: 8080
-          initialDelaySeconds: 60
-          periodSeconds: 5
-          timeoutSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /z/health/liveness
-            port: 8080
-          initialDelaySeconds: 120
-          periodSeconds: 5
-          timeoutSeconds: 10
+        - name: ledgerwriter
+          image: ghcr.io/nginxinc/bos-ledgerwriter:latest
+          volumeMounts:
+            - name: publickey
+              mountPath: /root/.ssh
+              readOnly: true
+          env:
+            - name: VERSION
+              value: v1.1.0
+            - name: PORT
+              value: "8080"
+            - name: ENABLE_TRACING
+              value: "false"
+            - name: ENABLE_METRICS
+              value: "false"
+            # tell Java to obey container memory limits
+            - name: JVM_OPTS
+              value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+            # service level override of log level
+            - name: LOG_LEVEL
+              value: info
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: service-api-config
+            # add ledger-db credentials from ConfigMap
+            - configMapRef:
+                name: ledger-db-config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /z/health/readiness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /z/health/liveness
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 5
+            timeoutSeconds: 10
       volumes:
-      - name: publickey
-        secret:
-          secretName: jwt-key
-          items:
-          - key: jwtRS256.key.pub
-            path: publickey
+        - name: publickey
+          secret:
+            secretName: jwt-key
+            items:
+              - key: jwtRS256.key.pub
+                path: publickey
 ---
 apiVersion: v1
 kind: Service
@@ -99,6 +98,6 @@ spec:
   selector:
     app: ledgerwriter
   ports:
-  - name: http
-    port: 8080
-    targetPort: 8080
+    - name: http
+      port: 8080
+      targetPort: 8080

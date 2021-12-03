@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: ledger-db
 spec:
-  serviceName: "ledger-db"
+  serviceName: ledger-db
   replicas: 1
   selector:
     matchLabels:
@@ -78,6 +77,6 @@ spec:
   selector:
     app: ledger-db
   ports:
-  - name: tcp
-    port: 5432
-    targetPort: 5432
+    - name: tcp
+      port: 5432
+      targetPort: 5432

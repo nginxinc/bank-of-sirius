@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,14 +19,15 @@ spec:
       restartPolicy: Always
       containers:
         - name: loadgenerator
-          image: ghcr.io/nginxinc/bos-loadgenerator:latest
+          image: ghcr.io/nginxinc/bos-loadgenerator:v1.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8089
-          command: [ "locust" ]
+          command:
+            - locust
           env:
             - name: LOG_LEVEL
-              value: "error"
+              value: error
 ---
 apiVersion: v1
 kind: Service

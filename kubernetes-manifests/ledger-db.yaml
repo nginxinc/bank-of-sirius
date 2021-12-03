@@ -1,10 +1,9 @@
----
 kind: StatefulSet
 apiVersion: apps/v1
 metadata:
   name: ledger-db
 spec:
-  serviceName: "ledger-db"
+  serviceName: ledger-db
   replicas: 1
   selector:
     matchLabels:
@@ -17,7 +16,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: postgres
-          image: ghcr.io/nginxinc/bos-ledger-db:latest
+          image: ghcr.io/nginxinc/bos-ledger-db:v1.1.0
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
@@ -50,8 +49,7 @@ spec:
               subPath: postgres
       volumes:
         - name: postgresdb
-          emptyDir: { }
-
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service

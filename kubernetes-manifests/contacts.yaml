@@ -1,4 +1,3 @@
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,19 +15,19 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: contacts
-          image: ghcr.io/nginxinc/bos-contacts:latest
+          image: ghcr.io/nginxinc/bos-contacts:v1.1.0
           imagePullPolicy: Always
           volumeMounts:
             - name: publickey
-              mountPath: "/root/.ssh"
+              mountPath: /root/.ssh
               readOnly: true
           env:
             - name: STATSD_HOST
-              value: "statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125"
+              value: statsd-prometheus-statsd-exporter.prometheus.svc.cluster.local:9125
             - name: STATSD_PREFIX
               value: bos.contacts
             - name: VERSION
-              value: "v0.4.3"
+              value: v1.1.0
             - name: PORT
               value: "8080"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -46,12 +45,12 @@ spec:
                 configMapKeyRef:
                   name: tracing-config
                   key: ENABLE_METRICS
-            # Valid levels are debug, info, warning, error, critical.
-            # If no valid level is set, will default to info.
+                  # Valid levels are debug, info, warning, error, critical.
+                  # If no valid level is set, will default to info.
             - name: LOG_LEVEL
-              value: "info"
+              value: info
             - name: APP_NAME
-              value: "contacts"
+              value: contacts
           envFrom:
             - configMapRef:
                 name: environment-config

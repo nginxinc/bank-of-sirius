@@ -19,14 +19,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-boot-parent</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>Spring Boot Parent</name>
 
     <parent>
         <groupId>com.f5.sirius.samples</groupId>
         <artifactId>bank-of-sirius</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.1.0</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
