@@ -23,6 +23,17 @@ administrative endpoints available like `/z/info`.
 In order to make local development easier, JWT can now be disabled by
 setting `JWT_ENABLED` environment variable to `false`.
 
+### Deployment Updates
+The deployment manifests in the `kubernetes-manifests` directory have
+been updated to work within the context of the
+[`kic-reference-project`](https://github.com/nginxinc/kic-reference-architectures).
+
+### Metric Updates
+The python applications using gunicorn (frontend, contacts, userservice)
+have been updated to include logic to write to the statsd collector 
+deployed as part of the prometheus installation in the
+[`kic-reference-project`](https://github.com/nginxinc/kic-reference-architectures).
+
 ## v1.0.0
 
 ### Rewrite of Build System
