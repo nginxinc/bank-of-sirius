@@ -52,25 +52,25 @@ spec:
               value: "info"
             - name: APP_NAME
               value: "contacts"
-        envFrom:
-          - configMapRef:
-              name: environment-config
-          - configMapRef:
-              name: accounts-db-config
-        readinessProbe:
-          httpGet:
-            path: /z/health/readiness
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 10
-        livenessProbe:
-          httpGet:
-            path: /z/health/liveness
-            port: 8080
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 10
+          envFrom:
+            - configMapRef:
+                name: environment-config
+            - configMapRef:
+                name: accounts-db-config
+          readinessProbe:
+            httpGet:
+              path: /z/health/readiness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /z/health/liveness
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 10
       volumes:
         - name: publickey
           secret:
