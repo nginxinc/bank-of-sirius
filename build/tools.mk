@@ -14,7 +14,13 @@ commitsar: ## Run git commit linter
 
 .PHONY: validate-manifests ## Validate Kubernetes manifests
 validate-manifests:
-	$Q docker run --tty --rm \
+	$Q $(DOCKER) run --tty --rm \
 		--volume "$(CURDIR)/kubernetes-manifests:/kubernetes-manifests" \
 		--volume "$(CURDIR)/dev-kubernetes-manifests:/dev-kubernetes-manifests" \
 		garethr/kubeval --directories '/kubernetes-manifests,/dev-kubernetes-manifests'
+
+.PHONY: reformat-manifests
+reformat-manifests: ## Reformats manifest files to a standard layout
+	$Q find kubernetes-manifests dev-kubernetes-manifests -type f \
+		-name '*.yml' -or -name '*.yaml' \
+		-exec yq eval --prettyPrint --inplace '{}' \;
