@@ -10,3 +10,11 @@ endif
 commitsar: ## Run git commit linter
 	$Q $(info $(M) running commitsar...)
 	$(COMMITSAR)
+
+
+.PHONY: validate-manifests ## Validate Kubernetes manifests
+validate-manifests:
+	$Q docker run --tty --rm \
+		--volume "$(CURDIR)/kubernetes-manifests:/kubernetes-manifests" \
+		--volume "$(CURDIR)/dev-kubernetes-manifests:/dev-kubernetes-manifests" \
+		garethr/kubeval --directories '/kubernetes-manifests,/dev-kubernetes-manifests'
