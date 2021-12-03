@@ -30,12 +30,14 @@ public class NoopCurrentTraceContext implements CurrentTraceContext {
 
     @Override
     public Scope newScope(final TraceContext context) {
-        return () -> {};
+        return () -> {
+        };
     }
 
     @Override
     public Scope maybeScope(final TraceContext context) {
-        return () -> {};
+        return () -> {
+        };
     }
 
     @Override

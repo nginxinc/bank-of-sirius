@@ -37,9 +37,8 @@ public class TracingAutoConfiguration {
         if ("true".equalsIgnoreCase(tracingEnabled)) {
             String otelEndpoint = System.getenv("OTEL_EXPORTER_OTLP_ENDPOINT");
             if (otelEndpoint == null) {
-//                final Logger logger = LoggerFactory.getLogger(TracingAutoConfiguration.class);
-//                logger.error("OTEL_EXPORTER_OTLP_ENDPOINT environment variable must be set");
-                final String msg = "OTEL_EXPORTER_OTLP_ENDPOINT environment variable must be set if ENABLE_TRACING=true";
+                final String msg = "OTEL_EXPORTER_OTLP_ENDPOINT environment variable "
+                        + "must be set if ENABLE_TRACING=true";
                 throw new IllegalArgumentException(msg);
             }
         }
