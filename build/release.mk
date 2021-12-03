@@ -1,23 +1,37 @@
 LAST_VERSION       = $(shell git tag -l | $(GREP) -E '^v[0-9]+\.[0-9]+\.[0-9]+$$' | $(SORT) --version-sort --field-separator=. --reverse | head -n1)
 LAST_VERSION_HASH  = $(shell git show --format=%H $(LAST_VERSION) | head -n1)
 
-.PHONY: update-manifests
-.ONESHELL: update-manifests
-update-manifests: ## Updates Kubernetes manifest files to use the current deployment version
+.PHONY: update-manifest-image-versions
+.ONESHELL: update-manifest-image-versions
+update-manifest-image-versions: docker-python-dev-images ## Updates Kubernetes manifest files to use the current deployment version
 	$Q $(info $(M) changing kubernetes-manifests/*.yaml to use image v$(VERSION))
 	files="$$($(FIND) kubernetes-manifests/ -maxdepth 1 -mindepth 1 -type f -iname '*.yml' -or -iname '*.yaml' | xargs)"
 	$(DOCKER) run --tty --rm -v "$(CURDIR):/project" --workdir "/project" \
 		$(IMAGE_NAME_PREFIX)python-dev \
 		python3 build/bin/update_manifest_image_versions.py 'v$(VERSION)' $${files}
 
+.PHONY: update-manifest-versions
+.ONESHELL: update-manifest-versions
+update-manifest-versions:
+	$(Q) $(info $(M) updating application versions in kubernetes manifests to v$(VERSION))
+	files="$$($(FIND) kubernetes-manifests/ dev-kubernetes-manifests -maxdepth 1 -mindepth 1 -type f -iname '*.yml' -or -iname '*.yaml' | xargs)"
+	$(DOCKER) run --tty --rm -v "$(CURDIR):/project" --workdir "/project" \
+		$(IMAGE_NAME_PREFIX)python-dev \
+		python3 build/bin/update_manifest_versions.py 'v$(VERSION)' $${files}
+
+.PHONY: update-maven-versions
+update-maven-versions: ## Updates maven projects to the latest version
+	$Q $(info $(M) updating versions in maven projects to v$(VERSION))
+	$Q $(MVN) versions:set -DnewVersion=$(VERSION)
+
 .PHONY: version
 version: ## Outputs the current version
 	$Q echo "Version: $(VERSION)"
 	$Q echo "Commit : $(GITHASH)"
 
-.PHONY: version-update
-.ONESHELL: version-update
-version-update: ## Prompts for a new version
+.PHONY: version-set
+.ONESHELL: version-set
+version-set: ## Prompts for a new version
 	$(info $(M) updating repository to new version) @
 	$Q echo "  last committed version: $(LAST_VERSION)"
 	$Q echo "  .version file version : $(VERSION)"
@@ -25,6 +39,9 @@ version-update: ## Prompts for a new version
 	$Q echo "$$version" | $(GREP) -qE '^[0-9]+\.[0-9]+\.[0-9]+$$' || \
 		(echo "invalid version identifier: $$version" && exit 1) && \
 	echo -n $$version > $(CURDIR)/.version
+
+.PHONY: version-update
+version-update: validate-manifests version-set update-manifest-image-versions update-manifest-versions update-maven-versions
 
 .PHONY: release
 .ONESHELL: release
