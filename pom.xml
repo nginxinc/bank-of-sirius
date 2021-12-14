@@ -46,29 +46,29 @@
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-        <spring.boot.version>2.6.0-RC1</spring.boot.version>
+        <spring.boot.version>2.6.1</spring.boot.version>
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
 
         <maven.min.version>3.6</maven.min.version>
 
         <!-- Dependency versions -->
-        <dependency.spring-cloud-sleuth.version>3.1.0-RC1</dependency.spring-cloud-sleuth.version>
+        <dependency.spring-cloud-sleuth.version>3.1.0</dependency.spring-cloud-sleuth.version>
         <dependency.hibernate-core.version>5.5.7.Final</dependency.hibernate-core.version>
         <dependency.hibernate-annotations.version>5.5.6.Final</dependency.hibernate-annotations.version>
         <dependency.javax.servlet-api.version>4.0.1</dependency.javax.servlet-api.version>
         <dependency.slf4j-api.version>1.7.32</dependency.slf4j-api.version>
-        <dependency.log4j2.version>2.14.1</dependency.log4j2.version>
+        <dependency.log4j2.version>2.16.0</dependency.log4j2.version>
         <dependency.guava.version>31.0.1-jre</dependency.guava.version>
         <dependency.jackson.version>2.13.0</dependency.jackson.version>
         <dependency.opentelemetry-api.version>1.7.1</dependency.opentelemetry-api.version>
         <dependency.micrometer.version>1.8.0</dependency.micrometer.version>
         <dependency.grpc-netty.version>1.42.1</dependency.grpc-netty.version>
         <dependency.grpc-api.version>1.42.1</dependency.grpc-api.version>
-        <dependency.error-prone.version>2.9.0</dependency.error-prone.version>
+        <dependency.error-prone.version>2.10.0</dependency.error-prone.version>
 
         <!-- Test dependency versions -->
-        <dependency.junit-jupiter-engine.version>5.8.1</dependency.junit-jupiter-engine.version>
-        <dependency.mockito-core.version>2.28.2</dependency.mockito-core.version>
+        <dependency.junit-jupiter-engine.version>5.8.2</dependency.junit-jupiter-engine.version>
+        <dependency.mockito-core.version>4.1.0</dependency.mockito-core.version>
         <dependency.apiguardian-api.version>1.1.2</dependency.apiguardian-api.version>
         <!-- Plugin versions -->
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
