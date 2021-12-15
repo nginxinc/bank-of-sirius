@@ -6,6 +6,8 @@
 #
 backoff==1.10.0
     # via opentelemetry-exporter-otlp-proto-grpc
+bunyan==0.1.2
+    # via -r requirements.in
 certifi==2021.10.8
     # via requests
 cffi==1.14.5
@@ -24,7 +26,7 @@ flask==1.1.2
     # via -r requirements.in
 flask-management-endpoints==1.0.0
     # via -r requirements.in
-googleapis-common-protos==1.53.0
+googleapis-common-protos==1.54.0
     # via opentelemetry-exporter-otlp-proto-grpc
 grpcio==1.39.0
     # via
