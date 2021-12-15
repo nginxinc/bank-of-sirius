@@ -67,7 +67,7 @@ spec:
                   name: demo-data-config
                   key: DEMO_LOGIN_PASSWORD
             - name: APP_NAME
-              value: userservice
+              value: frontend
           envFrom:
             - configMapRef:
                 name: environment-config
