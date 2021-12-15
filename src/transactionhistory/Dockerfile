@@ -16,6 +16,8 @@ FROM bos-java
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
+ENV APP_NAME transaction-history
+
 COPY target/transactionhistory.jar /app/libs/transactionhistory.jar
 
 CMD ["java", "-Dlogging.config=/app/log4j2.xml", "-jar", "/app/libs/transactionhistory.jar"]

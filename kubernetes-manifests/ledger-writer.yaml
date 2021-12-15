@@ -22,6 +22,8 @@ spec:
               mountPath: /root/.ssh
               readOnly: true
           env:
+            - name: APP_NAME
+              value: "ledger-writer"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               valueFrom:
                 configMapKeyRef:

@@ -16,6 +16,8 @@ FROM bos-java
 
 LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
 
+ENV APP_NAME ledger-writer
+
 COPY target/ledgerwriter.jar /app/libs/ledgerwriter.jar
 
 CMD ["java", "-Dlogging.config=/app/log4j2.xml", "-jar", "/app/libs/ledgerwriter.jar"]
