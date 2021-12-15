@@ -93,6 +93,10 @@
             <artifactId>log4j-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.dekobon</groupId>
+            <artifactId>log4j2-bunyan-layout</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
         </dependency>

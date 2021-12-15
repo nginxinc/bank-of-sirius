@@ -58,6 +58,7 @@
         <dependency.javax.servlet-api.version>4.0.1</dependency.javax.servlet-api.version>
         <dependency.slf4j-api.version>1.7.32</dependency.slf4j-api.version>
         <dependency.log4j2.version>2.16.0</dependency.log4j2.version>
+        <dependency.log4j2-bunyan-layout.version>1.0.4</dependency.log4j2-bunyan-layout.version>
         <dependency.guava.version>31.0.1-jre</dependency.guava.version>
         <dependency.jackson.version>2.13.0</dependency.jackson.version>
         <dependency.opentelemetry-api.version>1.7.1</dependency.opentelemetry-api.version>
@@ -420,6 +421,11 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
                 <version>${dependency.log4j2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.dekobon</groupId>
+                <artifactId>log4j2-bunyan-layout</artifactId>
+                <version>${dependency.log4j2-bunyan-layout.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
