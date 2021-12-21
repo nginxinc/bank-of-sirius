@@ -30,6 +30,8 @@ ENV JAVA_HOME=/usr/lib/jvm/zulu8
 # 3. Set heap size on almost 50% of the total of the memory limit.
 ENV JAVA_TOOL_OPTIONS "-Djava.security.egd=file:/dev/urandom -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2"
 
+COPY app/log4j2.xml /app/log4j2.xml
+
 RUN set -eux; \
     ZULU_REPO_VER=1.0.0-2; \
     ZULU_REPO_DEB_CHECKSUM=b8d11979d9b1959b5ff621f1021ff0dba40c7d47d948ae6ec4a4bbde98cf71f5; \
@@ -55,9 +57,8 @@ RUN set -eux; \
     mkdir --parents /app/libs /app/resources /app/classes; \
     groupadd --gid 1919 app; \
     useradd --home-dir /app --uid 1919 --gid 1919 --shell /bin/bash app; \
-    chown "app:app" /app
-
-COPY app/log4j2.xml /app/log4j2.xml
+    chown "app:app" /app; \
+    chmod -r /app/log4j2.xml
 
 EXPOSE 8080
 WORKDIR /app
