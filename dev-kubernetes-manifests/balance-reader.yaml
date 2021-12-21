@@ -35,12 +35,12 @@ spec:
               readOnly: true
           env:
             - name: APP_NAME
-              value: "balance-reader"
+              value: balance-reader
             - name: VERSION
-              value: v1.1.0
+              value: v1.2.0
             - name: PORT
               value: "8080"
-            # toggle Cloud Trace export
+              # toggle Cloud Trace export
             - name: ENABLE_TRACING
               value: "false"
             - name: ENABLE_METRICS
@@ -49,11 +49,11 @@ spec:
               value: "100"
             - name: CACHE_SIZE
               value: "1000000"
-            # tell Java to obey container memory limits
+              # tell Java to obey container memory limits
             - name: JVM_OPTS
               value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
-            # Valid levels are debug, info, warn, error, fatal.
-            # If no valid level is set, will default to info.
+              # Valid levels are debug, info, warn, error, fatal.
+              # If no valid level is set, will default to info.
             - name: LOG_LEVEL
               value: info
             - name: NAMESPACE
@@ -63,7 +63,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: environment-config
-            # add ledger-db credentials from ConfigMap
+                # add ledger-db credentials from ConfigMap
             - configMapRef:
                 name: ledger-db-config
           resources:

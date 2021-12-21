@@ -23,7 +23,7 @@ spec:
               readOnly: true
           env:
             - name: VERSION
-              value: v1.1.0
+              value: v1.2.0
             - name: PORT
               value: "8080"
             - name: STATSD_HOST
@@ -67,7 +67,7 @@ spec:
                   name: demo-data-config
                   key: DEMO_LOGIN_PASSWORD
             - name: APP_NAME
-              value: userservice
+              value: frontend
           envFrom:
             - configMapRef:
                 name: environment-config

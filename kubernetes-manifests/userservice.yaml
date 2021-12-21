@@ -26,7 +26,7 @@ spec:
               containerPort: 8080
           env:
             - name: VERSION
-              value: v1.1.0
+              value: v1.2.0
             - name: PORT
               value: "8080"
             - name: STATSD_HOST

@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>sirius.samples.bankofsirius</groupId>
     <artifactId>telemetry-common</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
     <name>Telemetry Common</name>
     <description>Addons for customizing tracing with Spring Sleuth</description>
@@ -28,7 +28,7 @@
     <parent>
         <groupId>com.f5.sirius.samples</groupId>
         <artifactId>bank-of-sirius</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 

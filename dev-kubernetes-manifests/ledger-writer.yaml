@@ -35,19 +35,19 @@ spec:
               readOnly: true
           env:
             - name: APP_NAME
-              value: "ledger-writer"
+              value: ledger-writer
             - name: VERSION
-              value: v1.1.0
+              value: v1.2.0
             - name: PORT
               value: "8080"
             - name: ENABLE_TRACING
               value: "false"
             - name: ENABLE_METRICS
               value: "false"
-            # tell Java to obey container memory limits
+              # tell Java to obey container memory limits
             - name: JVM_OPTS
               value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
-            # service level override of log level
+              # service level override of log level
             - name: LOG_LEVEL
               value: info
             - name: NAMESPACE
@@ -59,7 +59,7 @@ spec:
                 name: environment-config
             - configMapRef:
                 name: service-api-config
-            # add ledger-db credentials from ConfigMap
+                # add ledger-db credentials from ConfigMap
             - configMapRef:
                 name: ledger-db-config
           resources:
