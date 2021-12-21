@@ -1,0 +1,4 @@
+publickey
+secretkey
+*.key
+*.key.pub

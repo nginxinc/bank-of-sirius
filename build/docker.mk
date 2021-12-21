@@ -13,8 +13,11 @@ docker-python-dev-images: docker-image-build/base-images/python docker-image-bui
 .PHONY: docker-db-images
 docker-db-images: $(foreach project,$(DB_PROJECTS),docker-image-build/src/$(project)) ## Build database container images
 
+.PHONY: docker-nginx-images
+docker-nginx-images: docker-image-build/src/nginx ## Build NGINX container images
+
 .PHONY: docker-all-images
-docker-all-images: docker-db-images docker-java-images docker-python-images ## Build all container images
+docker-all-images: docker-db-images docker-java-images docker-python-images docker-nginx-images ## Build all container images
 
 .PHONY: docker-image-build/%
 .ONESHELL:
