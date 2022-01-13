@@ -117,23 +117,28 @@ public final class LedgerWriterController {
     public ResponseEntity<?> addTransaction(
             @RequestHeader("Authorization") String authorization,
             @RequestBody Transaction transaction) {
+        final Span span = tracer.currentSpan();
+        Objects.requireNonNull(span);
+        span.tag("transaction", transaction.toString());
+
         if (authorization == null || authorization.isEmpty()) {
             return new ResponseEntity<>("HTTP request 'Authorization' header is null",
                     HttpStatus.BAD_REQUEST);
         }
-        final String accountId = transaction.getFromAccountNum();
+
+        final String accountId;
 
         try {
-            authenticator.verify(authorization, accountId);
+            // Make sure that transactions are either going to or from the
+            // authenticated user's account.
+            accountId = authenticator.verify(authorization, transaction.getToAccountNum(),
+                    transaction.getFromAccountNum());
+            span.tag("account.id", accountId);
         } catch (AuthenticationException e) {
             LOGGER.error("Authentication failed: {}", e.getMessage());
             return new ResponseEntity<>("not authorized",
                     HttpStatus.UNAUTHORIZED);
         }
-
-        final Span span = tracer.currentSpan();
-        Objects.requireNonNull(span);
-        span.tag("transaction", transaction.toString());
 
         LOGGER.debug("Adding new transaction [transaction={}]", transaction);
 
@@ -179,7 +184,8 @@ public final class LedgerWriterController {
                     span.tag("error", "true");
                     span.tag("transaction", transaction.toString());
                     span.tag("account.balance", Integer.toString(balance));
-                    span.tag("account.id", transaction.getFromAccountNum());
+                    span.tag("transaction.from_account_id", transaction.getFromAccountNum());
+                    span.tag("transaction.to_account_id", transaction.getToAccountNum());
                     span.event(msg);
                     return new ResponseEntity<>(EXCEPTION_MESSAGE_INSUFFICIENT_BALANCE,
                             HttpStatus.BAD_REQUEST);
@@ -204,13 +210,12 @@ public final class LedgerWriterController {
         // Add to ledger
         try {
             transactionRepository.save(transaction);
-            this.cache.put(transaction.getRequestUuid(),
-                    transaction.getTransactionId());
+            this.cache.put(transaction.getRequestUuid(), transaction.getTransactionId());
             LOGGER.info("Submitted transaction successfully [transactionId={}]",
                     transaction.getTransactionId());
         } catch (RuntimeException e) {
             String msg = String.format("Unable to persist transaction [transaction=%s]",
-                    transaction);
+                    Transaction.asString(transaction));
 
             if (e instanceof ReadAvailableBalanceException) {
                 LOGGER.error(msg);
@@ -242,13 +247,23 @@ public final class LedgerWriterController {
         LOGGER.debug("Retrieving balance for transaction sender");
 
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + token);
+        headers.set("Authorization", token);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String uri = balancesApiUri + "/" + fromAcct;
 
+        final ResponseEntity<Integer> response;
+
         try {
-            final ResponseEntity<Integer> response = restOperations.exchange(
-                    uri, HttpMethod.GET, entity, Integer.class);
+            response = restOperations.exchange(uri, HttpMethod.GET, entity, Integer.class);
+        } catch (IllegalArgumentException e) {
+            final String msg = String.format("Invalid URI for getBalance from remote api [uri=%s]", uri);
+            throw new ReadAvailableBalanceException(msg, e);
+        } catch (RuntimeException e) {
+            final String msg = String.format("Unable to connect to remote API [uri=%s]", uri);
+            throw new ReadAvailableBalanceException(msg, e);
+        }
+
+        try {
             final Integer senderBalance = response.getBody();
             if (senderBalance == null) {
                 final String msg = String.format("Null response for getBalance from remote api [uri=%s]", uri);
@@ -256,11 +271,14 @@ public final class LedgerWriterController {
             }
 
             return senderBalance;
-        } catch (IllegalArgumentException e) {
-            final String msg = String.format("Invalid URI for getBalance from remote api [uri=%s]", uri);
-            throw new ReadAvailableBalanceException(msg, e);
         } catch (RuntimeException e) {
-            final String msg = String.format("Unable to read balance from remote api [uri=%s]", uri);
+            final String msg;
+            if (response != null) {
+                msg = String.format("Unable to read balance from request body [uri=%s, statusCode=%d]",
+                        uri, response.getStatusCodeValue());
+            } else {
+                msg = String.format("Unable to read balance from request body [uri=%s, response=null]", uri);
+            }
             throw new ReadAvailableBalanceException(msg, e);
         }
     }

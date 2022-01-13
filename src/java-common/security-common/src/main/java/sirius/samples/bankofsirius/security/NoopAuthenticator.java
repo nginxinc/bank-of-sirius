@@ -25,8 +25,9 @@ public class NoopAuthenticator implements Authenticator {
     private static final Logger LOGGER = LoggerFactory.getLogger(NoopAuthenticator.class);
 
     @Override
-    public void verify(final String authorization, final String accountId) throws AuthenticationException {
-        LOGGER.warn("Skipping authentication because JWT is disabled. [accountID={}]",
-                accountId);
+    public String verify(final String authorization, final String... accountIds) throws AuthenticationException {
+        LOGGER.warn("Skipping authentication because JWT is disabled. [accountIds={}]",
+                String.join(", ", accountIds));
+        return "";
     }
 }

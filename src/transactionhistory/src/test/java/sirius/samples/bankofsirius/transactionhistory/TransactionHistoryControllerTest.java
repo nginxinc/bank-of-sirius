@@ -19,6 +19,7 @@ package sirius.samples.bankofsirius.transactionhistory;
 import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,23 +32,20 @@ import sirius.samples.bankofsirius.ledger.Transaction;
 import sirius.samples.bankofsirius.security.AuthenticationException;
 import sirius.samples.bankofsirius.security.Authenticator;
 
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 class TransactionHistoryControllerTest {
 
     private TransactionHistoryController transactionHistoryController;
-    @Mock
-    private Authenticator authenticator;
     @Mock
     private LoadingCache<String, Deque<Transaction>> cache;
     @Mock
@@ -59,6 +57,17 @@ class TransactionHistoryControllerTest {
     @Mock
     private Deque<Transaction> transactions;
 
+    private final Authenticator authenticator = (authorization, accountIds) -> {
+        if (authorization.equals(BEARER_TOKEN)) {
+            if (Arrays.asList(accountIds).contains(AUTHED_ACCOUNT_NUM)) {
+                return "";
+            }
+        }
+        throw new AuthenticationException("Unit test authentication failure");
+    };
+
+    private AutoCloseable mocks;
+
     private static final MeterRegistry METER_REGISTRY = null;
     private static final String AUTHED_ACCOUNT_NUM = "1234567890";
     private static final String NON_AUTHED_ACCOUNT_NUM = "9876543210";
@@ -67,17 +76,21 @@ class TransactionHistoryControllerTest {
 
     @BeforeEach
     void setUp() {
-        initMocks(this);
+        this.mocks = openMocks(this);
 
         when(cache.stats()).thenReturn(stats);
         transactionHistoryController = new TransactionHistoryController(authenticator, METER_REGISTRY, cache,
                 tracer, EXTRA_LATENCY_MILLIS);
-        doThrow(AuthenticationException.class).when(authenticator)
-                .verify(anyString(), anyString());
-        doNothing().when(authenticator).verify(BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
         when(tracer.spanBuilder()).thenReturn(spanBuilder);
         when(spanBuilder.name(anyString())).thenReturn(spanBuilder);
         when(spanBuilder.start()).thenReturn(mock(Span.class));
+    }
+
+    @AfterEach
+    void cleanUp() throws Exception {
+        if (this.mocks != null) {
+            this.mocks.close();
+        }
     }
 
     @Test

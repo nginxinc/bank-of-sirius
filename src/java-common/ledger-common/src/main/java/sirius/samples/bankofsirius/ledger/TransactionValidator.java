@@ -110,7 +110,7 @@ public class TransactionValidator {
                         ExceptionMessages.EXCEPTION_MESSAGE_INVALID_AMOUNT);
             }
         } catch (RuntimeException e) {
-            span.tag("transaction", Objects.toString(transaction));
+            span.tag("transaction", Transaction.asString(transaction));
             span.error(e);
             throw e;
         } finally {

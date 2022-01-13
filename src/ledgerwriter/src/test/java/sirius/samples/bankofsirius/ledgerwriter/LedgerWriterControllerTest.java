@@ -17,6 +17,7 @@
 package sirius.samples.bankofsirius.ledgerwriter;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,19 +39,20 @@ import sirius.samples.bankofsirius.ledger.TransactionValidator;
 import sirius.samples.bankofsirius.security.AuthenticationException;
 import sirius.samples.bankofsirius.security.Authenticator;
 
+import java.util.Arrays;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 import static sirius.samples.bankofsirius.ledger.ExceptionMessages.EXCEPTION_MESSAGE_WHEN_AUTHORIZATION_HEADER_NULL;
 
 class LedgerWriterControllerTest {
@@ -62,8 +64,6 @@ class LedgerWriterControllerTest {
     @Mock
     private TransactionRepository transactionRepository;
     @Mock
-    private Authenticator authenticator;
-    @Mock
     private RestOperations restOperations;
     @Mock
     private Transaction transaction;
@@ -73,6 +73,17 @@ class LedgerWriterControllerTest {
     private Span span;
     @Mock
     Span.Builder spanBuilder;
+
+    private AutoCloseable mocks;
+
+    private Authenticator authenticator = (authorization, accountIds) -> {
+        if (authorization.equals(BEARER_TOKEN)) {
+            if (Arrays.asList(accountIds).contains(AUTHED_ACCOUNT_NUM)) {
+                return AUTHED_ACCOUNT_NUM;
+            }
+        }
+        throw new AuthenticationException("Unit test authentication failure");
+    };
 
     private static final MeterRegistry METER_REGISTRY = null;
     private static final String LOCAL_ROUTING_NUM = "123456789";
@@ -88,19 +99,23 @@ class LedgerWriterControllerTest {
 
     @BeforeEach
     void setUp() {
-        initMocks(this);
+        this.mocks = openMocks(this);
 
         ledgerWriterController = new LedgerWriterController(authenticator,
                 METER_REGISTRY, transactionRepository, transactionValidator,
                 LOCAL_ROUTING_NUM, BALANCES_API_ADDR, restOperations,
                 tracer);
-        doThrow(AuthenticationException.class).when(authenticator)
-                .verify(nullable(String.class), anyString());
-        doNothing().when(authenticator).verify(BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
         when(tracer.currentSpan()).thenReturn(span);
         when(tracer.spanBuilder()).thenReturn(spanBuilder);
         when(spanBuilder.name(anyString())).thenReturn(spanBuilder);
         when(spanBuilder.start()).thenReturn(span);
+    }
+
+    @AfterEach
+    void cleanUp() throws Exception {
+        if (this.mocks != null) {
+            this.mocks.close();
+        }
     }
 
     @Test
@@ -108,6 +123,7 @@ class LedgerWriterControllerTest {
     void addTransactionSuccessWhenDiffThanLocalRoutingNum(TestInfo testInfo) {
         // Given
         when(transaction.getFromRoutingNum()).thenReturn(NON_LOCAL_ROUTING_NUM);
+        when(transaction.getToAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
 
         // When
@@ -129,12 +145,12 @@ class LedgerWriterControllerTest {
         LedgerWriterController spyLedgerWriterController =
                 spy(ledgerWriterController);
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
-        when(transaction.getFromRoutingNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getAmount()).thenReturn(SENDER_BALANCE);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
         doReturn(SENDER_BALANCE).when(
                 spyLedgerWriterController).getAvailableBalance(
-                TOKEN, AUTHED_ACCOUNT_NUM);
+                BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
         final ResponseEntity<?> actualResult =
@@ -157,12 +173,12 @@ class LedgerWriterControllerTest {
         LedgerWriterController spyLedgerWriterController =
                 spy(ledgerWriterController);
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
-        when(transaction.getFromRoutingNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getAmount()).thenReturn(SMALLER_THAN_SENDER_BALANCE);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
         doReturn(SENDER_BALANCE).when(
                 spyLedgerWriterController).getAvailableBalance(
-                TOKEN, AUTHED_ACCOUNT_NUM);
+                BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
         final ResponseEntity<?> actualResult =
@@ -226,7 +242,11 @@ class LedgerWriterControllerTest {
     @DisplayName("Given exception thrown on validation, return HTTP Status 400")
     void addTransactionWhenIllegalArgumentExceptionThrown() throws TransactionValidationException {
         // Given
+        final String badAccountId = "123477777777";
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        when(transaction.getToAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        when(transaction.getTransactionId()).thenReturn(123456789L);
+        when(transaction.getRequestUuid()).thenReturn(new UUID(1234L, 1234L).toString());
         doThrow(new TransactionValidationException("Unit test controlled failure", EXCEPTION_MESSAGE)).
                 when(transactionValidator).validateTransaction(
                         LOCAL_ROUTING_NUM, AUTHED_ACCOUNT_NUM, transaction);
@@ -237,8 +257,7 @@ class LedgerWriterControllerTest {
 
         // Then
         assertNotNull(actualResult);
-        assertEquals(EXCEPTION_MESSAGE,
-                actualResult.getBody());
+        assertEquals(EXCEPTION_MESSAGE, actualResult.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, actualResult.getStatusCode());
     }
 
@@ -285,24 +304,22 @@ class LedgerWriterControllerTest {
     @DisplayName("Given the transaction is external and the transaction "
             + "cannot be saved to the transaction repository, return HTTP"
             + " Status 500")
-    void addTransactionWhenCannotCreateTransactionExceptionExceptionThrown(TestInfo testInfo) {
+    void addTransactionWhenCannotCreateTransactionExceptionThrown(TestInfo testInfo) {
         // Given
         when(transaction.getFromRoutingNum()).thenReturn(NON_LOCAL_ROUTING_NUM);
+        when(transaction.getToAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
         doThrow(new CannotCreateTransactionException(EXCEPTION_MESSAGE)).when(
                 transactionRepository).save(transaction);
 
         // When
-        final ResponseEntity<?> actualResult =
-                ledgerWriterController.addTransaction(
-                        TOKEN, transaction);
+        final ResponseEntity<?> actualResult = ledgerWriterController.addTransaction(
+                BEARER_TOKEN, transaction);
 
         // Then
         assertNotNull(actualResult);
-        assertEquals("unable to persist transaction",
-                actualResult.getBody());
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
-                actualResult.getStatusCode());
+        assertEquals("unable to persist transaction", actualResult.getBody());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, actualResult.getStatusCode());
     }
 
     @Test
@@ -319,6 +336,7 @@ class LedgerWriterControllerTest {
         @SuppressWarnings("unchecked")
         ResponseEntity<Integer> badResponse = mock(ResponseEntity.class);
         Throwable throwable = new ExpectedUnitTestException();
+        when(badResponse.getStatusCodeValue()).thenReturn(500);
         when(badResponse.getBody()).thenThrow(throwable);
         when(restOperations.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class),
                 eq(Integer.class))).thenReturn(badResponse);
@@ -343,12 +361,12 @@ class LedgerWriterControllerTest {
         LedgerWriterController spyLedgerWriterController =
                 spy(ledgerWriterController);
         when(transaction.getFromRoutingNum()).thenReturn(LOCAL_ROUTING_NUM);
-        when(transaction.getFromRoutingNum()).thenReturn(AUTHED_ACCOUNT_NUM);
+        when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
         when(transaction.getAmount()).thenReturn(SMALLER_THAN_SENDER_BALANCE);
         when(transaction.getRequestUuid()).thenReturn(testInfo.getDisplayName());
         doReturn(SENDER_BALANCE).when(
                 spyLedgerWriterController).getAvailableBalance(
-                TOKEN, AUTHED_ACCOUNT_NUM);
+                BEARER_TOKEN, AUTHED_ACCOUNT_NUM);
 
         // When
         final ResponseEntity<?> originalResult =

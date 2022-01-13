@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import sirius.samples.bankofsirius.security.AuthenticationException;
 import sirius.samples.bankofsirius.security.Authenticator;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -82,6 +83,9 @@ public final class BalanceReaderController {
     public ResponseEntity<?> getBalance(
         @RequestHeader("Authorization") String authorization,
         @PathVariable String accountId) {
+        final Span span = tracer.currentSpan();
+        Objects.requireNonNull(span);
+
         if (authorization == null || authorization.isEmpty()) {
             return new ResponseEntity<>("HTTP request 'Authorization' header is null",
                     HttpStatus.BAD_REQUEST);
@@ -90,14 +94,22 @@ public final class BalanceReaderController {
         try {
             authenticator.verify(authorization, accountId);
         } catch (AuthenticationException e) {
-            LOGGER.error("Authentication failed: {}", e.getMessage());
+            final String msg;
+            if (e.getCause() != null) {
+                msg = String.format("Authentication failed: %s. Cause: %s",
+                        e.getMessage(), e.getCause().getMessage());
+            } else {
+                msg = String.format("Authentication failed: %s", e.getMessage());
+            }
+
+            span.error(e);
+            LOGGER.error(msg);
             return new ResponseEntity<>("not authorized",
                     HttpStatus.UNAUTHORIZED);
         }
 
         LOGGER.debug("Balance requested [accountId={}]", accountId);
 
-        final Span span = tracer.spanBuilder().name("cache_lookup").start();
         try {
             // Load from cache
             final Long balance = cache.get(accountId);

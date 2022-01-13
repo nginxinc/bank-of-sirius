@@ -31,6 +31,7 @@ import java.util.Objects;
 @ConditionalOnProperty(value = "jwt.account.authentication.enabled",
     matchIfMissing = true, havingValue = "true")
 public class JWTAuthenticator implements Authenticator {
+    private static final String ACCOUNT_ID_JWT_CLAIM_NAME = "acct";
     private static final Logger LOGGER =
             LoggerFactory.getLogger(JWTAuthenticator.class);
 
@@ -44,7 +45,8 @@ public class JWTAuthenticator implements Authenticator {
     }
 
     @Override
-    public void verify(final String authorization, final String accountId) {
+    public String verify(final String authorization, final String... accountIds)
+            throws AuthenticationException {
         final Span span = tracer.spanBuilder().name("jwt_verify").start();
 
         try {
@@ -54,18 +56,30 @@ public class JWTAuthenticator implements Authenticator {
             if (authorization.isEmpty()) {
                 throw new IllegalArgumentException("JWT authorization header is empty");
             }
-            if (accountId == null) {
-                throw new NullPointerException("account id is null");
-            }
-            if (accountId.isEmpty()) {
-                throw new IllegalArgumentException("account id is blank");
-            }
 
             final String bearerToken = extractBearerToken(authorization);
-            verifyToken(bearerToken, accountId);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Authenticated request [accountId={}]", accountId);
+            final Claim claim = extractClaimFromBearerToken(bearerToken, ACCOUNT_ID_JWT_CLAIM_NAME);
+            final String expectedAccountId = claim.asString();
+            if (expectedAccountId.isEmpty()) {
+                throw new AuthenticationException("Account id in JWT bearer token is empty");
             }
+
+            final boolean accountIdMatched = verifyTokens(expectedAccountId, accountIds);
+
+            if (accountIdMatched) {
+                span.tag("account.id", expectedAccountId);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Authenticated request [accountId={}]", expectedAccountId);
+                }
+            } else {
+                String msg = String.format(
+                        "No account id matches JWT token contexts [accountIdInJwtToken=%s,expectedIds=%s]",
+                        expectedAccountId,
+                        String.join(", ", accountIds));
+                throw new AuthenticationException(msg);
+            }
+
+            return expectedAccountId;
         } finally {
             span.end();
         }
@@ -85,31 +99,31 @@ public class JWTAuthenticator implements Authenticator {
         return authorization.substring(pos + prefix.length());
     }
 
-    void verifyToken(final String bearerToken,
-                     final String accountId) throws AuthenticationException {
-        final Span span = tracer.spanBuilder().name("jwt_token_verify").start();
-
+    Claim extractClaimFromBearerToken(final String bearerToken, final String claimName) {
+        final DecodedJWT jwt;
         try {
-            final DecodedJWT jwt = verifier.verify(bearerToken);
-            final Claim decodedAccountId = jwt.getClaim("acct");
-
-            if (decodedAccountId.isNull()) {
-                throw new AuthenticationException("Unable to decode account id from bearer token");
-            }
-
-            // Check that the authenticated user can access this account.
-            if (!accountId.equals(decodedAccountId.asString())) {
-                String msg = "Requested account id does not match bearer token";
-                throw new AuthenticationException(msg);
-            }
+            jwt = verifier.verify(bearerToken);
         } catch (JWTVerificationException e) {
-            String msg = "Unable to verify JWT token";
-            throw new AuthenticationException(msg, e);
-        } catch (RuntimeException e) {
-            span.error(e);
-            throw e;
-        } finally {
-            span.end();
+            throw new AuthenticationException("Unable to decode or verify JWT bearer token", e);
         }
+
+        final Claim claim = jwt.getClaim(claimName);
+        if (claim.isNull()) {
+            throw new AuthenticationException("Unable to extract account id claim from JWT bearer token");
+        }
+
+        return claim;
+    }
+
+    boolean verifyTokens(final String expectedAccountId, final String... accountIds) {
+        boolean accountIdFound = false;
+        for (String accountId : accountIds) {
+            if (expectedAccountId.equals(accountId)) {
+                accountIdFound = true;
+                break;
+            }
+        }
+
+        return accountIdFound;
     }
 }

@@ -14,5 +14,5 @@
 package sirius.samples.bankofsirius.security;
 
 public interface Authenticator {
-    void verify(String authorization, String accountId) throws AuthenticationException;
+    String verify(String authorization, String... accountIds) throws AuthenticationException;
 }
