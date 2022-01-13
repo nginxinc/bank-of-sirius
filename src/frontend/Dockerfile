@@ -46,11 +46,3 @@ RUN set -eux; \
 COPY static /app/static
 COPY templates /app/templates
 COPY *.py /app/
-
-# Start server using gunicorn
-CMD gunicorn \
-    --bind :$PORT \
-    --threads $THREADS \
-    --log-level=$LOG_LEVEL \
-    --statsd-host=$STATSD_HOST \
-    --statsd-prefix=$STATSD_PREFIX

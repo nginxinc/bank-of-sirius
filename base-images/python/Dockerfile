@@ -36,8 +36,10 @@ ENV PIP_CONFIG_FILE /env/etc/pip.conf
 ENV PATH /env/bin:$PATH
 
 COPY env/etc/pip.conf /env/etc/pip.conf
+COPY usr/local/bin/run_gunicorn.sh /usr/local/bin/run_gunicorn.sh
 
 RUN set -eux; \
+    chmod +x /usr/local/bin/run_gunicorn.sh; \
     mkdir --parents /app; \
     mkdir --parents /env; \
     groupadd --gid 1919 app; \
@@ -57,5 +59,5 @@ RUN set -eux; \
 EXPOSE 8080
 WORKDIR /app
 
-# The user's Dockerfile must specify an entrypoint with ENTRYPOINT or CMD.
-CMD []
+# Start server using gunicorn
+CMD /usr/local/bin/run_gunicorn.sh

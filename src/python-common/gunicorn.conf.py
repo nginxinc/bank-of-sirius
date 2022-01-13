@@ -49,7 +49,6 @@ logconfig_dict = {
         "console": {
             'class': 'logging.StreamHandler',
             'formatter': 'bunyan',
-            # 'name': 'foo',
             'stream': 'ext://sys.stdout'
         }
     },

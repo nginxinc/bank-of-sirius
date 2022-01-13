@@ -140,11 +140,12 @@ services:
       - "accounts-db"
     expose:
       - "8080/tcp"
-    command: "gunicorn --bind :8080 --threads 5 --log-level=info"
     volumes:
       - ./jwt_keys:/jwt_keys:ro
     environment:
       APP_NAME: "contacts"
+      LOG_LEVEL: info
+      THREADS: 5
       VERSION: "1.x-dev"
       PORT: "8080"
       OTEL_PYTHON_LOG_LEVEL: "info"
@@ -169,11 +170,12 @@ services:
       - "accounts-db"
     expose:
       - "8080/tcp"
-    command: "gunicorn --bind :8080 --threads 5 --log-level=info"
     volumes:
       - ./jwt_keys:/jwt_keys:ro
     environment:
       APP_NAME: "userservice"
+      LOG_LEVEL: info
+      THREADS: 5
       VERSION: "1.x-dev"
       PORT: "8080"
       OTEL_PYTHON_LOG_LEVEL: "info"
@@ -206,12 +208,13 @@ services:
       - "user-service"
     expose:
       - "8080/tcp"
-    command: "gunicorn --bind :8080 --threads 5 --log-level=info"
     volumes:
       - ./jwt_keys:/jwt_keys:ro
     environment:
       APP_NAME: "frontend"
       VERSION: "1.x-dev"
+      LOG_LEVEL: "debug"
+      THREADS: 5
       DEFAULT_USERNAME: "testuser"
       DEFAULT_PASSWORD: "password"
       BALANCES_API_ADDR: "balance-reader:8080"
