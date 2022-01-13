@@ -74,7 +74,7 @@ def create_app():
         display_name = token_data['name']
         username = token_data['user']
         account_id = token_data['acct']
-        span.set_attributes({'account_id': account_id})
+        span.set_attributes({'account.id': account_id})
 
         # get balance
         app.logger.debug('Getting account balance')
@@ -192,6 +192,7 @@ def create_app():
             return abort(401)
         try:
             account_id = jwt.decode(token, verify=False)['acct']
+            span.set_attribute('account.id', account_id)
             recipient = request.form['account_num']
             if recipient == 'add':
                 recipient = request.form['contact_account_num']
@@ -209,6 +210,8 @@ def create_app():
                                 "toRoutingNum": app.config['LOCAL_ROUTING'],
                                 "amount": int(Decimal(request.form['amount']) * 100),
                                 "uuid": request.form['uuid']}
+            span.set_attribute("transaction", transaction_data)
+
             _submit_transaction(transaction_data)
             app.logger.info('Payment initiated successfully')
             return redirect(url_for('home',
@@ -276,6 +279,8 @@ def create_app():
                                 "toRoutingNum": app.config['LOCAL_ROUTING'],
                                 "amount": int(Decimal(request.form['amount']) * 100),
                                 "uuid": request.form['uuid']}
+            span.set_attribute("transaction", transaction_data)
+
             _submit_transaction(transaction_data)
             app.logger.info('Deposit submitted successfully')
             return redirect(url_for('home',
@@ -311,7 +316,7 @@ def create_app():
                                  headers=hed,
                                  timeout=app.config['BACKEND_TIMEOUT'])
             try:
-                resp.raise_for_status() # Raise on HTTP Status code 4XX or 5XX
+                resp.raise_for_status()  # Raise on HTTP Status code 4XX or 5XX
             except requests.exceptions.HTTPError as http_request_err:
                 raise UserWarning(resp.text) from http_request_err
 
