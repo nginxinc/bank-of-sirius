@@ -16,6 +16,7 @@
 
 package sirius.samples.bankofsirius.ledger;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 class TransactionValidatorTest {
 
@@ -42,6 +43,8 @@ class TransactionValidatorTest {
     private Tracer tracer;
     @Mock
     Span.Builder spanBuilder;
+
+    private AutoCloseable mocks;
 
     private static final String LOCAL_ROUTING_NUM = "123456789";
     private static final String AUTHED_ACCOUNT_NUM = "1234567890";
@@ -90,7 +93,7 @@ class TransactionValidatorTest {
 
     @BeforeEach
     void setUp() {
-        initMocks(this);
+        this.mocks = openMocks(this);
         transactionValidator = new TransactionValidator(tracer);
 
         when(transaction.getFromAccountNum()).thenReturn(AUTHED_ACCOUNT_NUM);
@@ -101,6 +104,13 @@ class TransactionValidatorTest {
         when(tracer.spanBuilder()).thenReturn(spanBuilder);
         when(spanBuilder.name(anyString())).thenReturn(spanBuilder);
         when(spanBuilder.start()).thenReturn(mock(Span.class));
+    }
+
+    @AfterEach
+    void cleanUp() throws Exception {
+        if (this.mocks != null) {
+            this.mocks.close();
+        }
     }
 
     @Test
