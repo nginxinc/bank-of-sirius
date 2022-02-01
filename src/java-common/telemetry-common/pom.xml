@@ -36,7 +36,7 @@
         <!-- This library is still in beta. We want to upgrade to a stable
              version ASAP because it will allow us to remove the Spring
              snapshots repository. -->
-        <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M3</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
+        <dependency.spring-cloud-sleuth-otel-autoconfigure.version>1.1.0-M4</dependency.spring-cloud-sleuth-otel-autoconfigure.version>
         <dependency.p6spy.version>3.9.1</dependency.p6spy.version>
         <dependency.jimfs.version>1.2</dependency.jimfs.version>
     </properties>
@@ -148,15 +148,11 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>${dependency.grpc-netty.version}</version>
+            <version>${dependency.grpc-api.version}</version>
         </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
