@@ -14,9 +14,9 @@
 
 ARG ARCH=amd64
 
-FROM $ARCH/nginx:1.21.4
+FROM $ARCH/nginx:1.21.6
 
-COPY --from=ghcr.io/nginxinc/amd64/ngx_otel_module:linux-libc-nginx-1.21.4 /usr/lib/nginx/modules/otel_ngx_module.so /usr/lib/nginx/modules/otel_ngx_module.so
+COPY --from=ghcr.io/nginxinc/amd64/ngx_otel_module:linux-libc-nginx-1.21.6 /usr/lib/nginx/modules/otel_ngx_module.so /usr/lib/nginx/modules/otel_ngx_module.so
 
 COPY etc/nginx/nginx.conf /etc/nginx/nginx.conf
 COPY etc/nginx/otel-nginx.toml /etc/nginx/otel-nginx.toml
