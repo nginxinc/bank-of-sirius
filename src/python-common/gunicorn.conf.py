@@ -10,6 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+
+import bunyan
 import sys
 
 import tracing
@@ -25,12 +27,8 @@ tracing.config.setup_tracer_provider()
 # only if Open Telemetry is enabled and logging is configured.
 if tracing.config.tracing_enabled:
     tracing.config.setup_logging()
-    tracing_fields = ', "trace_id": "%(otelTraceID)s"'
-else:
-    tracing_fields = ''
 
-log_format = '{"timestamp": "%(asctime)s", "message": "%(funcName)s | %(message)s", "severity": "%(levelname)s"' \
-             + tracing_fields + '}'
+# formatter = bunyan.BunyanFormatter()
 
 # By using APP_NAME we can share this gunicorn config file with all of
 # the Python Flask services.
@@ -43,17 +41,15 @@ logconfig_dict = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "generic": {
-            "format": log_format,
-            "validate": False,
-            "datefmt": '%Y-%m-%d %H:%M:%S',
-            'class': 'logging.Formatter'
+        "bunyan": {
+            '()': 'bunyan.BunyanFormatter'
         }
     },
     "handlers": {
         "console": {
             'class': 'logging.StreamHandler',
-            'formatter': 'generic',
+            'formatter': 'bunyan',
+            'stream': 'ext://sys.stdout'
         }
     },
     "loggers": {

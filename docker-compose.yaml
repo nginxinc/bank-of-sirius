@@ -1,0 +1,248 @@
+version: "3"
+
+services:
+  jaeger:
+    image: "jaegertracing/all-in-one"
+    expose:
+      - "14250/tcp"
+    ports:
+      - "16686:16686/tcp"
+
+  otel-exporter:
+    image: otel/opentelemetry-collector
+    depends_on:
+      - "jaeger"
+    expose:
+      - "9978/tcp"
+    command: "--config /otel-config.yaml"
+    volumes:
+      - ./docker-compose-otel-config.yaml:/otel-config.yaml:ro
+
+  accounts-db:
+    image: "bos-accounts-db"
+    depends_on:
+      - "otel-exporter"
+    links:
+      - "otel-exporter"
+    expose:
+      - "5432/tcp"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      USE_DEMO_DATA: "True"
+      POSTGRES_DB: "accounts"
+      POSTGRES_USER: "accounts"
+      POSTGRES_PASSWORD: "accounts"
+      LOCAL_ROUTING_NUM: "883745000"
+      ENABLE_TRACING: "true"
+
+  ledger-db:
+    image: "bos-ledger-db"
+    depends_on:
+      - "otel-exporter"
+    links:
+      - "otel-exporter"
+    expose:
+      - "5432/tcp"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      USE_DEMO_DATA: "True"
+      POSTGRES_DB: "ledger"
+      POSTGRES_USER: "ledger"
+      POSTGRES_PASSWORD: "ledger"
+      LOCAL_ROUTING_NUM: "883745000"
+      ENABLE_TRACING: "true"
+
+  balance-reader:
+    image: "bos-balancereader"
+    depends_on:
+      - "otel-exporter"
+      - "ledger-db"
+    links:
+      - "otel-exporter"
+      - "ledger-db"
+    expose:
+      - "8080/tcp"
+    volumes:
+      - ./jwt_keys:/jwt_keys:ro
+    environment:
+      APP_NAME: "balance-reader"
+      VERSION: "1.x-dev"
+      PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      LOCAL_ROUTING_NUM: "883745000"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://ledger-db:5432/ledger"
+      SPRING_DATASOURCE_USERNAME: "ledger"
+      SPRING_DATASOURCE_PASSWORD: "ledger"
+      POLL_MS: 1000
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "true"
+      PUB_KEY_PATH: "/jwt_keys/jwtRS256.key.pub"
+
+  ledger-writer:
+    image: "bos-ledgerwriter"
+    depends_on:
+      - "otel-exporter"
+      - "ledger-db"
+    links:
+      - "otel-exporter"
+      - "ledger-db"
+      - "balance-reader"
+    expose:
+      - "8080/tcp"
+    volumes:
+      - ./jwt_keys:/jwt_keys:ro
+    environment:
+      APP_NAME: "ledger-writer"
+      VERSION: "1.x-dev"
+      PORT: "8080"
+      BALANCES_API_ADDR: "balance-reader:8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      LOCAL_ROUTING_NUM: "883745000"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://ledger-db:5432/ledger"
+      SPRING_DATASOURCE_USERNAME: "ledger"
+      SPRING_DATASOURCE_PASSWORD: "ledger"
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "true"
+      PUB_KEY_PATH: "/jwt_keys/jwtRS256.key.pub"
+
+  transaction-history:
+    image: "bos-transactionhistory"
+    depends_on:
+      - "otel-exporter"
+      - "ledger-db"
+    links:
+      - "otel-exporter"
+      - "ledger-db"
+    expose:
+      - "8080/tcp"
+    volumes:
+      - ./jwt_keys:/jwt_keys:ro
+    environment:
+      APP_NAME: "transaction-history"
+      VERSION: "1.x-dev"
+      PORT: "8080"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      LOCAL_ROUTING_NUM: "883745000"
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://ledger-db:5432/ledger"
+      SPRING_DATASOURCE_USERNAME: "ledger"
+      SPRING_DATASOURCE_PASSWORD: "ledger"
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "true"
+      PUB_KEY_PATH: "/jwt_keys/jwtRS256.key.pub"
+
+  contacts:
+    image: "bos-contacts"
+    depends_on:
+      - "otel-exporter"
+      - "accounts-db"
+    links:
+      - "otel-exporter"
+      - "accounts-db"
+    expose:
+      - "8080/tcp"
+    volumes:
+      - ./jwt_keys:/jwt_keys:ro
+    environment:
+      APP_NAME: "contacts"
+      LOG_LEVEL: info
+      THREADS: 5
+      VERSION: "1.x-dev"
+      PORT: "8080"
+      OTEL_PYTHON_LOG_LEVEL: "info"
+      OTEL_PYTHON_LOG_CORRELATION: "true"
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "false"
+      SCHEME: "http"
+      LOCAL_ROUTING_NUM: "883745000"
+      ACCOUNTS_DB_URI: "postgresql://accounts:accounts@accounts-db:5432/accounts"
+      TOKEN_EXPIRY_SECONDS: "86400"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      PUB_KEY_PATH: "/jwt_keys/jwtRS256.key.pub"
+      PRIV_KEY_PATH: "/jwt_keys/jwtRS256.key"
+
+  user-service:
+    image: "bos-userservice"
+    depends_on:
+      - "otel-exporter"
+      - "accounts-db"
+    links:
+      - "otel-exporter"
+      - "accounts-db"
+    expose:
+      - "8080/tcp"
+    volumes:
+      - ./jwt_keys:/jwt_keys:ro
+    environment:
+      APP_NAME: "userservice"
+      LOG_LEVEL: info
+      THREADS: 5
+      VERSION: "1.x-dev"
+      PORT: "8080"
+      OTEL_PYTHON_LOG_LEVEL: "info"
+      OTEL_PYTHON_LOG_CORRELATION: "true"
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "false"
+      SCHEME: "http"
+      LOCAL_ROUTING_NUM: "883745000"
+      ACCOUNTS_DB_URI: "postgresql://accounts:accounts@accounts-db:5432/accounts"
+      TOKEN_EXPIRY_SECONDS: "86400"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      PUB_KEY_PATH: "/jwt_keys/jwtRS256.key.pub"
+      PRIV_KEY_PATH: "/jwt_keys/jwtRS256.key"
+
+  frontend:
+    image: "bos-frontend"
+    depends_on:
+      - "otel-exporter"
+      - "balance-reader"
+      - "ledger-writer"
+      - "transaction-history"
+      - "contacts"
+      - "user-service"
+    links:
+      - "otel-exporter"
+      - "balance-reader"
+      - "ledger-writer"
+      - "transaction-history"
+      - "contacts"
+      - "user-service"
+    expose:
+      - "8080/tcp"
+    volumes:
+      - ./jwt_keys:/jwt_keys:ro
+    environment:
+      APP_NAME: "frontend"
+      VERSION: "1.x-dev"
+      LOG_LEVEL: "debug"
+      THREADS: 5
+      DEFAULT_USERNAME: "testuser"
+      DEFAULT_PASSWORD: "password"
+      BALANCES_API_ADDR: "balance-reader:8080"
+      CONTACTS_API_ADDR: "contacts:8080"
+      HISTORY_API_ADDR: "transaction-history:8080"
+      TRANSACTIONS_API_ADDR: "ledger-writer:8080"
+      USERSERVICE_API_ADDR: "user-service:8080"
+      OTEL_PYTHON_LOG_LEVEL: "info"
+      OTEL_PYTHON_LOG_CORRELATION: "true"
+      ENABLE_TRACING: "true"
+      ENABLE_METRICS: "false"
+      SCHEME: "http"
+      LOCAL_ROUTING_NUM: "883745000"
+      ACCOUNTS_DB_URI: "postgresql://accounts:accounts@accounts-db:5432/accounts"
+      TOKEN_EXPIRY_SECONDS: "86400"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"
+      PUB_KEY_PATH: "/jwt_keys/jwtRS256.key.pub"
+      PRIV_KEY_PATH: "/jwt_keys/jwtRS256.key"
+
+  nginx:
+    image: "bos-nginx"
+    depends_on:
+      - "otel-exporter"
+      - "frontend"
+    links:
+      - "otel-exporter"
+      - "frontend"
+    ports:
+      - "8080:8080/tcp"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-exporter:9978"

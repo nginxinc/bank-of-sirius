@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
+    <CustomLevels>
+        <CustomLevel name="STARTUP" intLevel="30" />
+    </CustomLevels>
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
-            <PatternLayout
-                pattern='{"timestamp": "%d{yyyy-MM-dd HH:mm:ss}", "message": "%M | %msg", "severity": "%level" traceId: "%X{traceId}"}%n' />
+            <BunyanJsonLayout appName="$${env:APP_NAME}">
+                <ThrowableFormat format="extended" />
+                <KeyValuePair key="traceId" value="$${ctx:traceId:-}"/>
+            </BunyanJsonLayout>
         </Console>
     </Appenders>
     <Loggers>

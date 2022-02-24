@@ -35,13 +35,13 @@ spec:
               readOnly: true
           env:
             - name: VERSION
-              value: v1.1.0
+              value: v1.2.0
             - name: PORT
               value: "8080"
             - name: ENABLE_TRACING
               value: "false"
-            # Valid levels are debug, info, warning, error, critical.
-            # If no valid level is set, will default to info.
+              # Valid levels are debug, info, warning, error, critical.
+              # If no valid level is set, will default to info.
             - name: LOG_LEVEL
               value: info
           envFrom:

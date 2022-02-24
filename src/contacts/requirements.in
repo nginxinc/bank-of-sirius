@@ -1,6 +1,7 @@
 attrs==19.3.0
 bcrypt==3.1.7
 bleach==4.1.0
+bunyan==0.1.2
 cachetools==4.1.1
 certifi==2020.6.20
 chardet==3.0.4
@@ -60,4 +61,4 @@ psycopg2==2.8.6
 sqlalchemy==1.3.22
 wrapt==1.12.1
 
-# requirements checksum: 5542ba85ba9276733596197eb442e34a
+# requirements checksum: 7bbbbab456a13494fa9810f9624546fa

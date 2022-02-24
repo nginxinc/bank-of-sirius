@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM bos-java
+ARG ARCH=amd64
 
-LABEL org.opencontainers.image.source=https://github.com/nginxinc/bank-of-sirius
+FROM $ARCH/nginx:1.21.6
 
-ENV APP_NAME ledger-writer
+COPY --from=ghcr.io/nginxinc/amd64/ngx_otel_module:linux-libc-nginx-1.21.6 /usr/lib/nginx/modules/otel_ngx_module.so /usr/lib/nginx/modules/otel_ngx_module.so
 
-COPY target/ledgerwriter.jar /app/libs/ledgerwriter.jar
-
-CMD ["java", "-Dlogging.config=/app/log4j2.xml", "-jar", "/app/libs/ledgerwriter.jar"]
+COPY etc/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY etc/nginx/otel-nginx.toml /etc/nginx/otel-nginx.toml
+COPY etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf

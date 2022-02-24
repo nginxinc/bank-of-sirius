@@ -16,6 +16,7 @@ package sirius.samples.bankofsirius.security;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class JWTAuthenticatorTest {
     private static final String JWT_ACCOUNT_KEY = "acct";
@@ -48,17 +49,26 @@ public class JWTAuthenticatorTest {
     @Mock
     private Span.Builder spanBuilder;
 
+    private AutoCloseable mocks;
+
     private JWTAuthenticator instance;
 
     @BeforeEach
     void setUp() {
-        initMocks(this);
+        this.mocks = openMocks(this);
 
         when(jwt.getClaim(JWT_ACCOUNT_KEY)).thenReturn(claim);
         when(tracer.spanBuilder()).thenReturn(spanBuilder);
         when(spanBuilder.name(anyString())).thenReturn(spanBuilder);
         when(spanBuilder.start()).thenReturn(mock(Span.class));
         this.instance = new JWTAuthenticator(tracer, verifier);
+    }
+
+    @AfterEach
+    void cleanUp() throws Exception {
+        if (this.mocks != null) {
+            this.mocks.close();
+        }
     }
 
     @Test

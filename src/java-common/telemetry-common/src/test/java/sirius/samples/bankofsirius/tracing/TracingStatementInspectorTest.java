@@ -1,5 +1,6 @@
 package sirius.samples.bankofsirius.tracing;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -10,7 +11,7 @@ import org.springframework.cloud.sleuth.Tracer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class TracingStatementInspectorTest {
     @Mock
@@ -20,12 +21,21 @@ public class TracingStatementInspectorTest {
     @Mock
     private TraceContext traceContext;
 
+    private AutoCloseable mocks;
+
     @BeforeEach
     void setUp() {
-        initMocks(this);
+        this.mocks = openMocks(this);
 
         when(tracer.currentSpan()).thenReturn(span);
         when(span.context()).thenReturn(traceContext);
+    }
+
+    @AfterEach
+    void cleanUp() throws Exception {
+        if (this.mocks != null) {
+            this.mocks.close();
+        }
     }
 
     @Test

@@ -107,7 +107,28 @@ public class Transaction {
      * Formatting = "{accountNum}:{type}:{amount}"
      */
     public String toString() {
-        return String.format("%s->$%.2f->%s",
-                fromAccountNum, amount / CENTS_PER_DOLLAR, toAccountNum);
+        return asString(this);
+    }
+
+    public static String asString(final Transaction transaction) {
+        if (transaction == null) {
+            return "null transaction";
+        }
+        final Integer transactionAmount = transaction.getAmount();
+        final int amount;
+        if (transactionAmount == null) {
+            amount = 0;
+        } else {
+            amount = transactionAmount;
+        }
+        final double currencyAmount = amount / CENTS_PER_DOLLAR;
+        return String.format("(id=%s, requestUUID=%s, fromRoutingNumber=%s, toRoutingNumber=%s) %s->$%.2f->%s",
+                transaction.getTransactionId(),
+                transaction.getRequestUuid(),
+                transaction.getFromRoutingNum(),
+                transaction.getToRoutingNum(),
+                transaction.getFromAccountNum(),
+                currencyAmount,
+                transaction.getToAccountNum());
     }
 }

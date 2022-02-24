@@ -35,22 +35,22 @@ spec:
               readOnly: true
           env:
             - name: VERSION
-              value: v1.1.0
+              value: v1.2.0
             - name: PORT
               value: "8080"
             - name: ENABLE_TRACING
               value: "false"
             - name: SCHEME
               value: http
-            # Valid levels are debug, info, warning, error, critical. If no valid level is set, gunicorn will default to info.
+              # Valid levels are debug, info, warning, error, critical. If no valid level is set, gunicorn will default to info.
             - name: LOG_LEVEL
               value: info
-            # Set to "true" to enable the CymbalBank logo + title
-            # - name: CYMBAL_LOGO
-            #   value: "false"
-            # Customize the bank name used in the header. Defaults to 'Bank of Sirius' - when CYMBAL_LOGO is true, uses 'CymbalBank'
-            # - name: BANK_NAME
-            #   value: ""
+              # Set to "true" to enable the CymbalBank logo + title
+              # - name: CYMBAL_LOGO
+              #   value: "false"
+              # Customize the bank name used in the header. Defaults to 'Bank of Sirius' - when CYMBAL_LOGO is true, uses 'CymbalBank'
+              # - name: BANK_NAME
+              #   value: ""
             - name: DEFAULT_USERNAME
               valueFrom:
                 configMapKeyRef:
@@ -61,6 +61,8 @@ spec:
                 configMapKeyRef:
                   name: demo-data-config
                   key: DEMO_LOGIN_PASSWORD
+            - name: APP_NAME
+              value: frontend
           envFrom:
             - configMapRef:
                 name: environment-config

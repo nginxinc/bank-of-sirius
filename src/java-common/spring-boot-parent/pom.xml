@@ -19,21 +19,21 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>spring-boot-parent</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
     <name>Spring Boot Parent</name>
 
     <parent>
         <groupId>com.f5.sirius.samples</groupId>
         <artifactId>bank-of-sirius</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <properties>
         <bootstrap.version>4.2.1</bootstrap.version>
-        <dependency.reactor-core.version>3.4.0</dependency.reactor-core.version>
-        <dependency.checker-qual.version>3.13.0</dependency.checker-qual.version>
+        <dependency.reactor-core.version>3.4.3</dependency.reactor-core.version>
+        <dependency.checker-qual.version>3.16.0</dependency.checker-qual.version>
     </properties>
 
     <build>
@@ -91,6 +91,10 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.dekobon</groupId>
+            <artifactId>log4j2-bunyan-layout</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
