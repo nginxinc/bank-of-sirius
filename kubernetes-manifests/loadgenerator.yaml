@@ -19,7 +19,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: loadgenerator
-          image: ghcr.io/nginxinc/bos-loadgenerator:v1.1.0
+          image: ghcr.io/nginxinc/bos-loadgenerator:v1.3.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8089

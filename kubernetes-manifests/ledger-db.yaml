@@ -16,7 +16,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: postgres
-          image: ghcr.io/nginxinc/bos-ledger-db:v1.1.0
+          image: ghcr.io/nginxinc/bos-ledger-db:v1.3.0
           imagePullPolicy: Always
           ports:
             - containerPort: 5432
