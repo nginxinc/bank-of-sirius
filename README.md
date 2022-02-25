@@ -2,30 +2,44 @@
 
 # Bank of Sirius
 
-
-**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/nginxinc/bank-of-anthos). This project
-improves upon **Bank of Anthos** by adding additional telemetry, instrumentation, performance tuning, upgraded libraries, and more.
-The intention is for it to me a more *productionized* example.
+**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/nginxinc/bank-of-anthos). This
+project improves upon **Bank of Anthos** by adding additional telemetry, instrumentation, performance tuning, upgraded
+libraries, and more. The intention is for it to me a more *productionized* example.
 
 ## Project
 
-
-**Bank of Sirius** is a sample HTTP-based web app that simulates a bank's payment processing network, allowing users to create artificial bank accounts and complete transactions.
+**Bank of Sirius** is a sample HTTP-based web app that simulates a bank's payment processing network, allowing users to
+create artificial bank accounts and complete transactions.
 
 If you’re using this app, please ★Star the repository to show your interest!
 
 ## Important Note
-This repository is intended to be used with the NGINX Modern Application Architecture (MARA) project [kic-reference-architectures](https://github.com/nginxinc/kic-reference-architectures). This includes modifications to the deployment process, as well as the inclusion of OTEL elements that work with the above project.
 
-If you wish to run this outside of the NGINX MARA project you may run into issues, so it is recommended in this case you either fork this project or the original [Google Bank of Anthos](https://github.com/GoogleCloudPlatform/bank-of-anthos) project. 
+This repository is intended to be used with the NGINX Modern Application Architecture (MARA)
+project [kic-reference-architectures](https://github.com/nginxinc/kic-reference-architectures). This includes
+modifications to the deployment process, as well as the inclusion of OTEL elements that work with the above project.
 
+If you wish to run this outside of the NGINX MARA project you may run into issues, so it is recommended in this case you
+either fork this project or the original [Google Bank of Anthos](https://github.com/GoogleCloudPlatform/bank-of-anthos)
+project.
+
+### Release Process
+This process is intended to be used for releases that are intended to be used with the NGINX Modern Application 
+Architecture (MARA) project [kic-reference-architectures](https://github.com/nginxinc/kic-reference-architectures). If 
+you are using a forked version of MARA you will want to examine the [GNUMakefile](./GNUmakefile) and adjust your 
+repository or other targets as required.
+
+1. Set the version: `make version-set`.
+2. Update the maven files: `make update-maven-versions`
+3. Update the manifest files: `make update-manifest-image-versions`
+4. Build the docker images: `make docker-all-images`
+5. Push the resulting images to the container registry: `make release`
 
 ## Screenshots
 
 | Sign in                                                                                                        | Home                                                                                                    |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Login](./docs/login.png)](./docs/login.png) | [![User Transactions](./docs/transactions.png)](./docs/transactions.png) |
-
 
 ## Service Architecture
 

@@ -1,24 +1,27 @@
 # Development Guide
 
-This document describes how to develop and add features to the Bank of Sirius application in your local environment. 
+This document describes how to develop and add features to the Bank of Sirius application in your local environment.
 
-## Prerequisites 
+## Prerequisites
 
 1. A clone of this repository.
 2. A linux build environment.
 
-## Install Tools 
+## Install Tools
 
-You can use MacOS or Linux as your dev environment - all these languages and tools support both. 
+You can use MacOS or Linux as your dev environment - all these languages and tools support both.
 
-1. [Docker](https://www.docker.com/products/docker-desktop) 
+1. [Docker](https://www.docker.com/products/docker-desktop)
 2. [GNU Make 4.x](https://www.gnu.org/software/make/)
 5. [JDK **8**](https://www.azul.com/downloads/?package=jdk) (newer versions might cause issues)
 6. [Maven **3.6**](https://downloads.apache.org/maven/maven-3/) (newer versions might cause issues)
 
 ## Makefile Targets
 
-The following code block shows the valid targets for the make process. Most of these options are self-explanatory, but to completely build the application one can run `make docker-all-images`. To push the new versions to the defined registry, you can run `make release`. Note that this assumes you have the appropriate permissions to push to the defined registry.
+The following code block shows the valid targets for the make process. Most of these options are self-explanatory, but
+to completely build the application one can run `make docker-all-images`. To push the new versions to the defined
+registry, you can run `make release`. Note that this assumes you have the appropriate permissions to push to the defined
+registry.
 
 ```
 checkstyle                   Run all code style checks
@@ -44,26 +47,33 @@ version                      Outputs the current version
 version-update               Prompts for a new version
 ```
 
-## Adding External Packages 
+## Adding External Packages
 
-### Python 
+### Python
 
-If you're adding a new feature that requires a new external Python package in one or more services (`frontend`, `contacts`, `userservice`), you must regenerate the `requirements.txt` file using `piptools`. This is what the Python Dockerfiles use to install external packages inside the containers.
+If you're adding a new feature that requires a new external Python package in one or more services (`frontend`
+, `contacts`, `userservice`), you must regenerate the `requirements.txt` file using `piptools`. This is what the Python
+Dockerfiles use to install external packages inside the containers.
 
-To add a package: 
+To add a package:
 
 1. Add the package name to `requirements.in` within the `src/<service>` directory:
 
-2. Then run the make target `python-preproc-requirements`. This will transform all Python projects' `requirements.in` files to `requirements.txt` if there have been changes to the `requirements.in` file.
+2. Then run the make target `python-preproc-requirements`. This will transform all Python projects' `requirements.in`
+   files to `requirements.txt` if there have been changes to the `requirements.in` file.
 
-3. Re-run `make` with the appropriate target for your build. To build just the python packages you can run `make docker-python-images`
+3. Re-run `make` with the appropriate target for your build. To build just the python packages you can
+   run `make docker-python-images`
 
+### Java
 
-### Java 
+If you're adding a new feature to one or more of the Java services (`ledgerwriter`, `transactionhistory`
+, `balancereader`) and require a new third-party package, do the following:
 
-If you're adding a new feature to one or more of the Java services (`ledgerwriter`, `transactionhistory`, `balancereader`) and require a new third-party package, do the following:  
-
-1. Add the package to the `pom.xml` file in the `src/<service>` directory, under `<dependencies>`. You can find specific package info in [Maven Central](https://search.maven.org/) ([example](https://search.maven.org/artifact/org.postgresql/postgresql/42.2.16.jre7/jar)). Example: 
+1. Add the package to the `pom.xml` file in the `src/<service>` directory, under `<dependencies>`. You can find specific
+   package info
+   in [Maven Central](https://search.maven.org/) ([example](https://search.maven.org/artifact/org.postgresql/postgresql/42.2.16.jre7/jar))
+   . Example:
 
 ```
         <dependency>
@@ -71,9 +81,11 @@ If you're adding a new feature to one or more of the Java services (`ledgerwrite
             <artifactId>postgresql</artifactId>
         </dependency>
 ```
-3. Re-run `make` with the appropriate target for your build. To build just the java packages you can run `make docker-java-images`
 
+3. Re-run `make` with the appropriate target for your build. To build just the java packages you can
+   run `make docker-java-images`
 
 ## Continuous Integration
 
-Github actions are used for continuous integration (CI) for this project. Due to time constrains we have been unable to reimplement the UI tests and deployment tests in the fork.
+Github actions are used for continuous integration (CI) for this project. Due to time constrains we have been unable to
+reimplement the UI tests and deployment tests in the fork.
