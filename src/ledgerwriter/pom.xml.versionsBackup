@@ -23,12 +23,12 @@
     <packaging>jar</packaging>
     <name>Ledger Writer</name>
     <description>Ledger Writer</description>
-    <version>1.3.0</version>
+    <version>1.2.0</version>
 
     <parent>
         <groupId>com.f5.sirius.samples</groupId>
         <artifactId>spring-boot-parent</artifactId>
-        <version>1.3.0</version>
+        <version>1.2.0</version>
         <relativePath>../java-common/spring-boot-parent/pom.xml</relativePath>
     </parent>
 
