@@ -15,7 +15,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: front
-          image: ghcr.io/nginxinc/bos-frontend:v1.1.0
+          image: ghcr.io/nginxinc/bos-frontend:v1.3.0
           imagePullPolicy: Always
           volumeMounts:
             - name: publickey

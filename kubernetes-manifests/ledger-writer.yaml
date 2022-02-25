@@ -15,7 +15,7 @@ spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: ledgerwriter
-          image: ghcr.io/nginxinc/bos-ledgerwriter:v1.1.0
+          image: ghcr.io/nginxinc/bos-ledgerwriter:v1.3.0
           imagePullPolicy: Always
           volumeMounts:
             - name: publickey

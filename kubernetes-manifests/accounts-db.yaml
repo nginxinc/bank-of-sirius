@@ -21,7 +21,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: accounts-db
-          image: ghcr.io/nginxinc/bos-accounts-db:v1.1.0
+          image: ghcr.io/nginxinc/bos-accounts-db:v1.3.0
           imagePullPolicy: Always
           env:
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
