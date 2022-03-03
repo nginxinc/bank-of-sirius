@@ -46,24 +46,24 @@
 
         <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
-        <spring.boot.version>2.6.3</spring.boot.version>
+        <spring.boot.version>2.6.4</spring.boot.version>
         <dependency.spring-web.version>5.3.10</dependency.spring-web.version>
 
         <maven.min.version>3.6</maven.min.version>
 
         <!-- Dependency versions -->
-        <dependency.spring-cloud-sleuth.version>3.1.0</dependency.spring-cloud-sleuth.version>
+        <dependency.spring-cloud-sleuth.version>3.1.1</dependency.spring-cloud-sleuth.version>
         <dependency.javax.servlet-api.version>4.0.1</dependency.javax.servlet-api.version>
-        <dependency.slf4j-api.version>1.7.33</dependency.slf4j-api.version>
-        <dependency.log4j2.version>2.17.1</dependency.log4j2.version>
-        <dependency.log4j2-bunyan-layout.version>1.0.6</dependency.log4j2-bunyan-layout.version>
-        <dependency.guava.version>31.0.1-jre</dependency.guava.version>
+        <dependency.slf4j-api.version>1.7.34</dependency.slf4j-api.version>
+        <dependency.log4j2.version>2.17.2</dependency.log4j2.version>
+        <dependency.log4j2-bunyan-layout.version>1.0.7</dependency.log4j2-bunyan-layout.version>
+        <dependency.guava.version>31.1-jre</dependency.guava.version>
         <dependency.jackson.version>2.13.1</dependency.jackson.version>
         <dependency.opentelemetry-api.version>1.9.0-alpha</dependency.opentelemetry-api.version>
-        <dependency.opentelemetry-exporter-otlp.version>1.9.1</dependency.opentelemetry-exporter-otlp.version>
-        <dependency.opentelemetry-sdk-extension-resources>1.9.1</dependency.opentelemetry-sdk-extension-resources>
-        <dependency.micrometer.version>1.8.2</dependency.micrometer.version>
-        <dependency.grpc-api.version>1.43.1</dependency.grpc-api.version>
+        <dependency.opentelemetry-exporter-otlp.version>1.10.0</dependency.opentelemetry-exporter-otlp.version>
+        <dependency.opentelemetry-sdk-extension-resources>1.10.0</dependency.opentelemetry-sdk-extension-resources>
+        <dependency.micrometer.version>1.8.3</dependency.micrometer.version>
+        <dependency.grpc-api.version>1.44.0</dependency.grpc-api.version>
         <dependency.error-prone.version>2.11.0</dependency.error-prone.version>
 
         <!-- Test dependency versions -->

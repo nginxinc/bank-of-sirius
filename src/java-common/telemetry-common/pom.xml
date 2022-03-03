@@ -239,14 +239,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <!-- as long as we are on a milestone build of spring-sleuth-otel-autoconfigure
-         we must include the snapshots repository in order to pull in its
-         parent pom: spring-cloud-build -->
-    <repositories>
-        <repository>
-            <id>spring-snapshots</id>
-            <url>https://repo.spring.io/snapshot</url>
-        </repository>
-    </repositories>
 </project>

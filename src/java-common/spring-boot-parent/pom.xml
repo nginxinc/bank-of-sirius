@@ -32,8 +32,8 @@
 
     <properties>
         <bootstrap.version>4.2.1</bootstrap.version>
-        <dependency.reactor-core.version>3.4.3</dependency.reactor-core.version>
-        <dependency.checker-qual.version>3.16.0</dependency.checker-qual.version>
+        <dependency.reactor-core.version>3.4.4</dependency.reactor-core.version>
+        <dependency.checker-qual.version>3.17.0</dependency.checker-qual.version>
     </properties>
 
     <build>
