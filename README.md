@@ -4,7 +4,7 @@
 
 **Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/nginxinc/bank-of-anthos). This
 project improves upon **Bank of Anthos** by adding additional telemetry, instrumentation, performance tuning, upgraded
-libraries, and more. The intention is for it to me a more *productionized* example.
+libraries, and more. The intention is for it to be a more *productionized* example.
 
 ## Project
 
