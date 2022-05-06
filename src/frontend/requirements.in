@@ -13,7 +13,7 @@ opentelemetry-instrumentation-logging==0.25b2
 
 # Provides Spring Actuator like health endpoints and Open Telemetry compatible
 # trace attributes
-flask-management-endpoints==1.0.0
+flask-management-endpoints==1.1.0
 
 # Hard-code the following to the pre-installed wheel versions
 grpcio==1.39.0
@@ -23,4 +23,4 @@ six==1.16.0
 cffi==1.14.5
 wrapt==1.12.1
 
-# requirements checksum: 103a78d8050b127fb6e9b7caddadafd0
+# requirements checksum: fec529a9ee72494f18539d00d623f825

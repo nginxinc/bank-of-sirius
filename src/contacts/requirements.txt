@@ -37,7 +37,7 @@ click==7.1.1
     # via
     #   -r requirements.in
     #   flask
-coverage==6.2
+coverage==6.3.2
     # via pytest-cov
 cryptography==3.3.2
     # via -r requirements.in
@@ -45,7 +45,7 @@ deprecated==1.2.13
     # via opentelemetry-api
 flask==1.1.2
     # via -r requirements.in
-flask-management-endpoints==1.0.0
+flask-management-endpoints==1.1.0
     # via -r requirements.in
 google-api-core[grpc]==1.22.2
     # via

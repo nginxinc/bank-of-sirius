@@ -229,7 +229,7 @@ def create_app():
     app.config.update(
         Z_ENDPOINTS={
             'check_functions': {
-                'readiness': {
+                'health': {
                     'db': db_check
                 }
             }

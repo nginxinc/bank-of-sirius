@@ -49,7 +49,7 @@ zipp==1.2.0
 
 # Provides Spring Actuator like health endpoints and Open Telemetry compatible
 # trace attributes
-flask-management-endpoints==1.0.0
+flask-management-endpoints==1.1.0
 
 # Hard-code the following to the pre-installed wheel versions
 grpcio==1.39.0
@@ -61,4 +61,4 @@ psycopg2==2.8.6
 sqlalchemy==1.3.22
 wrapt==1.12.1
 
-# requirements checksum: 7bbbbab456a13494fa9810f9624546fa
+# requirements checksum: d82963cbae9ab13d5a07c20aa8fd2ce0
