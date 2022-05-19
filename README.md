@@ -2,7 +2,7 @@
 
 # Bank of Sirius
 
-**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/nginxinc/bank-of-anthos). This
+**Bank of Sirius** is a open source fork of [**Bank of Anthos**](https://github.com/GoogleCloudPlatform/bank-of-anthos). This
 project improves upon **Bank of Anthos** by adding additional telemetry, instrumentation, performance tuning, upgraded
 libraries, and more. The intention is for it to be a more *productionized* example.
 
