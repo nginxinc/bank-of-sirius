@@ -1,15 +1,21 @@
-flask==1.1.2
+flask==1.1.4
 bunyan==0.1.2
 requests==2.23.0
 pyjwt==1.7.1
 cryptography==3.3.2
 gunicorn==20.1.0
-opentelemetry-sdk==1.6.2
-opentelemetry-exporter-otlp-proto-grpc==1.6.2
-opentelemetry-instrumentation-flask==0.25b2
-opentelemetry-instrumentation-jinja2==0.25b2
-opentelemetry-instrumentation-requests==0.25b2
-opentelemetry-instrumentation-logging==0.25b2
+
+# Open Telemetry dependencies
+opentelemetry-sdk==1.11.1
+opentelemetry-exporter-otlp-proto-grpc==1.11.1
+opentelemetry-instrumentation-flask==0.30b1
+opentelemetry-instrumentation-jinja2==0.30b1
+opentelemetry-instrumentation-requests==0.30b1
+opentelemetry-instrumentation-logging==0.30b1
+opentelemetry-instrumentation-sqlalchemy==0.30b1
+
+# Use an older version of markupsafe to maintain compatibility with jinja
+markupsafe==2.0.1
 
 # Provides Spring Actuator like health endpoints and Open Telemetry compatible
 # trace attributes
@@ -23,4 +29,4 @@ six==1.16.0
 cffi==1.14.5
 wrapt==1.12.1
 
-# requirements checksum: fec529a9ee72494f18539d00d623f825
+# requirements checksum: 832e2e2153b99d65bda913384e2a28bd
