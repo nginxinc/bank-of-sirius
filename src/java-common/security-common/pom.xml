@@ -16,7 +16,7 @@
     </parent>
 
     <properties>
-        <dependency.auth0.java-jwt.version>3.10.0</dependency.auth0.java-jwt.version>
+        <dependency.auth0.java-jwt.version>3.11.0</dependency.auth0.java-jwt.version>
     </properties>
 
     <dependencies>
