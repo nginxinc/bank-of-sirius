@@ -41,8 +41,10 @@ jinja2==3.0.1
     # via flask
 locust==2.1.0
     # via -r requirements.in
-markupsafe==2.0.1
-    # via jinja2
+markupsafe==2.1.2
+    # via
+    #   jinja2
+    #   werkzeug
 msgpack==1.0.2
     # via locust
 psutil==5.8.0
@@ -60,13 +62,13 @@ six==1.16.0
     #   geventhttpclient
 urllib3==1.26.6
     # via requests
-werkzeug==2.0.1
+werkzeug==2.2.3
     # via
     #   flask
     #   locust
-zope.event==4.5.0
+zope-event==4.5.0
     # via gevent
-zope.interface==5.4.0
+zope-interface==5.4.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
