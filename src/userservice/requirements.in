@@ -28,7 +28,7 @@ pyparsing==2.4.7
 pytest==5.4.3
 pytest-cov==2.10.0
 pytz==2020.1
-requests==2.24.0
+requests==2.31.0
 rsa==4.7
 urllib3==1.25.9
 wcwidth==0.2.5
