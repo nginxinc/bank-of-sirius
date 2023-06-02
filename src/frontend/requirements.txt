@@ -18,7 +18,7 @@ chardet==3.0.4
     # via requests
 click==7.1.2
     # via flask
-cryptography==3.3.2
+cryptography==41.0.0
     # via -r requirements.in
 deprecated==1.2.13
     # via opentelemetry-api
@@ -112,7 +112,6 @@ requests==2.23.0
 six==1.16.0
     # via
     #   -r requirements.in
-    #   cryptography
     #   grpcio
 typing-extensions==4.2.0
     # via opentelemetry-sdk
