@@ -57,7 +57,7 @@
         <dependency.slf4j-api.version>1.7.35</dependency.slf4j-api.version>
         <dependency.log4j2.version>2.17.2</dependency.log4j2.version>
         <dependency.log4j2-bunyan-layout.version>1.0.7</dependency.log4j2-bunyan-layout.version>
-        <dependency.guava.version>31.1-jre</dependency.guava.version>
+        <dependency.guava.version>32.0.0-jre</dependency.guava.version>
         <dependency.opentelemetry-api.version>1.9.0-alpha</dependency.opentelemetry-api.version>
         <dependency.opentelemetry-exporter-otlp.version>1.12.0</dependency.opentelemetry-exporter-otlp.version>
         <dependency.opentelemetry-sdk-extension-resources>1.12.0</dependency.opentelemetry-sdk-extension-resources>
