@@ -22,7 +22,7 @@ markupsafe==2.0.1
 flask-management-endpoints==1.1.0
 
 # Hard-code the following to the pre-installed wheel versions
-grpcio==1.39.0
+grpcio==1.53.0
 six==1.16.0
 
 # Hard-code the following to debian package version
