@@ -8,7 +8,7 @@ backoff==1.11.1
     # via opentelemetry-exporter-otlp-proto-grpc
 bunyan==0.1.2
     # via -r requirements.in
-certifi==2022.5.18.1
+certifi==2023.7.22
     # via requests
 cffi==1.14.5
     # via
