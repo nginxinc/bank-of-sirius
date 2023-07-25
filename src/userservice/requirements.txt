@@ -18,7 +18,7 @@ bunyan==0.1.2
     # via -r requirements.in
 cachetools==4.1.1
     # via -r requirements.in
-certifi==2020.6.20
+certifi==2023.7.22
     # via
     #   -r requirements.in
     #   requests
