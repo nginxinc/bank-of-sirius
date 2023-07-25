@@ -6,7 +6,7 @@
 #
 brotli==1.0.9
     # via geventhttpclient
-certifi==2021.5.30
+certifi==2023.7.22
     # via
     #   geventhttpclient
     #   requests
@@ -64,9 +64,9 @@ werkzeug==2.0.1
     # via
     #   flask
     #   locust
-zope.event==4.5.0
+zope-event==4.5.0
     # via gevent
-zope.interface==5.4.0
+zope-interface==5.4.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
