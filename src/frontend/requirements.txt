@@ -28,7 +28,7 @@ flask-management-endpoints==1.1.0
     # via -r requirements.in
 googleapis-common-protos==1.56.1
     # via opentelemetry-exporter-otlp-proto-grpc
-grpcio==1.39.0
+grpcio==1.53.0
     # via
     #   -r requirements.in
     #   opentelemetry-exporter-otlp-proto-grpc
@@ -113,7 +113,6 @@ six==1.16.0
     # via
     #   -r requirements.in
     #   cryptography
-    #   grpcio
 typing-extensions==4.2.0
     # via opentelemetry-sdk
 urllib3==1.25.11
