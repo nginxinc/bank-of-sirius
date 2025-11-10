@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=- --pip-args='--no-color --prefer-binary' requirements.in
 #
+blinker==1.6.2
+    # via flask
 brotli==1.0.9
     # via geventhttpclient
 certifi==2021.5.30
@@ -12,11 +14,11 @@ certifi==2021.5.30
     #   requests
 charset-normalizer==2.0.4
     # via requests
-click==8.0.1
+click==8.1.3
     # via flask
 configargparse==1.5.2
     # via locust
-flask==2.0.1
+flask==2.3.2
     # via
     #   flask-basicauth
     #   flask-cors
@@ -35,14 +37,16 @@ greenlet==1.1.1
     # via gevent
 idna==3.2
     # via requests
-itsdangerous==2.0.1
+itsdangerous==2.1.2
     # via flask
-jinja2==3.0.1
+jinja2==3.1.2
     # via flask
 locust==2.1.0
     # via -r requirements.in
-markupsafe==2.0.1
-    # via jinja2
+markupsafe==2.1.2
+    # via
+    #   jinja2
+    #   werkzeug
 msgpack==1.0.2
     # via locust
 psutil==5.8.0
@@ -60,13 +64,13 @@ six==1.16.0
     #   geventhttpclient
 urllib3==1.26.6
     # via requests
-werkzeug==2.0.1
+werkzeug==2.3.3
     # via
     #   flask
     #   locust
-zope.event==4.5.0
+zope-event==4.5.0
     # via gevent
-zope.interface==5.4.0
+zope-interface==5.4.0
     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
